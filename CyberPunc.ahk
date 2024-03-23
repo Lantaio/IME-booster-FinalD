@@ -44,11 +44,11 @@ $#Alt:: {
 }
 
 #HotIf IsNumber(LastCharType)
-$.:: {
+~.:: {
 	global
 	LastKey := SubStr(ThisHotkey, 2) ; 将当前按键存储在 LastKey 变量中
 	LastChar := "."
-	SendText "."
+	; SendText "."
 }
 :*?:..::
 {
@@ -59,17 +59,17 @@ $.:: {
 }
 
 #HotIf LastCharType = "e"
-$.:: {
+~.:: {
 	global
 	LastKey := SubStr(ThisHotkey, 2) ; 将当前按键存储在 LastKey 变量中
 	LastChar := "."
-	SendText "."
+	; SendText "."
 }
 
 #HotIf LastCharType = "z"
-$.:: {
+~.:: {
 	global
 	LastKey := SubStr(ThisHotkey, 2) ; 将当前按键存储在 LastKey 变量中
 	LastChar := "。"
-	SendText "。"
+	; SendText "。"
 }
