@@ -48,7 +48,7 @@ GetPrevChar() {
 	If Ord(GetPrevChar()) < 9352
 		SendText '"'
 	Else
-		Send '"'
+		Send "+'"
 }
 ':: {
 	If Ord(GetPrevChar()) < 9352
@@ -68,19 +68,18 @@ GetPrevChar() {
 	Else
 		SendText "）"
 }
-/*[:: {
+[:: {
 	If Ord(GetPrevChar()) < 9352
 		SendText "["
 	Else
-		SendText "【"
+		Send "["
 }
 ]:: {
 	If Ord(GetPrevChar()) < 9352
 		SendText "]"
 	Else
-		SendText "】"
+		Send "]"
 }
-*/
 {:: {
 	If Ord(GetPrevChar()) < 9352
 		SendText "{"
@@ -93,25 +92,24 @@ GetPrevChar() {
 	Else
 		SendText "」"
 }
-/*/:: {
+/:: {
 	If Ord(GetPrevChar()) < 9352
 		SendText "/"
 	Else
-		SendText "÷"
+		Send "/"
 }
 \:: {
 	If Ord(GetPrevChar()) < 9352
 		SendText "\"
 	Else
-		SendText "、"
+		Send "\"
 }
-*/
 /*=:: SendText "="
 +:: SendText "+"
 -:: SendText "-"
 *:: SendText "*"
 #:: SendText "#"
-`:: SendText "``"
+`:: SendText "`"
 */
 _:: {
 	If Ord(GetPrevChar()) < 9352
@@ -144,32 +142,147 @@ _:: {
 		SendText "》"
 }
 ; &:: SendText "&"
-/*|:: {
+|:: {
 	If Ord(GetPrevChar()) < 9352
 		SendText "|"
 	Else
-		SendText "｜"
+		Send "+|"
 }
-*/
-; @:: SendText "@"
-/*$:: {
+$:: {
 	If Ord(GetPrevChar()) < 9352
 		SendText "$"
 	Else
 		SendText "￥"
 }
-%:: SendText "%"
-~:: SendText "~"
-^:: SendText "^"
-*/
+; @:: SendText "@"
+; %:: SendText "%"
+~:: {
+	If Ord(GetPrevChar()) < 9352
+		SendText "~"
+	Else
+		Send "+``"
+}
+^:: {
+	If Ord(GetPrevChar()) < 9352
+		SendText "^"
+	Else
+		Send "+6"
+}
 
 #Alt:: {
-	; global
 	Switch GetPrevChar()
 	{
-	Case ".": Send "{Backspace}{text}。" ; 如果是小数点，则替换为中文句号
-	Case "。": Send "{Backspace}{text}."
-	Case ",": Send "{Backspace}{text}，"
-	Case "，": Send "{Backspace}{text},"
+	Case ".": Send "{BS}{Text}。" ; 如果是英文句点，则替换为中文句号。
+	Case "。": Send "{BS}{Text}." ; 如果是中文句号，则替换为英文句点。以下类似
+
+	Case ",": Send "{BS}{Text}，"
+	Case "，": Send "{BS}{Text},"
+
+	Case ";": Send "{BS}{Text}；"
+	Case "；": Send "{BS}{Text};"
+
+	Case ":": Send "{BS}{Text}："
+	Case "：": Send "{BS}{Text}:"
+
+	Case '"': Send "{BS}{Text}“"
+	Case "“": Send "{BS}{Text}”"
+	Case "”": Send '{BS}{Text}"'
+
+	Case "'": Send "{BS}{Text}‘"
+	Case "‘": Send "{BS}{Text}’"
+	Case "’": Send "{BS}{Text}'"
+
+	Case "(": Send "{BS}{Text}（"
+	Case "（": Send "{BS}{Text}("
+
+	Case ")": Send "{BS}{Text}）"
+	Case "）": Send "{BS}{Text})"
+
+	Case "[": Send "{BS}{Text}【"
+	Case "【": Send "{BS}{Text}〖"
+	Case "〖": Send "{BS}{Text}["
+
+	Case "]": Send "{BS}{Text}】"
+	Case "】": Send "{BS}{Text}〗"
+	Case "〗": Send "{BS}{Text}]"
+
+	Case "{": Send "{BS}{Text}「"
+	Case "「": Send "{BS}{Text}『"
+	Case "『": Send "{BS}{Text}{"
+
+	Case "}": Send "{BS}{Text}」"
+	Case "」": Send "{BS}{Text}』"
+	Case "』": Send "{BS}{Text}}"
+
+	Case "/": Send "{BS}{Text}÷"
+	Case "÷": Send "{BS}{Text}✔"
+	Case "✔": Send "{BS}{Text}/"
+
+	Case "\": Send "{BS}{Text}、"
+	Case "、": Send "{BS}{Text}✘"
+	Case "✘": Send "{BS}{Text}\"
+
+	Case "=": Send "{BS}{Text}℃"
+	Case "℃": Send "{BS}{Text}℉"
+	Case "℉": Send "{BS}{Text}="
+
+	Case "+": Send "{BS}{Text}⌥"
+	Case "⌥": Send "{BS}{Text}⌘"
+	Case "⌘": Send "{BS}{Text}+"
+
+	Case "-": Send "{BS}{Text}→"
+	Case "→": Send "{BS}{Text}-"
+
+	Case "*": Send "{BS}{Text}×"
+	Case "×": Send "{BS}{Text}*"
+
+	Case "#": Send "{BS}{Text}■"
+	Case "■": Send "{BS}{Text}□"
+	Case "□": Send "{BS}{Text}#"
+
+	Case "``": Send "{BS}{Text}°"
+	Case "°": Send "{BS}{Text}``"
+
+	Case "_": Send "{BS}{Text}——"
+	Case "—": Send "{BS 2}{Text}_"
+
+	Case "!": Send "{BS}{Text}！"
+	Case "！": Send "{BS}{Text}!"
+
+	Case "?": Send "{BS}{Text}？"
+	Case "？": Send "{BS}{Text}?"
+
+	Case "<": Send "{BS}{Text}《"
+	Case "《": Send "{BS}{Text}<"
+
+	Case ">": Send "{BS}{Text}》"
+	Case "》": Send "{BS}{Text}>"
+
+	Case "&": Send "{BS}{Text}※"
+	Case "※": Send "{BS}{Text}&"
+
+	Case "|": Send "{BS}{Text}｜"
+	Case "｜": Send "{BS}{Text}§"
+	Case "§": Send "{BS}{Text}|"
+
+	Case "$": Send "{BS}{Text}￥"
+	Case "￥": Send "{BS}{Text}＄"
+	Case "＄": Send "{BS}{Text}$"
+
+	Case "@": Send "{BS}{Text}●"
+	Case "●": Send "{BS}{Text}○"
+	Case "○": Send "{BS}{Text}@"
+
+	Case "%": Send "{BS}{Text}★"
+	Case "★": Send "{BS}{Text}☆"
+	Case "☆": Send "{BS}{Text}%"
+
+	Case "~": Send "{BS}{Text}～"
+	Case "～": Send "{BS}{Text}~"
+
+	Case "^": Send "{BS}{Text}……"
+	Case "…": Send "{BS 2}{Text}▲"
+	Case "▲": Send "{BS}{Text}△"
+	Case "△": Send "{BS}{Text}^"
 	}
 }
