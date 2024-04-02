@@ -1,2 +1,2 @@
-# IME-booster-CyberPunc
-标点符号输入加速器。
+# AgentPunc / 标点特工
+中英文标点符号智能输入代理。
