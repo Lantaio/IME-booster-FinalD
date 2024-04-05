@@ -66,6 +66,13 @@ IsEndOfLine() {
 	else
 		return false
 }
+;
+IsOKApp() {
+	if WinActive("ahk_exe sublime")
+		return false
+	else
+		return true
+}
 
 ; 如果不存在输入法候选窗口，并且当前活动窗口不是Excel，则……
 #HotIf not (WinExist("ahk_class ^ATL:") or WinActive("Excel"))  ; or WinActive("ahk_class ConsoleWindowClass"))
