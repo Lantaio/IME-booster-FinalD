@@ -16,11 +16,14 @@ GetPrevChar() {
 	; 清空剪贴板
 	A_Clipboard := ""
 	; 获取当前光镖位置的前一个子符
-	Send "+{Left}^c{Right}"
+	Send "+{Left}^c"
 	; 等待剪贴板更新
 	ClipWait 0.2
 	; 获取剪贴板中的字符，即光镖前一个子符，然后恢复原来的剪贴板内容
 	prevChar := A_Clipboard, A_Clipboard := temp
+	; Send Ord(prevChar)
+	if StrLen(prevChar) = 1
+		Send "{Right}"
 	return prevChar
 }
 
@@ -37,7 +40,7 @@ GetNextChar() {
 	; 获取剪贴板中的字符，即光镖后一个子符，然后恢复原来的剪贴板内容
 	nextChar := A_Clipboard, A_Clipboard := temp
 	; Send Ord(nextChar)
-	if nextChar != '' and Ord(nextChar) != 129337
+	if StrLen(nextChar) = 1
 		Send "{Left}"
 	return nextChar
 }
@@ -58,7 +61,7 @@ ExpectEnglishPunc() {
 IsEndOfLine() {
 	nextChar := GetNextChar()
 	; 如果下一个子符是换行符 或 回车符 或 为空子符串，则……
-	if Ord(nextChar) = 10 or Ord(nextChar) = 13 or nextChar = '' or Ord(nextChar) = 129337
+	if Ord(nextChar) = 10 or Ord(nextChar) = 13 or nextChar = '' or StrLen(nextChar) > 1
 		return true
 	else
 		return false
