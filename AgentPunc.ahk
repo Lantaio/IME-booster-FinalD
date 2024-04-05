@@ -21,9 +21,9 @@ GetPrevChar() {
 	ClipWait 0.2
 	; 获取剪贴板中的字符，即光镖前一个子符，然后恢复原来的剪贴板内容
 	prevChar := A_Clipboard, A_Clipboard := clipStorage, clipStorage := ""
-	; Send Ord(prevChar)
-	if StrLen(prevChar) = 1
+	if prevChar != '' and (StrLen(prevChar) = 1 or prevChar = "`r`n")
 		Send "{Right}"
+	; Send StrLen(prevChar)
 	return prevChar
 }
 
@@ -39,9 +39,9 @@ GetNextChar() {
 	ClipWait 0.2
 	; 获取剪贴板中的字符，即光镖后一个子符，然后恢复原来的剪贴板内容
 	nextChar := A_Clipboard, A_Clipboard := clipStorage, clipStorage := ""
-	; Send Ord(nextChar)
-	if StrLen(nextChar) = 1
+	if nextChar != '' and (StrLen(nextChar) = 1 or nextChar = "`r`n")
 		Send "{Left}"
+	; Send Ord(nextChar)
 	return nextChar
 }
 
@@ -60,19 +60,20 @@ ExpectEnglishPunc() {
 ; 判断光镖是否在行末
 IsEndOfLine() {
 	nextChar := GetNextChar()
-	; 如果下一个子符是换行符 或 回车符 或 为空子符串，则……
-	if Ord(nextChar) = 10 or Ord(nextChar) = 13 or nextChar = '' or StrLen(nextChar) > 1
+	; 如果下一个子符是换行符 或 回车符 或 回车换行符 或 为空子符串，则……
+	if nextChar = "`n" or nextChar = "`r" or nextChar = "`r`n" or nextChar = ''
 		return true
 	else
 		return false
 }
-;
-IsOKApp() {
+
+/*IsAutoOKApp() {
 	if WinActive("ahk_exe sublime")
 		return false
 	else
 		return true
 }
+*/
 
 ; 如果不存在输入法候选窗口，并且当前活动窗口不是Excel，则……
 #HotIf not (WinExist("ahk_class ^ATL:") or WinActive("Excel"))  ; or WinActive("ahk_class ConsoleWindowClass"))
