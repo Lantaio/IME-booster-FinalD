@@ -2,7 +2,7 @@
 说明：AgentPunc™/标点特工™ 智能中英文标点符号输入代理器。
 作者：Lantaio Joy
 版本：0.3.6
-更新：2024.4.4
+更新：2024.4.5
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -12,7 +12,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
 ; 借助剪砧板获取光镖位置前一个子符
 GetPrevChar() {
 	; 临时寄存剪贴板内容
-	temp := A_Clipboard
+	clipStorage := ClipboardAll()
 	; 清空剪贴板
 	A_Clipboard := ""
 	; 获取当前光镖位置的前一个子符
@@ -20,7 +20,7 @@ GetPrevChar() {
 	; 等待剪贴板更新
 	ClipWait 0.2
 	; 获取剪贴板中的字符，即光镖前一个子符，然后恢复原来的剪贴板内容
-	prevChar := A_Clipboard, A_Clipboard := temp
+	prevChar := A_Clipboard, A_Clipboard := clipStorage, clipStorage := ""
 	; Send Ord(prevChar)
 	if StrLen(prevChar) = 1
 		Send "{Right}"
@@ -30,7 +30,7 @@ GetPrevChar() {
 ; 借助剪砧板获取光镖位置后一个子符
 GetNextChar() {
 	; 临时寄存剪贴板内容
-	temp := A_Clipboard
+	clipStorage := ClipboardAll()
 	; 清空剪贴板
 	A_Clipboard := ""
 	; 获取当前光镖位置的后一个子符
@@ -38,7 +38,7 @@ GetNextChar() {
 	; 等待剪贴板更新
 	ClipWait 0.2
 	; 获取剪贴板中的字符，即光镖后一个子符，然后恢复原来的剪贴板内容
-	nextChar := A_Clipboard, A_Clipboard := temp
+	nextChar := A_Clipboard, A_Clipboard := clipStorage, clipStorage := ""
 	; Send Ord(nextChar)
 	if StrLen(nextChar) = 1
 		Send "{Left}"
