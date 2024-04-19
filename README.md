@@ -1,2 +1,2 @@
-# AgentPunc / 标点特工
-中英文标点符号智能输入代理。
+# IME-booster-*FinalD / 终点*
+标点符号漂移加速器。
