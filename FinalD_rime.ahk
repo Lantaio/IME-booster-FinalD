@@ -9,12 +9,15 @@
 #SingleInstance
 #UseHook
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
+global ENDoubleQuoteWanted := false  ; 需要英文双引号标志
+global ENSingleQuoteWanted := false  ; 需要英文单引号标志
+
 global CHSDoubleQuoteWanted := false  ; 需要简体中文双引号标志
 global CHSSingleQuoteWanted := false  ; 需要简体中文单引号标志
-; global CHTComerBracketWanted := false  ; 需要繁体中文单引号标志
+global CHTComerBracketWanted := false  ; 需要繁体中文单引号标志
 
 ; 借助剪砧板获取光镖位置前一个子符
-GetPrevChar() {
+getPrevChar() {
 	; 临时寄存剪砧板内容
 	clipStorage := ClipboardAll()
 	; 清空剪砧板
@@ -33,7 +36,7 @@ GetPrevChar() {
 }
 
 ; 借助剪砧板获取光镖位置后一个子符
-GetNextChar() {
+getNextChar() {
 	; 临时寄存剪砧板内容
 	clipStorage := ClipboardAll()
 	; 清空剪砧板
@@ -51,21 +54,19 @@ GetNextChar() {
 	return nextChar
 }
 
-; 判断前一个字符是不是英纹（或数字）
-prevCharIsEnglish() {
-	prevChar := GetPrevChar()
-	; 如果前一个子符在英纹子符集中，则……
-	if Ord(prevChar) < 0x200A
+; 是否期望输入西纹标点符号。
+ExpecteENPunc() {
+	prevChar := getPrevChar()
+	; 如果前一个子符在西纹子符集中 或 是‘'’，则……
+	if Ord(prevChar) < 0x200A or prevChar = '‘'
 		return true
-	; else if prevChar = '‘'
-	; 	return true
 	else
 		return false
 }
 
 ; 判断光镖是否在行末
-IsAtEndOfLine() {
-	nextChar := GetNextChar()
+isAtEndOfLine() {
+	nextChar := getNextChar()
 	; 如果下一个子符是换行符 或 回车换行符 或 为空子符串，则……
 	if nextChar = "`n" or nextChar = "`r`n" or nextChar = ''
 		return true
@@ -85,132 +86,150 @@ IsAtEndOfLine() {
 #HotIf not (WinExist("ahk_class ^ATL:") or WinActive("ahk_class ^XLMAIN$") or
 		WinActive("ahk_class ^ConsoleWindowClass$"))
 .:: {
-	; 如果前一个子符是英纹，则……
-	if prevCharIsEnglish()
-		SendText "."  ; 输出按键对应的英纹镖点
+	; 如果前一个子符是西纹，则……
+	if ExpecteENPunc()
+		SendText "."  ; 输出按键对应的西纹镖点
 	else
 		SendText "。"  ; 输出按键对应的中纹镖点
 }
 ,:: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc()
 		SendText ","
 	else
 		SendText "，"
 }
 (:: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc() {
 		SendText "("
-	else
+		if isAtEndOfLine() {
+			SendText ")"
+			Send "{Left}"
+		}
+	}
+	else {
 		SendText "（"
+		if isAtEndOfLine() {
+			SendText "）"
+			Send "{Left}"
+		}
+	}
 }
 ):: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc()
 		SendText ")"
 	else
 		SendText "）"
 }
 _:: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc()
 		SendText "_"
 	else
 		SendText "——"
 }
 ::: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc()
 		SendText ":"
 	else
 		SendText "："
 }
 ":: {
 	global
-	if CHSDoubleQuoteWanted {
+	if ENDoubleQuoteWanted {
+		SendText '"'
+		ENDoubleQuoteWanted := false
+	}
+	else if CHSDoubleQuoteWanted {
 		SendText "”"
 		CHSDoubleQuoteWanted := false
 	}
-	else {
-		if prevCharIsEnglish() {
+	else if ExpecteENPunc() {
+		SendText '"'
+		ENDoubleQuoteWanted := true
+		if isAtEndOfLine() {
 			SendText '"'
-			if IsAtEndOfLine() {
-				SendText '"'
-				Send "{Left}"
-			}
+			Send "{Left}"
+			ENDoubleQuoteWanted := false
 		}
-		else {
-			SendText "“"
-			CHSDoubleQuoteWanted := true
-			if IsAtEndOfLine() {
-				SendText "”"
-				Send "{Left}"
-				CHSDoubleQuoteWanted := false
-			}
+	}
+	else {
+		SendText "“"
+		CHSDoubleQuoteWanted := true
+		if isAtEndOfLine() {
+			SendText "”"
+			Send "{Left}"
+			CHSDoubleQuoteWanted := false
 		}
 	}
 }
 /:: SendText "/"
 =:: SendText "="
 <:: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc()
 		SendText "<"
 	else
 		SendText "《"
 }
 >:: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc()
 		SendText ">"
 	else
 		SendText "》"
 }
 `;:: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc()
 		SendText ";"
 	else
 		SendText "；"
 }
 -:: SendText "-"
 {:: {
-	if prevCharIsEnglish() {
+	if ExpecteENPunc() {
 		SendText "{"
-		if IsAtEndOfLine() {
+		if isAtEndOfLine() {
 			SendText "}"
 			Send "{Left}"
 		}
 	}
 	else {
 		SendText "「"
-		if IsAtEndOfLine() {
+		if isAtEndOfLine() {
 			SendText "」"
 			Send "{Left}"
 		}
 	}
 }
 }:: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc()
 		SendText "}"
 	else
 		SendText "」"
 }
 ':: {
 	global
-	if CHSSingleQuoteWanted = true {
+	if ENSingleQuoteWanted {
+		SendText "'"
+		ENSingleQuoteWanted := false
+	}
+	else if CHSSingleQuoteWanted {
 		SendText "’"
 		CHSSingleQuoteWanted := false
 	}
-	else {
-		if prevCharIsEnglish() {
+	else if ExpecteENPunc() {
+		SendText "'"
+		ENSingleQuoteWanted := true
+		if isAtEndOfLine() {
 			SendText "'"
-			if IsAtEndOfLine() {
-				SendText "'"
-				Send "{Left}"
-			}
+			Send "{Left}"
+			ENSingleQuoteWanted := false
 		}
-		else {
-			SendText "‘"
-			CHSSingleQuoteWanted := true
-			if IsAtEndOfLine() {
-				SendText "’"
-				Send "{Left}"
-				CHSSingleQuoteWanted := false
-			}
+	}
+	else {
+		SendText "‘"
+		CHSSingleQuoteWanted := true
+		if isAtEndOfLine() {
+			SendText "’"
+			Send "{Left}"
+			CHSSingleQuoteWanted := false
 		}
 	}
 }
@@ -218,14 +237,14 @@ _:: {
 #:: SendText "#"
 [:: {
 	SendText "["
-/*	if prevCharIsEnglish()
+/*	if ExpecteENPunc()
 	else
 		Send "【"
 */
 }
 ]:: {
 	SendText "]"
-/*	if prevCharIsEnglish()
+/*	if ExpecteENPunc()
 	else
 		Send "】"
 */
@@ -233,71 +252,59 @@ _:: {
 ; `:: SendText "`"
 ; +:: SendText "+"
 &:: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc()
 		SendText "&"
 	else
 		Send "{Blind}7"
 }
 !:: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc()
 		SendText "!"
 	else
 		SendText "！"
 }
 ?:: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc()
 		SendText "?"
 	else
 		SendText "？"
 }
 \:: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc()
 		SendText "\"
 	else
 		SendText "、"
 }
 |:: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc()
 		SendText "|"
 	else
-		Send "{Blind}\"  ; 此符号触发笔画反查功能，因此必须转给输入法处理
+		Send "{Blind}\"  ; 此符号触发笔画反查功能
 }
 @:: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc()
 		SendText "@"
 	else
-		SendText "●"
+		Send "{Blind}2"
 }
 %:: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc()
 		SendText "%"
 	else
 		Send "{Blind}5"
 }
-^:: {
-		Send "{Blind}6"  ; 此符号触发输入扩展符号功能，因此必须转给输入法处理
-/*	if prevCharIsEnglish()
-		SendText "^"
-	else
-*/
-}
+^:: Send "{Blind}6"  ; 此符号触发输入扩展符号功能，因此必须直接交由输入法处理
 ~:: {
-	if prevCharIsEnglish()
+	if ExpecteENPunc()
 		SendText "~"
 	else
 		Send "{Blind}``"
 }
-$:: {
-	Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此必须转给输入法处理
-/*	if prevCharIsEnglish()
-		SendText "$"
-	else
-*/
-}
+$:: Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此必须直接交由输入法处理
 
 !Space:: {
 	global
-	switch GetPrevChar()
+	switch getPrevChar()
 	{
 	case ".": Send "{BS}{Text}。" ; 如果是英文句点，则替换为中文句号。
 	case "。": Send "{BS}{Text}." ; 如果是中文句号，则替换为英文句点。
@@ -305,8 +312,14 @@ $:: {
 	case ",": Send "{BS}{Text}，"
 	case "，": Send "{BS}{Text},"
 
-	case "(": Send "{BS}{Text}（"
-	case "（": Send "{BS}{Text}("
+	case "(":
+		Send "{BS}{Text}（"
+		if getNextChar = ")"
+			Send "{Del}{Text}）"
+	case "（":
+		Send "{BS}{Text}("
+		if getNextChar = "）"
+			Send "{Del}{Text})"
 
 	case ")": Send "{BS}{Text}）"
 	case "）": Send "{BS}{Text})"
@@ -318,14 +331,18 @@ $:: {
 	case "：": Send "{BS}{Text}:"
 
 	case '"':
-		if CHSDoubleQuoteWanted {
-			Send "{BS}{Text}”"
-			CHSDoubleQuoteWanted := false
-		}
-		else {
+		if !CHSDoubleQuoteWanted {
 			Send "{BS}{Text}“"
 			CHSDoubleQuoteWanted := true
 		}
+		else {
+			Send "{BS}{Text}”"
+			CHSDoubleQuoteWanted := true
+		}
+		if ENDoubleQuoteWanted
+			ENDoubleQuoteWanted := false
+		else
+			ENDoubleQuoteWanted := true
 		; if CaretGetPos(&x, &y) {
 		; 	ToolTip "Cn左双引号", x, y + 20
 		; 	SetTimer () => ToolTip(), -2000
@@ -333,7 +350,14 @@ $:: {
 	case "“":
 		Send "{BS}{Text}”"
 		CHSDoubleQuoteWanted := false
-	case "”": Send '{BS}{Text}"'
+	case "”":
+		Send '{BS}{Text}"'
+		CHSDoubleQuoteWanted := true
+		if ENDoubleQuoteWanted
+			ENDoubleQuoteWanted := false
+		else
+			ENDoubleQuoteWanted := true
+
 
 	case "/": Send "{BS}{Text}÷"
 	case "÷": Send "{BS}{Text}/"
@@ -368,7 +392,7 @@ $:: {
 			CHSSingleQuoteWanted := true
 		}
 	case "‘":
-		Send "{BS}{Text}’"
+		Send "{BS}{Text}'"
 		CHSSingleQuoteWanted := false
 	case "’": Send "{BS}{Text}'"
 
@@ -402,6 +426,148 @@ $:: {
 	case "@": Send "{BS}{Text}●"
 	case "●": Send "{BS}{Text}@"
 
+	case "%": Send "{BS}{Text}★"
+	case "★": Send "{BS}{Text}%"
+
+	case "^": Send "{BS}{Text}……"
+	case "…": Send "{BS 2}{Text}^"
+
+	case "~": Send "{BS}{Text}～"
+	case "～": Send "{BS}{Text}~"
+
+	case "$": Send "{BS}{Text}￥"
+	case "￥": Send "{BS}{Text}$"
+	}
+}
+
+#Alt:: {
+	global
+	switch getPrevChar()
+	{
+	case ".": Send "{BS}{Text}。" ; 如果是英文句点，则替换为中文句号。
+	case "。": Send "{BS}{Text}." ; 如果是中文句号，则替换为英文句点。
+
+	case ",": Send "{BS}{Text}，"
+	case "，": Send "{BS}{Text},"
+
+	case "(":
+		Send "{BS}{Text}（"
+		if getNextChar = ")"
+			Send "{Del}{Text}）"
+	case "（":
+		Send "{BS}{Text}("
+		if getNextChar = "）"
+			Send "{Del}{Text})"
+
+	case ")": Send "{BS}{Text}）"
+	case "）": Send "{BS}{Text})"
+
+	case "_": Send "{BS}{Text}——"
+	case "—": Send "{BS 2}{Text}_"
+
+	case ":": Send "{BS}{Text}："
+	case "：": Send "{BS}{Text}:"
+
+	case '"':
+		if !CHSDoubleQuoteWanted {
+			Send "{BS}{Text}“"
+			CHSDoubleQuoteWanted := true
+		}
+		else {
+			Send "{BS}{Text}”"
+			CHSDoubleQuoteWanted := true
+		}
+		if ENDoubleQuoteWanted
+			ENDoubleQuoteWanted := false
+		else
+			ENDoubleQuoteWanted := true
+		; if CaretGetPos(&x, &y) {
+		; 	ToolTip "Cn左双引号", x, y + 20
+		; 	SetTimer () => ToolTip(), -2000
+		; }
+	case "“":
+		Send "{BS}{Text}”"
+		CHSDoubleQuoteWanted := false
+	case "”":
+		Send '{BS}{Text}"'
+		CHSDoubleQuoteWanted := true
+		if ENDoubleQuoteWanted
+			ENDoubleQuoteWanted := false
+		else
+			ENDoubleQuoteWanted := true
+
+
+	case "/": Send "{BS}{Text}÷"
+	case "÷": Send "{BS}{Text}/"
+
+	case "=": Send "{BS}="
+	; case "≈": Send "{BS}{Text}≃"
+	; case "≃": Send "{BS}{Text}≅"
+	; case "≅": Send "{BS}{Text}="
+
+	case "<": Send "{BS}{Text}《"
+	case "《": Send "{BS}{Text}<"
+
+	case ">": Send "{BS}{Text}》"
+	case "》": Send "{BS}{Text}>"
+
+	case ";": Send "{BS}{Text}；"
+	case "；": Send "{BS}{Text};"
+
+	case "{": Send "{BS}{Text}「"
+	case "「": Send "{BS}{Text}{"
+
+	case "}": Send "{BS}{Text}」"
+	case "」": Send "{BS}{Text}}"
+
+	case "'":
+		if CHSSingleQuoteWanted {
+			Send "{BS}{Text}’"
+			CHSSingleQuoteWanted := false
+		}
+		else {
+			Send "{BS}{Text}‘"
+			CHSSingleQuoteWanted := true
+		}
+	case "‘":
+		Send "{BS}{Text}'"
+		CHSSingleQuoteWanted := false
+	case "’": Send "{BS}{Text}'"
+
+	case "*": Send "{BS}{Text}×"
+	case "×": Send "{BS}{Text}*"
+
+	case "#": Send "{BS}{Text}◆"
+	case "◆": Send "{BS}{Text}#"
+
+	case "[": Send "{BS}{Text}【"
+	case "【": Send "{BS}{Text}["
+
+	case "]": Send "{BS}{Text}】"
+	case "】": Send "{BS}{Text}]"
+
+	case "&": Send "{BS}&"
+	case "※": Send "{BS}&"
+	case "℃": Send "{BS}&"
+	case "℉": Send "{BS}&"
+
+	case "!": Send "{BS}{Text}！"
+	case "！": Send "{BS}{Text}!"
+
+	case "?": Send "{BS}{Text}？"
+	case "？": Send "{BS}{Text}?"
+
+	case "\": Send "{BS}{Text}、"
+	case "、": Send "{BS}{Text}\"
+
+	case "|": Send "{BS}{Text}｜"
+	case "｜": Send "{BS}{Text}|"
+
+	case "@": Send "{BS}@"
+	case "●": Send "{BS}@"
+	case "©": Send "{BS}@"
+	case "®": Send "{BS}@"
+
 	case "%": Send "{BS}%"
 	case "★": Send "{BS}%"
 	case "°": Send "{BS}%"
@@ -428,132 +594,6 @@ $:: {
 	case "¢": Send "{BS}$"
 	case "¤": Send "{BS}$"
 	case "₩": Send "{BS}$"
-	}
-}
-
-#Alt:: {
-	switch GetPrevChar()
-	{
-	case ".": Send "{BS}{Text}。" ; 如果是英文句点，则替换为中文句号。
-	case "。": Send "{BS}{Text}." ; 如果是中文句号，则替换为英文句点。
-
-	case ",": Send "{BS}{Text}，"
-	case "，": Send "{BS}{Text},"
-
-	case ";": Send "{BS}{Text}；"
-	case "；": Send "{BS}{Text};"
-
-	case ":": Send "{BS}{Text}："
-	case "：": Send "{BS}{Text}:"
-
-	case '"':
-		Send "{BS}{Text}“"
-		; if CaretGetPos(&x, &y) {
-		; 	ToolTip "Cn左双引号", x, y + 20
-		; 	SetTimer () => ToolTip(), -2000
-		; }
-	case "“": Send "{BS}{Text}”"
-	case "”": Send '{BS}{Text}"'
-
-	case "'": Send "{BS}{Text}‘"
-	case "‘": Send "{BS}{Text}’"
-	case "’": Send "{BS}{Text}'"
-
-	case "(": Send "{BS}{Text}（"
-	case "（": Send "{BS}{Text}("
-
-	case ")": Send "{BS}{Text}）"
-	case "）": Send "{BS}{Text})"
-
-	case "[": Send "{BS}{Text}【"
-	case "【": Send "{BS}{Text}〖"
-	case "〖": Send "{BS}{Text}["
-
-	case "]": Send "{BS}{Text}】"
-	case "】": Send "{BS}{Text}〗"
-	case "〗": Send "{BS}{Text}]"
-
-	case "{": Send "{BS}{Text}「"
-	case "「": Send "{BS}{Text}『"
-	case "『": Send "{BS}{Text}{"
-
-	case "}": Send "{BS}{Text}」"
-	case "」": Send "{BS}{Text}』"
-	case "』": Send "{BS}{Text}}"
-
-	case "/": Send "{BS}{Text}÷"
-	case "÷": Send "{BS}{Text}/"
-
-	case "\": Send "{BS}{Text}、"
-	case "、": Send "{BS}{Text}\"
-
-	case "=": Send "{BS}{Text}≈"
-	case "≈": Send "{BS}{Text}≃"
-	case "≃": Send "{BS}{Text}≅"
-	case "≅": Send "{BS}{Text}="
-
-	case "+": Send "{BS}{Text}⌥"
-	case "⌥": Send "{BS}{Text}⌘"
-	case "⌘": Send "{BS}{Text}+"
-
-	case "-": Send "{BS}{Text}→"
-	case "→": Send "{BS}{Text}↔"
-	case "↔": Send "{BS}{Text}-"
-
-	case "*": Send "{BS}{Text}×"
-	case "×": Send "{BS}{Text}*"
-
-	case "#": Send "{BS}{Text}■"
-	case "■": Send "{BS}{Text}□"
-	case "□": Send "{BS}{Text}#"
-
-	case "``": Send "{BS}{Text}°"
-	case "°": Send "{BS}{Text}``"
-
-	case "_": Send "{BS}{Text}——"
-	case "—": Send "{BS 2}{Text}_"
-
-	case "!": Send "{BS}{Text}！"
-	case "！": Send "{BS}{Text}!"
-
-	case "?": Send "{BS}{Text}？"
-	case "？": Send "{BS}{Text}?"
-
-	case "<": Send "{BS}{Text}《"
-	case "《": Send "{BS}{Text}<"
-
-	case ">": Send "{BS}{Text}》"
-	case "》": Send "{BS}{Text}◆"
-	case "◆": Send "{BS}{Text}◇"
-	case "◇": Send "{BS}{Text}>"
-
-	case "&": Send "{BS}{Text}℃"
-	case "℃": Send "{BS}{Text}℉"
-	case "℉": Send "{BS}{Text}&"
-
-	case "|": Send "{BS}{Text}｜"
-	case "｜": Send "{BS}{Text}|"
-
-	case "$": Send "{BS}{Text}￥"
-	case "￥": Send "{BS}{Text}$"
-
-	case "@": Send "{BS}{Text}●"
-	case "●": Send "{BS}{Text}○"
-	case "○": Send "{BS}{Text}@"
-
-	case "%": Send "{BS}{Text}★"
-	case "★": Send "{BS}{Text}☆"
-	case "☆": Send "{BS}{Text}%"
-
-	case "~": Send "{BS}{Text}～"
-	case "～": Send "{BS}{Text}˜"
-	case "˜": Send "{BS}{Text}≋"
-	case "≋": Send "{BS}{Text}~"
-
-	case "^": Send "{BS}{Text}……"
-	case "…": Send "{BS 2}{Text}▲"
-	case "▲": Send "{BS}{Text}△"
-	case "△": Send "{BS}{Text}^"
 	}
 }
 
