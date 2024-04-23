@@ -1,6 +1,6 @@
-/*
+﻿/*
 说明：FinalD™/终点™ 标点符号漂移加速器。
-注意：编辑保存此文件时必须保存为“UTF-8 with BOM”编码格式。
+注意：！！！编辑保存此文件时必须保存为“UTF-8 with BOM”编码格式！！！
 作者：Lantaio Joy
 版本：0.3.6
 更新：2024.4.18
@@ -15,15 +15,15 @@ global ENSingleQuoteWanted := false  ; 需要英文单引号标志
 
 global CHSDoubleQuoteWanted := false  ; 需要简体中文双引号标志
 global CHSSingleQuoteWanted := false  ; 需要简体中文单引号标志
-global CHTComerBracketWanted := false  ; 需要繁体中文单引号标志
+; global CHTComerBracketWanted := false  ; 需要繁体中文单引号标志
 
-; 借助剪砧板获取光镖位置前一个子符
+; 借助剪砧板获取光镖前一个子符
 getPrevChar() {
 	; 临时寄存剪砧板内容
 	clipStorage := ClipboardAll()
 	; 清空剪砧板
 	A_Clipboard := ''
-	; 获取当前光镖位置的前一个子符
+	; 获取当前光镖前一个子符
 	Send "+{Left}^c"
 	; 等待剪砧板更新
 	ClipWait 0.2
@@ -36,13 +36,13 @@ getPrevChar() {
 	return prevChar
 }
 
-; 借助剪砧板获取光镖位置后一个子符
+; 借助剪砧板获取光镖后一个子符
 getNextChar() {
 	; 临时寄存剪砧板内容
 	clipStorage := ClipboardAll()
 	; 清空剪砧板
 	A_Clipboard := ''
-	; 获取当前光镖位置的后一个子符
+	; 获取当前光镖后一个子符
 	Send "+{Right}^c"
 	; 等待剪砧板更新
 	ClipWait 0.2
@@ -75,17 +75,8 @@ isAtEndOfLine() {
 		return false
 }
 
-/*IsAutoOKApp() {
-	if WinActive("ahk_exe sublime")
-		return false
-	else
-		return true
-}
-*/
-
 ; 如果不存在输入法候选窗口，并且当前活动窗口不是Excel或CMD，则……
-#HotIf not (WinExist("ahk_class ^ATL:") or WinActive("ahk_class ^XLMAIN$") or
-		WinActive("ahk_class ^ConsoleWindowClass$"))
+#HotIf not (WinExist("ahk_class ^ATL:") or WinActive("ahk_class ^XLMAIN$") or WinActive("ahk_class ^ConsoleWindowClass$"))
 .:: {
 	; 如果前一个子符是西纹，则……
 	if ExpecteENPunc()
@@ -315,12 +306,16 @@ $:: Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此
 
 	case "(":
 		Send "{BS}{Text}（"
-		if getNextChar = ")"
+		if getNextChar() = ")" {
 			Send "{Del}{Text}）"
+			Send "{Left}"
+		}
 	case "（":
 		Send "{BS}{Text}("
-		if getNextChar = "）"
+		if getNextChar() = "）" {
 			Send "{Del}{Text})"
+			Send "{Left}"
+		}
 
 	case ")": Send "{BS}{Text}）"
 	case "）": Send "{BS}{Text})"
@@ -332,13 +327,13 @@ $:: Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此
 	case "：": Send "{BS}{Text}:"
 
 	case '"':
-		if !CHSDoubleQuoteWanted {
+		if ENDoubleQuoteWanted {
 			Send "{BS}{Text}“"
 			CHSDoubleQuoteWanted := true
 		}
 		else {
 			Send "{BS}{Text}”"
-			CHSDoubleQuoteWanted := true
+			CHSDoubleQuoteWanted := false
 		}
 		if ENDoubleQuoteWanted
 			ENDoubleQuoteWanted := false
@@ -372,18 +367,22 @@ $:: Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此
 
 	case "{":
 		Send "{BS}{Text}「"
-		if getNextChar() = "}"
+		if getNextChar() = "}" {
 			Send "{Del}{Text}」"
+			Send "{Left}"
+		}
 	case "「":
 		Send "{BS}{Text}{"
-		if getNextChar() = "」"
+		if getNextChar() = "」" {
 			Send "{Del}{Text}}"
+			Send "{Left}"
+		}
 
 	case "}": Send "{BS}{Text}」"
 	case "」": Send "{BS}{Text}}"
 
 	case "'":
-		if !CHSSingleQuoteWanted {
+		if ENSingleQuoteWanted {
 			Send "{BS}{Text}‘"
 			CHSSingleQuoteWanted := true
 		}
@@ -396,15 +395,11 @@ $:: Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此
 		else
 			ENSingleQuoteWanted := true
 	case "‘":
-		Send "{BS}{Text}’"
-		CHSSingleQuoteWanted := false
+		Send "{BS}{Text}'"
+		CHSSingleQuoteWanted := false, ENSingleQuoteWanted := true
 	case "’":
 		Send "{BS}{Text}'"
-		CHSSingleQuoteWanted := true
-		if ENSingleQuoteWanted
-			ENSingleQuoteWanted := false
-		else
-			ENSingleQuoteWanted := true
+		CHSSingleQuoteWanted := true, ENSingleQuoteWanted := false
 
 	case "*": Send "{BS}{Text}×"
 	case "×": Send "{BS}{Text}*"
@@ -414,12 +409,16 @@ $:: Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此
 
 	case "[":
 		Send "{BS}{Text}【"
-		if getNextChar() = "]"
+		if getNextChar() = "]" {
 			Send "{Del}{Text}】"
+			Send "{Left}"
+		}
 	case "【":
 		Send "{BS}{Text}["
-		if getNextChar() = "】"
+		if getNextChar() = "】" {
 			Send "{Del}{Text}]"
+			Send "{Left}"
+		}
 
 	case "]": Send "{BS}{Text}】"
 	case "】": Send "{BS}{Text}]"
@@ -471,12 +470,16 @@ $:: Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此
 
 	case "(":
 		Send "{BS}{Text}（"
-		if getNextChar = ")"
+		if getNextChar() = ")" {
 			Send "{Del}{Text}）"
+			Send "{Left}"
+		}
 	case "（":
 		Send "{BS}{Text}("
-		if getNextChar = "）"
+		if getNextChar() = "）" {
 			Send "{Del}{Text})"
+			Send "{Left}"
+		}
 
 	case ")": Send "{BS}{Text}）"
 	case "）": Send "{BS}{Text})"
@@ -488,13 +491,13 @@ $:: Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此
 	case "：": Send "{BS}{Text}:"
 
 	case '"':
-		if !CHSDoubleQuoteWanted {
+		if ENDoubleQuoteWanted {
 			Send "{BS}{Text}“"
 			CHSDoubleQuoteWanted := true
 		}
 		else {
 			Send "{BS}{Text}”"
-			CHSDoubleQuoteWanted := true
+			CHSDoubleQuoteWanted := false
 		}
 		if ENDoubleQuoteWanted
 			ENDoubleQuoteWanted := false
@@ -535,18 +538,38 @@ $:: Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此
 	case ";": Send "{BS}{Text}；"
 	case "；": Send "{BS}{Text};"
 
-	case "{": Send "{BS}{"
-	case "「": Send "{BS}{"
-	case "『": Send "{BS}{"
-	case "〖": Send "{BS}{"
+	case "{":
+		Send "{BS}{Text}「"
+		if getNextChar() = "}" {
+			Send "{Del}{Text}」"
+			Send "{Left}"
+		}
+	case "「":
+		Send "{BS}{Text}『"
+		if getNextChar() = "」" {
+			Send "{Del}{Text}』"
+			Send "{Left}"
+		}
+	case "『":
+		Send "{BS}{Text}〖"
+		if getNextChar() = "』" {
+			Send "{Del}{Text}〗"
+			Send "{Left}"
+		}
+	case "〖":
+		Send "{BS}{Text}{"
+		if getNextChar() = "〗" {
+			Send "{Del}{Text}}"
+			Send "{Left}"
+		}
 
-	case "}": Send "{BS}}"
-	case "」": Send "{BS}}"
-	case "』": Send "{BS}}"
-	case "〗": Send "{BS}}"
+	case "}": Send "{BS}{}}"
+	case "」": Send "{BS}{}}"
+	case "』": Send "{BS}{}}"
+	case "〗": Send "{BS}{}}"
 
 	case "'":
-		if !CHSSingleQuoteWanted {
+		if ENSingleQuoteWanted {
 			Send "{BS}{Text}‘"
 			CHSSingleQuoteWanted := true
 		}
@@ -577,11 +600,35 @@ $:: Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此
 	case "◆": Send "{BS}{Text}■"
 	case "■": Send "{BS}{Text}#"
 
-	case "[": Send "{BS}["
-	case "【": Send "{BS}["
+	case "[":
+		Send "{BS}{Text}【"
+		if getNextChar() = "]" {
+			Send "{Del}{Text}】"
+			Send "{Left}"
+		}
+	case "【":
+		Send "{BS}{Text}〔"
+		if getNextChar() = "】" {
+			Send "{Del}{Text}〕"
+			Send "{Left}"
+		}
+	case "〔":
+		Send "{BS}{Text}［"
+		if getNextChar() = "〕" {
+			Send "{Del}{Text}］"
+			Send "{Left}"
+		}
+	case "［":
+		Send "{BS}{Text}["
+		if getNextChar() = "］" {
+			Send "{Del}{Text}]"
+			Send "{Left}"
+		}
 
-	case "]": Send "{BS}]"
-	case "】": Send "{BS}]"
+	case "]": Send "{BS}{Text}】"
+	case "】": Send "{BS}{Text}〕"
+	case "〕": Send "{BS}{Text}］"
+	case "］": Send "{BS}{Text}]"
 
 	case "``": Send "{BS}{Text}々"
 	case "々": Send "{BS}{Text}〃"
@@ -593,7 +640,8 @@ $:: Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此
 	case "℉": Send "{BS}&"
 
 	case "!": Send "{BS}{Text}！"
-	case "！": Send "{BS}{Text}!"
+	case "！": Send "{BS}{Text}▲"
+	case "▲": Send "{BS}{Text}!"
 
 	case "?": Send "{BS}?"
 	case "？": Send "{BS}?"
@@ -620,10 +668,10 @@ $:: Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此
 	case "°": Send "{BS}%"
 	case "‰": Send "{BS}%"
 
-	case "^": Send "{BS}^"
-	case "…": Send "{BS 2}^"
-	case "⌘": Send "{BS}^"
-	case "⌥": Send "{BS}^"
+	case "^": Send "{BS}{^}"
+	case "…": Send "{BS 2}{^}"
+	case "⌘": Send "{BS}{^}"
+	case "⌥": Send "{BS}{^}"
 
 	case "~": Send "{BS}~"
 	case "～": Send "{BS}~"
