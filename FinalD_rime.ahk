@@ -1,4 +1,4 @@
-﻿/*
+/*
 说明：FinalD™/终点™ 标点符号漂移加速器。
 注意：！！！编辑保存此文件时必须保存为“UTF-8 with BOM”编码格式！！！
 作者：Lantaio Joy
@@ -91,6 +91,7 @@ isAtEndOfLine() {
 		SendText "，"
 }
 (:: {
+	; Send "{Blind}{9 Up}{Shift Up}"
 	if ExpecteENPunc() {
 		SendText "("
 		if isAtEndOfLine() {
@@ -292,10 +293,16 @@ _:: {
 	else
 		Send "{Blind}``"
 }
-$:: Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此必须直接交由Rime输入法处理
+$:: {
+	if ExpecteENPunc()
+		SendText "$"
+	else
+		Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此必须直接交由Rime输入法处理
+}
 
 !Space:: {
 	global
+	Send "{Blind}{Space Up}{Alt Up}"
 	switch getPrevChar()
 	{
 	case ".": Send "{BS}{Text}。" ; 如果是英文句点，则替换为中文句号。
@@ -326,29 +333,33 @@ $:: Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此
 	case ":": Send "{BS}{Text}："
 	case "：": Send "{BS}{Text}:"
 
+; 只处理成对标点的情况，后面Win+Alt则只处理单个标点的情况。
 	case '"':
-		if ENDoubleQuoteWanted {
+		if getNextChar() = '"' {
 			Send "{BS}{Text}“"
-			CHSDoubleQuoteWanted := true
+			Send "{Del}{Text}”"
+			Send "{Left}"
+			; CHSDoubleQuoteWanted := false
 		}
 		else {
-			Send "{BS}{Text}”"
-			CHSDoubleQuoteWanted := false
+			MsgBox "Alt+Space 只处理成对双引号的中英转换，`nWin+Alt 则只处理单个双引号的中英转换。", "提示", "OK Iconi T5"
 		}
-		if ENDoubleQuoteWanted
-			ENDoubleQuoteWanted := false
-		else
-			ENDoubleQuoteWanted := true
 		; if CaretGetPos(&x, &y) {
 		; 	ToolTip "Cn左双引号", x, y + 20
 		; 	SetTimer () => ToolTip(), -2000
 		; }
 	case "“":
-		Send '{BS}{Text}"'
-		CHSDoubleQuoteWanted := false, ENDoubleQuoteWanted := true
+		if getNextChar() = "”" {
+			Send '{BS}{Text}"'
+			Send '{Del}{Text}"'
+			Send "{Left}"
+			; EnDoubleQuoteWanted := false
+		}
+		else {
+			MsgBox "Alt+Space 只处理成对双引号的中英转换，`nWin+Alt 则只处理单个双引号的中英转换。", "提示", "OK Iconi T5"
+		}
 	case "”":
-		Send '{BS}{Text}"'
-		CHSDoubleQuoteWanted := true, ENDoubleQuoteWanted := false
+			MsgBox "Alt+Space 只处理成对双引号的中英转换，`nWin+Alt 则只处理单个双引号的中英转换。", "提示", "OK Iconi T5"
 
 	case "/": Send "{BS}{Text}÷"
 	case "÷": Send "{BS}{Text}/"
@@ -460,6 +471,7 @@ $:: Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此
 
 #Alt:: {
 	global
+	; Send "{Blind}{Alt Up}{LWin Up}"
 	switch getPrevChar()
 	{
 	case ".": Send "{BS}{Text}。" ; 如果是英文句点，则替换为中文句号。
@@ -493,16 +505,12 @@ $:: Send "{Blind}4"  ; 此符号触发中文大写金额、数字功能，因此
 	case '"':
 		if ENDoubleQuoteWanted {
 			Send "{BS}{Text}“"
-			CHSDoubleQuoteWanted := true
+			CHSDoubleQuoteWanted := true, ENDoubleQuoteWanted := false
 		}
 		else {
 			Send "{BS}{Text}”"
-			CHSDoubleQuoteWanted := false
+			CHSDoubleQuoteWanted := false, ENDoubleQuoteWanted := true
 		}
-		if ENDoubleQuoteWanted
-			ENDoubleQuoteWanted := false
-		else
-			ENDoubleQuoteWanted := true
 		; if CaretGetPos(&x, &y) {
 		; 	ToolTip "Cn左双引号", x, y + 20
 		; 	SetTimer () => ToolTip(), -2000
