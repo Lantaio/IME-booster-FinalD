@@ -1,7 +1,7 @@
 ---
 name: Bug reportBug report / 缺陷报告
 about: Create a report to help us improve. / 帮助我们改进。
-title: "[bug]"
+title: "[BUG]"
 labels: bug
 assignees: ''
 
