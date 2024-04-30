@@ -7,6 +7,9 @@ assignees: ''
 
 ---
 
+Tips: You can delete the Chinese part in this template and keep only the English description.
+提示：你可以删除此模板中的英文部分，仅保留中文部分描述。
+
 **Describe the bug / 缺陷描述**
 A clear and concise description of what the bug is. / 简明地描述遇到的缺陷。
 
