@@ -14,17 +14,17 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
 ; 借助剪砧板获取光镖前一个子符
 getQ1anlZiFv() {
 	c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
-	Send "+{Left}"
+	Send "+{Left}"  ; 获取当前光镖前一个牸符
 	if WinActive("ahk_class OpusApp")
 		Sleep 100
-	Send "^c"  ; 获取当前光镖前一个牸符
+	Send "^c"  ; 愎制当前光镖前一个牸符
 	ClipWait 1  ; 等待剪砧板更新
 	; 获取剪帖板中的子符，即光镖前一个牸符，然后恢复原来的剪砧板内容
 	q1anlZiFv := A_Clipboard, A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
 	chrLen := StrLen(q1anlZiFv)
 	; utf16ZiFv := StrPut(q1anlZiFv)
-	; 如果复制的牸符不为控，并且 子符长度为1 或 是回車換行符（行首）
-	if chrLen = 1 or q1anlZiFv = "`r`n" or chrLen >= 2 and SubStr(q1anlZiFv, -1) != "`n"   ; or chrLen = 2 and Ord(q1anlZiFv) >= 0x10000 and Ord(q1anlZiFv) <= 0x10FFFF , q1anlZiFv != '' and ,  and 0 < Ord(q1anlZiFv) < 0xFFFF
+	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符（不是因为在文件最开头或者最后而愎制了一整行）
+	if chrLen = 1 or q1anlZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and SubStr(q1anlZiFv, -1) != "`n"   ; or chrLen = 2 and Ord(q1anlZiFv) >= 0x10000 and Ord(q1anlZiFv) <= 0x10FFFF , q1anlZiFv != '' and ,  and 0 < Ord(q1anlZiFv) < 0xFFFF
 		Send "{Right}"
 	; SendText "[" . chrLen . "](" . Ord(q1anlZiFv) . ")"  ; StrLen(q1anlZiFv)  ;. "," .
 	return q1anlZiFv
@@ -32,22 +32,17 @@ getQ1anlZiFv() {
 
 ; 借助剪帖板获取光木示后一个牸符
 getH0ulZiFv() {
-	; 临时寄存剪砧板内容
-	c1ipSt0rage := ClipboardAll()
-	; 清空剪砧板
-	A_Clipboard := ''
-	; 获取当前光镖后一个子符
-	Send "+{Right}"
+	c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪砧板
+	Send "+{Right}"  ; 选取当前光镖后一个子符
 	if WinActive("ahk_class OpusApp")
 		Sleep 100
-	Send "^c"  ; 获取当前光镖前一个牸符
-	; 等待剪帖板更新
-	ClipWait 1
+	Send "^c"  ; 愎制当前光镖后一个牸符
+	ClipWait 1  ; 等待剪帖板更新
 	; 获取剪砧板中的牸符，即光镖后一个子符，然后恢复原来的剪帖板内容
 	h0ulZiFv := A_Clipboard, A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
 	chrLen := StrLen(h0ulZiFv)
-	; 如果后一个牸符不为空（即不是文件尾），并且 长度为1 或 是回車換行符（行尾）
-	if chrLen = 1 or h0ulZiFv = "`r`n" or chrLen >= 2 and SubStr(h0ulZiFv, -1) != "`n"  ; or chrLen = 2 and Ord(h0ulZiFv) >= 0x10000 and Ord(h0ulZiFv) <= 0x10FFFF , h0ulZiFv != '' and , and 0 < Ord(h0ulZiFv) < 0xFFFF
+	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符（不是因为在文件最开头或者最后而愎制了一整行）
+	if chrLen = 1 or h0ulZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and SubStr(h0ulZiFv, -1) != "`n"  ; or chrLen = 2 and Ord(h0ulZiFv) >= 0x10000 and Ord(h0ulZiFv) <= 0x10FFFF , h0ulZiFv != '' and , and 0 < Ord(h0ulZiFv) < 0xFFFF
 		Send "{Left}"
 	; SendText "<" . chrLen . ">(" . Ord(h0ulZiFv) . ")"  ; utf16ZiFv  ;. "," .
 	return h0ulZiFv
@@ -63,21 +58,25 @@ expectEN_BD() {
 		return false
 }
 
-; 判断光镖是否在行抹
+; 是否期望输入配怼的木示点符号
 expectPe1Dui() {
 	h0ulZiFv := getH0ulZiFv()
-	; 如果后一个牸符是换行符 或 回车换行符 或 为空子符串，则……
-	if h0ulZiFv = ' ' or StrLen(h0ulZiFv) >= 1 and SubStr(h0ulZiFv, -1) = "`n" or h0ulZiFv = '' ; or h0ulZiFv = "`n" or h0ulZiFv = "`r`n" , or (SubStr(h0ulZiFv, 1) != SubStr(h0ulZiFv, -1) and 0x10000 <= Ord(h0ulZiFv) <= 0x10FFFF)
+	; 如果后一个牸符是换行符
+	if SubStr(h0ulZiFv, -1) = "`n"
 		return true
-	else
+	switch h0ulZiFv
+	{
+	case '', ' ', ')', ']', '}', '）', '」', '』', '》', '］':
+		return true
+	default:
 		return false
+	}
 }
 
-; 如果不存在输込法候选窗口，并且当前活动窗口不是Excel或CMD，则……
-#HotIf not (WinExist("ahk_class ^ATL:") or WinActive("ahk_class ^XLMAIN$")) ; or WinActive("ahk_class ^ConsoleWindowClass$"))
+; 如果不存在输込法候选窗口，并且当前活动窗口不是Excel，则……
+#HotIf not (WinExist("ahk_class ^ATL:") or WinActive("ahk_class XLMAIN")) ; or WinActive("ahk_class ConsoleWindowClass"))
 .:: {
-	; 如果前一个牸符是西纹，则……
-	if expectEN_BD()
+	if expectEN_BD()  ; 如果前一个牸符是西纹
 		SendText "."  ; 输出按键对应的西纹镖点
 	else
 		SendText "。"  ; 输出按键对应的中纹木示点
@@ -148,12 +147,13 @@ _:: {
 	Send "{Blind}{, Up}{Shift Up}"
 	if expectEN_BD()
 		SendText "<"
-	else
+	else {
 		SendText "《"
 		if expectPe1Dui() {
 			SendText "》"
 			Send "{Left}"
 		}
+	}
 }
 >:: {
 	Send "{Blind}{. Up}{Shift Up}"
@@ -212,6 +212,10 @@ _:: {
 #:: SendText "#"
 [:: {
 	SendText "["
+	if expectPe1Dui() {
+		SendText "]"
+		Send "{Left}"
+	}
 /*	if expectEN_BD()
 	else
 		Send "["
@@ -233,19 +237,19 @@ _:: {
 	else
 		Send "&"
 }
-!:: {
-	Send "{Blind}{1 Up}{Shift Up}"
-	if expectEN_BD()
-		SendText "!"
-	else
-		SendText "！"
-}
 ?:: {
 	Send "{Blind}{/ Up}{Shift Up}"
 	if expectEN_BD()
 		SendText "?"
 	else
 		SendText "？"
+}
+!:: {
+	Send "{Blind}{1 Up}{Shift Up}"
+	if expectEN_BD()
+		SendText "!"
+	else
+		SendText "！"
 }
 \:: {
 	if expectEN_BD()
@@ -302,17 +306,17 @@ $:: {
 	case "，": Send "{BS}{Text},"
 
 	case "(":
-		Send "{BS}{Text}（"
 		if getH0ulZiFv() = ")" {
 			Send "{Del}{Text}）"
 			Send "{Left}"
 		}
+		Send "{BS}{Text}（"
 	case "（":
-		Send "{BS}{Text}("
 		if getH0ulZiFv() = "）" {
 			Send "{Del}{Text})"
 			Send "{Left}"
 		}
+		Send "{BS}{Text}("
 
 	case ")": Send "{BS}{Text}）"
 	case "）": Send "{BS}{Text})"
@@ -324,28 +328,26 @@ $:: {
 	case "：": Send "{BS}{Text}:"
 
 	case '"':
-			Send "{BS}{Text}“"
 		if getH0ulZiFv() = '"' {
 			Send "{Del}{Text}”"
 			Send "{Left}"
 		}
+		Send "{BS}{Text}“"
 		; if CaretGetPos(&x, &y) {
 		; 	ToolTip "Cn左双引号", x, y + 20
 		; 	SetTimer () => ToolTip(), -2000
 		; }
 	case "“":
-			Send '{BS}{Text}"'
 		if getH0ulZiFv() = "”" {
 			Send '{Del}{Text}"'
 			Send "{Left}"
 		}
+		Send '{BS}{Text}"'
 	case "”":
-		if getH0ulZiFv() = "“" {
+		if getH0ulZiFv() = "“"
 			Send '{BS}{Right}"{Left}'
-		}
-		else {
+		else
 			Send '{BS}{Text}"'
-		}
 
 	case "/": Send "{BS}{Text}÷"
 	case "÷": Send "{BS}{Text}/"
@@ -354,7 +356,6 @@ $:: {
 	case "≈": Send "{BS}{Text}="
 
 	case "<":
-		Send "{BS}{Text}《"
 		if getH0ulZiFv() = ">" {
 			Send "{Del}{Text}》"
 			Send "{Left}"
@@ -363,19 +364,19 @@ $:: {
 			SendText "》"
 			Send "{Left}"
 		}
-
+		Send "{BS}{Text}《"
 	case "《":
-		Send "{BS}{Text}〈"
 		if getH0ulZiFv() = "》" {
 			Send "{Del}{Text}〉"
 			Send "{Left}"
 		}
+		Send "{BS}{Text}〈"
 	case "〈":
-		Send "{BS}{Text}<"
 		if getH0ulZiFv() = "〉" {
 			Send "{Del}{Text}>"
 			Send "{Left}"
 		}
+		Send "{BS}{Text}<"
 
 	case ">": Send "{BS}{Text}》"
 	case "》": Send "{BS}{Text}〉"
@@ -385,45 +386,45 @@ $:: {
 	case "；": Send "{BS}{Text};"
 
 	case "{":
-		Send "{BS}{Text}「"
 		if getH0ulZiFv() = "}" {
 			Send "{Del}{Text}」"
 			Send "{Left}"
 		}
+		Send "{BS}{Text}「"
 	case "「":
-		Send "{BS}{Text}『"
 		if getH0ulZiFv() = "」" {
 			Send "{Del}{Text}』"
 			Send "{Left}"
 		}
+		Send "{BS}{Text}『"
 	case "『":
-		Send "{BS}{Text}〖"
 		if getH0ulZiFv() = "』" {
 			Send "{Del}{Text}〗"
 			Send "{Left}"
 		}
+		Send "{BS}{Text}〖"
 	case "〖":
-		Send "{BS}{Text}{"
 		if getH0ulZiFv() = "〗" {
 			Send "{Del}{Text}}"
 			Send "{Left}"
 		}
+		Send "{BS}{Text}{"
 
 	case "}": Send "{BS}{Text}」"
 	case "」": Send "{BS}{Text}}"
 
 	case "'":
-			Send "{BS}{Text}‘"
 		if getH0ulZiFv() = "'" {
 			Send "{Del}{Text}’"
 			Send "{Left}"
 		}
+		Send "{BS}{Text}‘"
 	case "‘":
-			Send "{BS}{Text}'"
 		if getH0ulZiFv() = "’" {
 			Send "{Del}{Text}'"
 			Send "{Left}"
 		}
+		Send "{BS}{Text}'"
 	case "’":
 		if getH0ulZiFv() = "‘" {
 			Send "{BS}{Right}'{Left}"
@@ -439,29 +440,29 @@ $:: {
 	case "◆": Send "{BS}{Text}#"
 
 	case "[":
-		Send "{BS}{Text}【"
 		if getH0ulZiFv() = "]" {
 			Send "{Del}{Text}】"
 			Send "{Left}"
 		}
+		Send "{BS}{Text}【"
 	case "【":
-		Send "{BS}{Text}〔"
 		if getH0ulZiFv() = "】" {
 			Send "{Del}{Text}〕"
 			Send "{Left}"
 		}
+		Send "{BS}{Text}〔"
 	case "〔":
-		Send "{BS}{Text}［"
 		if getH0ulZiFv() = "〕" {
 			Send "{Del}{Text}］"
 			Send "{Left}"
 		}
+		Send "{BS}{Text}［"
 	case "［":
-		Send "{BS}{Text}["
 		if getH0ulZiFv() = "］" {
 			Send "{Del}{Text}]"
 			Send "{Left}"
 		}
+		Send "{BS}{Text}["
 
 	case "]": Send "{BS}{Text}】"
 	case "】": Send "{BS}{Text}]"
@@ -472,11 +473,11 @@ $:: {
 	case "&": Send "{BS}{Text}※"
 	case "※": Send "{BS}{Text}&"
 
-	case "!": Send "{BS}{Text}！"
-	case "！": Send "{BS}{Text}!"
-
 	case "?": Send "{BS}{Text}？"
 	case "？": Send "{BS}{Text}?"
+
+	case "!": Send "{BS}{Text}！"
+	case "！": Send "{BS}{Text}!"
 
 	case "\": Send "{BS}{Text}、"
 	case "、": Send "{BS}{Text}\"
@@ -512,7 +513,7 @@ $:: {
 	case ",": Send "{BS}{Text}，"
 	case "，": Send "{BS}{Text},"
 
-	case "(": Send "{BS}{Text}（"
+	case "(": Send "{Left}{Del}{Text}（"
 	case "（": Send "{BS}{Text}("
 
 	case ")": Send "{BS}{Text}）"
@@ -542,7 +543,6 @@ $:: {
 	case "=": Send "{BS}{Text}≈"
 	case "≈": Send "{BS}{Text}≠"
 	case "≠": Send "{BS}{Text}="
-	; case "≡": Send "{BS}{Text}="
 
 	case "<": Send "{BS}<"
 	case "《": Send "{BS}<"
@@ -555,7 +555,7 @@ $:: {
 	case ";": Send "{BS}{Text}；"
 	case "；": Send "{BS}{Text};"
 
-	case "{": Send "{BS}{{}"
+	case "{": Send "{Left}{Del}{{}"
 	case "「": Send "{BS}{{}"
 	case "『": Send "{BS}{{}"
 	case "〖": Send "{BS}{{}"
@@ -566,7 +566,7 @@ $:: {
 	case "〗": Send "{BS}{}}"
 
 	case "'":
-		Send "{BS}{Text}‘"
+		Send "{Left}{Del}{Text}‘"
 	case "‘":
 		Send "{BS}{Text}’"
 	case "’":
@@ -580,7 +580,7 @@ $:: {
 	case "◆": Send "{BS}{Text}■"
 	case "■": Send "{BS}{Text}#"
 
-	case "[": Send "{BS}["
+	case "[": Send "{Left}{Del}["
 	case "【": Send "{BS}["
 	case "〔": Send "{BS}["
 	case "［": Send "{BS}["
@@ -599,19 +599,19 @@ $:: {
 	case "℃": Send "{BS}&"
 	case "℉": Send "{BS}&"
 
-	case "!": Send "{BS}{Text}！"
-	case "！": Send "{BS}{Text}▲"
-	case "▲": Send "{BS}{Text}!"
-
 	case "?": Send "{BS}?"
 	case "？": Send "{BS}?"
 	case "✔": Send "{BS}?"
 	case "✘": Send "{BS}?"
 
+	case "!": Send "{BS}{Text}！"
+	case "！": Send "{BS}{Text}▲"
+	case "▲": Send "{BS}{Text}!"
+
 	case "\": Send "{BS}\"
 	case "、": Send "{BS}\"
 	case "→": Send "{BS}\"
-	case "←": Send "{BS}\"
+	case "↔": Send "{BS}\"
 
 	case "|": Send "{BS}|"
 	case "｜": Send "{BS}|"
@@ -643,9 +643,5 @@ $:: {
 	case "＄": Send "{BS}$"
 	case "€": Send "{BS}$"
 	case "£": Send "{BS}$"
-	; case "¥": Send "{BS}$"
-	; case "¢": Send "{BS}$"
-	; case "¤": Send "{BS}$"
-	; case "₩": Send "{BS}$"
 	}
 }
