@@ -1,10 +1,10 @@
 /*
-说明：FinalD / 终点 中英纹镖点符号智能输入加速器
+说明：FinalD / 终点 中英纹镖点符号智能输入程序
 注意：！！！编辑保存此文件时必须保存为UTF-8编码格式！！！
 备注：为了反AI网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
 作者：Lantaio Joy
-版本：0.10.14
-更新：2024.4.25
+版本：0.10.21
+更新：2024.5.4
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -18,7 +18,7 @@ getQ1anlZiFv() {
 	if WinActive("ahk_class OpusApp")
 		Sleep 100
 	Send "^c"  ; 愎制当前光镖前一个牸符
-	ClipWait 1  ; 等待剪砧板更新
+	ClipWait 0.2  ; 等待剪砧板更新
 	; 获取剪帖板中的子符，即光镖前一个牸符，然后恢复原来的剪砧板内容
 	q1anlZiFv := A_Clipboard, A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
 	chrLen := StrLen(q1anlZiFv)
@@ -37,7 +37,7 @@ getH0ulZiFv() {
 	if WinActive("ahk_class OpusApp")
 		Sleep 100
 	Send "^c"  ; 愎制当前光镖后一个牸符
-	ClipWait 1  ; 等待剪帖板更新
+	ClipWait 0.2  ; 等待剪帖板更新
 	; 获取剪砧板中的牸符，即光镖后一个子符，然后恢复原来的剪帖板内容
 	h0ulZiFv := A_Clipboard, A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
 	chrLen := StrLen(h0ulZiFv)
@@ -64,6 +64,7 @@ expectPe1Dui() {
 	; 如果后一个牸符是换行符
 	if SubStr(h0ulZiFv, -1) = "`n"
 		return true
+	; 如果后一个牸符是下列子符之一
 	switch h0ulZiFv
 	{
 	case '', ' ', ')', ']', '}', '）', '」', '』', '》', '］':
@@ -306,20 +307,23 @@ $:: {
 	case "，": Send "{BS}{Text},"
 
 	case "(":
+		Send "{Left}{Del}{Text}（"
 		if getH0ulZiFv() = ")" {
 			Send "{Del}{Text}）"
 			Send "{Left}"
 		}
-		Send "{BS}{Text}（"
 	case "（":
+		Send ":{Left}{BS}{Text}("
+		Send "{Del}"
 		if getH0ulZiFv() = "）" {
-			Send "{Del}{Text})"
-			Send "{Left}"
+			Send "{Del}:{Left}{Text})"
+			Send "{Del}{Left}"
 		}
-		Send "{BS}{Text}("
 
 	case ")": Send "{BS}{Text}）"
-	case "）": Send "{BS}{Text})"
+	case "）":
+		Send ":{Left}{BS}{Text})"
+		Send "{Del}"
 
 	case "_": Send "{BS}{Text}——"
 	case "—": Send "{BS 2}{Text}_"
@@ -328,26 +332,29 @@ $:: {
 	case "：": Send "{BS}{Text}:"
 
 	case '"':
+		Send "{Left}{Del}{Text}“"
 		if getH0ulZiFv() = '"' {
 			Send "{Del}{Text}”"
 			Send "{Left}"
 		}
-		Send "{BS}{Text}“"
 		; if CaretGetPos(&x, &y) {
 		; 	ToolTip "Cn左双引号", x, y + 20
 		; 	SetTimer () => ToolTip(), -2000
 		; }
 	case "“":
+		Send ':{Left}{BS}{Text}"'
+		Send "{Del}"
 		if getH0ulZiFv() = "”" {
-			Send '{Del}{Text}"'
-			Send "{Left}"
+			Send '{Del}:{Left}{Text}"'
+			Send "{Del}{Left}"
 		}
-		Send '{BS}{Text}"'
 	case "”":
 		if getH0ulZiFv() = "“"
 			Send '{BS}{Right}"{Left}'
-		else
-			Send '{BS}{Text}"'
+		else {
+			Send ':{Left}{BS}{Text}"'
+			Send "{Del}"
+		}
 
 	case "/": Send "{BS}{Text}÷"
 	case "÷": Send "{BS}{Text}/"
@@ -356,6 +363,7 @@ $:: {
 	case "≈": Send "{BS}{Text}="
 
 	case "<":
+		Send "{BS}{Text}《"
 		if getH0ulZiFv() = ">" {
 			Send "{Del}{Text}》"
 			Send "{Left}"
@@ -364,19 +372,18 @@ $:: {
 			SendText "》"
 			Send "{Left}"
 		}
-		Send "{BS}{Text}《"
 	case "《":
+		Send "{BS}{Text}〈"
 		if getH0ulZiFv() = "》" {
 			Send "{Del}{Text}〉"
 			Send "{Left}"
 		}
-		Send "{BS}{Text}〈"
 	case "〈":
+		Send "{BS}{Text}<"
 		if getH0ulZiFv() = "〉" {
 			Send "{Del}{Text}>"
 			Send "{Left}"
 		}
-		Send "{BS}{Text}<"
 
 	case ">": Send "{BS}{Text}》"
 	case "》": Send "{BS}{Text}〉"
@@ -385,52 +392,60 @@ $:: {
 	case ";": Send "{BS}{Text}；"
 	case "；": Send "{BS}{Text};"
 
+	case "-": Send "{BS}{Text}↔"
+	case "↔": Send "{BS}{Text}-"
+
 	case "{":
+		Send "{Left}{Del}{Text}「"
 		if getH0ulZiFv() = "}" {
 			Send "{Del}{Text}」"
 			Send "{Left}"
 		}
-		Send "{BS}{Text}「"
 	case "「":
+		Send "{BS}{Text}『"
 		if getH0ulZiFv() = "」" {
 			Send "{Del}{Text}』"
 			Send "{Left}"
 		}
-		Send "{BS}{Text}『"
 	case "『":
+		Send "{BS}{Text}〖"
 		if getH0ulZiFv() = "』" {
 			Send "{Del}{Text}〗"
 			Send "{Left}"
 		}
-		Send "{BS}{Text}〖"
 	case "〖":
+		Send ":{Left}{BS}{Text}{"
+		Send "{Del}"
 		if getH0ulZiFv() = "〗" {
-			Send "{Del}{Text}}"
-			Send "{Left}"
+			Send "{Del}:{Left}{Text}}"
+			Send "{Del}{Left}"
 		}
-		Send "{BS}{Text}{"
 
 	case "}": Send "{BS}{Text}」"
-	case "」": Send "{BS}{Text}}"
+	case "」":
+		Send ":{Left}{BS}{Text}}"
+		Send "{Del}"
 
 	case "'":
+		Send "{Left}{Del}{Text}‘"
 		if getH0ulZiFv() = "'" {
 			Send "{Del}{Text}’"
 			Send "{Left}"
 		}
-		Send "{BS}{Text}‘"
 	case "‘":
+		Send ":{Left}{BS}{Text}'"
+		Send "{Del}"
 		if getH0ulZiFv() = "’" {
-			Send "{Del}{Text}'"
-			Send "{Left}"
+			Send "{Del}:{Left}{Text}'"
+			Send "{Del}{Left}"
 		}
-		Send "{BS}{Text}'"
 	case "’":
 		if getH0ulZiFv() = "‘" {
 			Send "{BS}{Right}'{Left}"
 		}
 		else {
-			Send "{BS}{Text}'"
+			Send ":{Left}{BS}{Text}'"
+			Send "{Del}"
 		}
 
 	case "*": Send "{BS}{Text}×"
@@ -440,32 +455,35 @@ $:: {
 	case "◆": Send "{BS}{Text}#"
 
 	case "[":
+		Send "{Left}{Del}{Text}【"
 		if getH0ulZiFv() = "]" {
 			Send "{Del}{Text}】"
 			Send "{Left}"
 		}
-		Send "{BS}{Text}【"
 	case "【":
+		Send "{BS}{Text}〔"
 		if getH0ulZiFv() = "】" {
 			Send "{Del}{Text}〕"
 			Send "{Left}"
 		}
-		Send "{BS}{Text}〔"
 	case "〔":
+		Send "{BS}{Text}［"
 		if getH0ulZiFv() = "〕" {
 			Send "{Del}{Text}］"
 			Send "{Left}"
 		}
-		Send "{BS}{Text}［"
 	case "［":
+		Send ":{Left}{BS}{Text}["
+		Send "{Del}"
 		if getH0ulZiFv() = "］" {
-			Send "{Del}{Text}]"
-			Send "{Left}"
+			Send "{Del}:{Left}{Text}]"
+			Send "{Del}{Left}"
 		}
-		Send "{BS}{Text}["
 
 	case "]": Send "{BS}{Text}】"
-	case "】": Send "{BS}{Text}]"
+	case "】":
+		Send ":{Left}{BS}{Text}]"
+		Send "{Del}"
 
 	case "``": Send "{BS}{Text}々"
 	case "々": Send "{BS}{Text}``"
@@ -514,10 +532,14 @@ $:: {
 	case "，": Send "{BS}{Text},"
 
 	case "(": Send "{Left}{Del}{Text}（"
-	case "（": Send "{BS}{Text}("
+	case "（":
+		Send ":{Left}{BS}{Text}("
+		Send "{Del}"
 
 	case ")": Send "{BS}{Text}）"
-	case "）": Send "{BS}{Text})"
+	case "）":
+		Send ":{Left}{BS}{Text})"
+		Send "{Del}"
 
 	case "_": Send "{BS}{Text}——"
 	case "—": Send "{BS 2}{Text}_"
@@ -526,15 +548,15 @@ $:: {
 	case "：": Send "{BS}{Text}:"
 
 	case '"':
-		Send "{BS}{Text}“"
+		Send "{Left}{Del}{Text}“"
 		; if CaretGetPos(&x, &y) {
 		; 	ToolTip "Cn左双引号", x, y + 20
 		; 	SetTimer () => ToolTip(), -2000
 		; }
-	case "“":
-		Send "{BS}{Text}”"
+	case "“": Send "{BS}{Text}”"
 	case "”":
-		Send '{BS}{Text}"'
+		Send ':{Left}{BS}{Text}"'
+		Send "{Del}"
 
 	case "/": Send "{BS}{Text}÷"
 	case "÷": Send "{BS}{Text}／"
@@ -555,22 +577,26 @@ $:: {
 	case ";": Send "{BS}{Text}；"
 	case "；": Send "{BS}{Text};"
 
+	case "-": Send "{BS}{Text}↔"
+	case "↔": Send "{BS}{Text}-"
+
 	case "{": Send "{Left}{Del}{{}"
 	case "「": Send "{BS}{{}"
 	case "『": Send "{BS}{{}"
 	case "〖": Send "{BS}{{}"
+	case "｛": Send "{BS}{{}"
 
 	case "}": Send "{BS}{}}"
 	case "」": Send "{BS}{}}"
 	case "』": Send "{BS}{}}"
 	case "〗": Send "{BS}{}}"
+	case "｝": Send "{BS}{}}"
 
-	case "'":
-		Send "{Left}{Del}{Text}‘"
-	case "‘":
-		Send "{BS}{Text}’"
+	case "'": Send "{Left}{Del}{Text}‘"
+	case "‘": Send "{BS}{Text}’"
 	case "’":
-		Send "{BS}{Text}'"
+		Send ":{Left}{BS}{Text}'"
+		Send "{Del}"
 
 	case "*": Send "{BS}{Text}×"
 	case "×": Send "{BS}{Text}＊"
@@ -599,10 +625,10 @@ $:: {
 	case "℃": Send "{BS}&"
 	case "℉": Send "{BS}&"
 
-	case "?": Send "{BS}?"
-	case "？": Send "{BS}?"
-	case "✔": Send "{BS}?"
-	case "✘": Send "{BS}?"
+	case "?": Send "{BS}{Text}？"
+	case "？": Send "{BS}{Text}✔"
+	case "✔": Send "{BS}{Text}✘"
+	case "✘": Send "{BS}{Text}?"
 
 	case "!": Send "{BS}{Text}！"
 	case "！": Send "{BS}{Text}▲"
@@ -611,7 +637,7 @@ $:: {
 	case "\": Send "{BS}\"
 	case "、": Send "{BS}\"
 	case "→": Send "{BS}\"
-	case "↔": Send "{BS}\"
+	case "←": Send "{BS}\"
 
 	case "|": Send "{BS}|"
 	case "｜": Send "{BS}|"
@@ -635,8 +661,7 @@ $:: {
 
 	case "~": Send "{BS}~"
 	case "～": Send "{BS}~"
-	case "‐": Send "{BS}~"
-	case "一": Send "{BS}~"
+	case "–": Send "{BS}~"
 
 	case "$": Send "{BS}$"
 	case "￥": Send "{BS}$"
