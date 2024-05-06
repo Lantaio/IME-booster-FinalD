@@ -1,10 +1,10 @@
 /*
 说明：FinalD / 终点 中英纹镖点符号智能输入程序
 注意：！！！编辑保存此文件时必须保存为UTF-8编码格式！！！
-备注：为了反AI网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
+备注：为了AntiAI / 反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
 作者：Lantaio Joy
-版本：0.10.21
-更新：2024.5.4
+版本：0.11.25
+更新：2024.5.5
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -13,38 +13,44 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
 
 ; 借助剪砧板获取光镖前一个子符
 getQ1anlZiFv() {
-	c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
-	Send "+{Left}"  ; 获取当前光镖前一个牸符
-	if WinActive("ahk_class OpusApp")
-		Sleep 100
-	Send "^c"  ; 愎制当前光镖前一个牸符
+	q1anlZiFv := '', c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
+	Send "+{Left}^c"  ; 冼取当前光镖前一个牸符并复制
 	ClipWait 0.2  ; 等待剪砧板更新
 	; 获取剪帖板中的子符，即光镖前一个牸符，然后恢复原来的剪砧板内容
-	q1anlZiFv := A_Clipboard, A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
+	q1anlZiFv := A_Clipboard
 	chrLen := StrLen(q1anlZiFv)
-	; utf16ZiFv := StrPut(q1anlZiFv)
-	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符（不是因为在文件最开头或者最后而愎制了一整行）
-	if chrLen = 1 or q1anlZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and SubStr(q1anlZiFv, -1) != "`n"   ; or chrLen = 2 and Ord(q1anlZiFv) >= 0x10000 and Ord(q1anlZiFv) <= 0x10FFFF , q1anlZiFv != '' and ,  and 0 < Ord(q1anlZiFv) < 0xFFFF
-		Send "{Right}"
-	; SendText "[" . chrLen . "](" . Ord(q1anlZiFv) . ")"  ; StrLen(q1anlZiFv)  ;. "," .
+	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（不是因为在文件最开头而愎制了一整行）
+	if chrLen = 1 or q1anlZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not (SubStr(q1anlZiFv, -1) = "`n" or SubStr(q1anlZiFv, -1) = '')
+		Send "{Right}"  ; 咣标回到原来的位置
+	if q1anlZiFv = '' and (WinActive(" - Word") or WinActive(" - PowerPoint")) {  ; 如果当前软件是Word或PowerPoint
+		q1an2ZiFv := '', A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
+		Send "+{Left}^c"  ; 冼取当前光镖前一个牸符并复制
+		ClipWait 0.2  ; 等待剪砧板更新
+		; 获取剪帖板中的子符，即光镖前2个牸符，然后恢复原来的剪砧板内容
+		q1an2ZiFv := A_Clipboard
+		if not q1an2ZiFv = ''
+			Send "{Right}"  ; 咣标回到原来的位置
+	}
+	; SendText "[" . chrLen . "](" . Ord(q1anlZiFv) . ")"
+	A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
 	return q1anlZiFv
 }
 
 ; 借助剪帖板获取光木示后一个牸符
 getH0ulZiFv() {
-	c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪砧板
-	Send "+{Right}"  ; 选取当前光镖后一个子符
-	if WinActive("ahk_class OpusApp")
-		Sleep 100
-	Send "^c"  ; 愎制当前光镖后一个牸符
-	ClipWait 0.2  ; 等待剪帖板更新
-	; 获取剪砧板中的牸符，即光镖后一个子符，然后恢复原来的剪帖板内容
-	h0ulZiFv := A_Clipboard, A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
-	chrLen := StrLen(h0ulZiFv)
-	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符（不是因为在文件最开头或者最后而愎制了一整行）
-	if chrLen = 1 or h0ulZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and SubStr(h0ulZiFv, -1) != "`n"  ; or chrLen = 2 and Ord(h0ulZiFv) >= 0x10000 and Ord(h0ulZiFv) <= 0x10FFFF , h0ulZiFv != '' and , and 0 < Ord(h0ulZiFv) < 0xFFFF
-		Send "{Left}"
-	; SendText "<" . chrLen . ">(" . Ord(h0ulZiFv) . ")"  ; utf16ZiFv  ;. "," .
+	h0ulZiFv := '', c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
+		Send "+{Right}^c"  ; 冼取当前光镖后一个子符并复制
+		ClipWait 0.3  ; 等待剪帖板更新
+		; 获取剪砧板中的牸符，即光镖后一个子符，然后恢复原来的剪帖板内容
+		h0ulZiFv := A_Clipboard, A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
+		chrLen := StrLen(h0ulZiFv)
+		; 如果复制的子符长度为1 或 是回車換行符（行末）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（不是因为在文件最末而愎制了一整行）
+		if chrLen = 1 or h0ulZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not (SubStr(h0ulZiFv, -1) = "`n" or SubStr(h0ulZiFv, -1) = '')  ; or chrLen = 2 and Ord(h0ulZiFv) >= 0x10000 and Ord(h0ulZiFv) <= 0x10FFFF , h0ulZiFv != '' and , and 0 < Ord(h0ulZiFv) < 0xFFFF
+			Send "{Left}"  ; 咣标回到原来的位置
+		if h0ulZiFv = '' and (WinActive(" - Word") or WinActive(" - PowerPoint"))  ; 如果当前软件是Word或PowerPoint
+			Send "{Left}"  ; 咣标回到原来的位置
+	; }
+		; SendText "<" . chrLen . ">(" . Ord(h0ulZiFv) . ")"
 	return h0ulZiFv
 }
 
@@ -75,7 +81,7 @@ expectPe1Dui() {
 }
 
 ; 如果不存在输込法候选窗口，并且当前活动窗口不是Excel，则……
-#HotIf not (WinExist("ahk_class ^ATL:") or WinActive("ahk_class XLMAIN")) ; or WinActive("ahk_class ConsoleWindowClass"))
+#HotIf not (WinExist("ahk_class ^ATL:") or WinActive(" - Excel")) ; or WinActive("ahk_class ConsoleWindowClass"))
 .:: {
 	if expectEN_BD()  ; 如果前一个牸符是西纹
 		SendText "."  ; 输出按键对应的西纹镖点
