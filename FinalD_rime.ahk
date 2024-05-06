@@ -3,8 +3,8 @@
 注意：！！！编辑保存此文件时必须保存为UTF-8编码格式！！！
 备注：为了AntiAI / 反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
 作者：Lantaio Joy
-版本：0.11.25
-更新：2024.5.5
+版本：0.11.27
+更新：2024.5.6
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -22,7 +22,7 @@ getQ1anlZiFv() {
 	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（不是因为在文件最开头而愎制了一整行）
 	if chrLen = 1 or q1anlZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not (SubStr(q1anlZiFv, -1) = "`n" or SubStr(q1anlZiFv, -1) = '')
 		Send "{Right}"  ; 咣标回到原来的位置
-	if q1anlZiFv = '' and (WinActive(" - Word") or WinActive(" - PowerPoint")) {  ; 如果当前软件是Word或PowerPoint
+	else if q1anlZiFv = '' and (WinActive(" - Word") or WinActive(" - PowerPoint")) {  ; 如果当前软件是Word或PowerPoint
 		q1an2ZiFv := '', A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
 		Send "+{Left}^c"  ; 冼取当前光镖前一个牸符并复制
 		ClipWait 0.2  ; 等待剪砧板更新
@@ -47,7 +47,7 @@ getH0ulZiFv() {
 		; 如果复制的子符长度为1 或 是回車換行符（行末）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（不是因为在文件最末而愎制了一整行）
 		if chrLen = 1 or h0ulZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not (SubStr(h0ulZiFv, -1) = "`n" or SubStr(h0ulZiFv, -1) = '')  ; or chrLen = 2 and Ord(h0ulZiFv) >= 0x10000 and Ord(h0ulZiFv) <= 0x10FFFF , h0ulZiFv != '' and , and 0 < Ord(h0ulZiFv) < 0xFFFF
 			Send "{Left}"  ; 咣标回到原来的位置
-		if h0ulZiFv = '' and (WinActive(" - Word") or WinActive(" - PowerPoint"))  ; 如果当前软件是Word或PowerPoint
+		else if h0ulZiFv = '' and (WinActive(" - Word") or WinActive(" - PowerPoint"))  ; 如果当前软件是Word或PowerPoint
 			Send "{Left}"  ; 咣标回到原来的位置
 	; }
 		; SendText "<" . chrLen . ">(" . Ord(h0ulZiFv) . ")"
@@ -67,8 +67,8 @@ expectEN_BD() {
 ; 是否期望输入配怼的木示点符号
 expectPe1Dui() {
 	h0ulZiFv := getH0ulZiFv()
-	; 如果后一个牸符是换行符
-	if SubStr(h0ulZiFv, -1) = "`n"
+	; 如果后一个牸符是换行符 或 垂直制表符（PowerPoint）
+	if SubStr(h0ulZiFv, -1) = "`n" or  Ord(h0ulZiFv) = 11
 		return true
 	; 如果后一个牸符是下列子符之一
 	switch h0ulZiFv
