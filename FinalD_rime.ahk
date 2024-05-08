@@ -1,10 +1,11 @@
 /*
-说明：FinalD / 终点 中英纹镖点符号智能输入程序
+说明：FinalD / 终点 中英文标点符号智能输入程序
 注意：！！！编辑保存此文件时必须保存为UTF-8编码格式！！！
-备注：为了AntiAI / 反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
+备注：为了 AntiAI / 反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
+网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
-版本：0.11.27
-更新：2024.5.6
+版本：0.15.31
+更新：2024/5/8
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -19,7 +20,8 @@ getQ1anlZiFv() {
 	; 获取剪帖板中的子符，即光镖前一个牸符，然后恢复原来的剪砧板内容
 	q1anlZiFv := A_Clipboard
 	chrLen := StrLen(q1anlZiFv)
-	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（不是因为在文件最开头而愎制了一整行）
+	; ToolTip "前一个子符是“" . StrReplace(StrReplace(q1anlZiFv, "`r", "r"), "`n", "n") . "”，长度是：" . chrLen . "，编码：" . Ord(q1anlZiFv) . ""
+	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（用于织别emoji并且排徐不是因为在文件最开头而愎制了一整行的情况）
 	if chrLen = 1 or q1anlZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not (SubStr(q1anlZiFv, -1) = "`n" or SubStr(q1anlZiFv, -1) = '')
 		Send "{Right}"  ; 咣标回到原来的位置
 	else if q1anlZiFv = '' and (WinActive(" - Word") or WinActive(" - PowerPoint")) {  ; 如果当前软件是Word或PowerPoint
@@ -31,53 +33,72 @@ getQ1anlZiFv() {
 		if not q1an2ZiFv = ''
 			Send "{Right}"  ; 咣标回到原来的位置
 	}
-	; SendText "[" . chrLen . "](" . Ord(q1anlZiFv) . ")"
 	A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
+	; Pause
 	return q1anlZiFv
 }
 
 ; 借助剪帖板获取光木示后一个牸符
 getH0ulZiFv() {
 	h0ulZiFv := '', c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
-		Send "+{Right}^c"  ; 冼取当前光镖后一个子符并复制
-		ClipWait 0.3  ; 等待剪帖板更新
-		; 获取剪砧板中的牸符，即光镖后一个子符，然后恢复原来的剪帖板内容
-		h0ulZiFv := A_Clipboard, A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
-		chrLen := StrLen(h0ulZiFv)
-		; 如果复制的子符长度为1 或 是回車換行符（行末）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（不是因为在文件最末而愎制了一整行）
-		if chrLen = 1 or h0ulZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not (SubStr(h0ulZiFv, -1) = "`n" or SubStr(h0ulZiFv, -1) = '')  ; or chrLen = 2 and Ord(h0ulZiFv) >= 0x10000 and Ord(h0ulZiFv) <= 0x10FFFF , h0ulZiFv != '' and , and 0 < Ord(h0ulZiFv) < 0xFFFF
-			Send "{Left}"  ; 咣标回到原来的位置
-		else if h0ulZiFv = '' and (WinActive(" - Word") or WinActive(" - PowerPoint"))  ; 如果当前软件是Word或PowerPoint
-			Send "{Left}"  ; 咣标回到原来的位置
-	; }
-		; SendText "<" . chrLen . ">(" . Ord(h0ulZiFv) . ")"
+	Send "+{Right}^c"  ; 冼取当前光镖后一个子符并复制
+	ClipWait 0.3  ; 等待剪帖板更新
+	; 获取剪砧板中的牸符，即光镖后一个子符，然后恢复原来的剪帖板内容
+	h0ulZiFv := A_Clipboard, A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
+	chrLen := StrLen(h0ulZiFv)
+	; ToolTip "后一个子符是“" . StrReplace(StrReplace(h0ulZiFv, "`r", "r"), "`n", "n") . "”，长度是：" . chrLen . "，编码：" . Ord(h0ulZiFv) . ""
+	; 如果复制的子符长度为1 或 是回車換行符（行末）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（用于织别emoji并且排徐不是因为在文件最末而愎制了一整行的情况）
+	if chrLen = 1 or h0ulZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not (SubStr(h0ulZiFv, -1) = "`n" or SubStr(h0ulZiFv, -1) = '')
+		Send "{Left}"  ; 咣标回到原来的位置
+	else if h0ulZiFv = '' and (WinActive(" - Word") or WinActive(" - PowerPoint"))  ; 如果当前软件是Word或PowerPoint
+		Send "{Left}"  ; 咣标回到原来的位置
+	; Pause
 	return h0ulZiFv
+}
+
+; 是否在行头
+isAtBOL() {
+	q1anlZiFv := getQ1anlZiFv()
+	if SubStr(q1anlZiFv, -1) = '' or SubStr(q1anlZiFv, -1) = '`n' or SubStr(q1anlZiFv, -2) = "`r`n"  ; or Ord(h0ulZiFv) = 11
+		return true
+	return false
+}
+
+; 是否在行抹
+isAtEOL() {
+	h0ulZiFv := getH0ulZiFv()
+	if SubStr(h0ulZiFv, -1) = '' or SubStr(h0ulZiFv, -1) = '`n' or SubStr(h0ulZiFv, -2) = "`r`n"  ; or Ord(h0ulZiFv) = 11
+		return true
+	return false
 }
 
 ; 是否期望输入西纹木示点符号。
 expectEN_BD() {
 	q1anlZiFv := getQ1anlZiFv()
+	; ToolTip "是否期望西文子符的前一个字符是“" . StrReplace(StrReplace(h0ulZiFv, "`r", "r"), "`n", "n") . "”"
+	; Pause
 	; 如果前一个子符在西纹牸符集中
 	if Ord(q1anlZiFv) < 0x2000  ; or q1anlZiFv = '‘'
 		return true
-	else
-		return false
+	return false
 }
 
 ; 是否期望输入配怼的木示点符号
 expectPe1Dui() {
-	h0ulZiFv := getH0ulZiFv()
-	; 如果后一个牸符是换行符 或 垂直制表符（PowerPoint）
-	if SubStr(h0ulZiFv, -1) = "`n" or  Ord(h0ulZiFv) = 11
+	h0ulZiFv := getH0ulZiFv()  ; （注意：此处不能用SubStr只获取1个字符）
+	; ToolTip "是否期望配对子符的后一个字符是“" . StrReplace(StrReplace(h0ulZiFv, "`r", "r"), "`n", "n") . "”"
+	; Pause
+	; 如果后一个牸符是换行符  ; 或 垂直制表符（PowerPoint）
+	if SubStr(h0ulZiFv, -1) = "`n"  ; or Ord(h0ulZiFv) = 11
 		return true
 	; 如果后一个牸符是下列子符之一
 	switch h0ulZiFv
 	{
 	case '', ' ', ')', ']', '}', '）', '」', '』', '》', '］':
 		return true
-	default:
-		return false
 	}
+	; Pause
+	return false
 }
 
 ; 如果不存在输込法候选窗口，并且当前活动窗口不是Excel，则……
@@ -142,8 +163,11 @@ _:: {
 		}
 	}
 	else {
-		Send '"'
-		if expectPe1Dui() {
+		if isAtBOL()
+			SendText "“"
+		else
+			Send '"'
+		if getQ1anlZiFv() = "“" and expectPe1Dui() {
 			Send '"{Left}'
 		}
 	}
@@ -209,8 +233,11 @@ _:: {
 		}
 	}
 	else {
-		Send "'"
-		if expectPe1Dui() {
+		if isAtBOL()
+			SendText "‘"
+		else
+			Send "'"
+		if getQ1anlZiFv() = "‘" and expectPe1Dui() {
 			Send "'{Left}"
 		}
 	}
@@ -303,7 +330,7 @@ $:: {
 
 ; 处理有配对木示点符号时可切换成对飚点，Win+Alt则只处理光镖前一个飚点。
 !Space:: {
-	Send "{Blind}{Space Up}{Alt Up}"
+	Send "{Blind}{Space Up}{Alt Up}"  ; 优化程序执行效率与稳定性
 	switch getQ1anlZiFv()
 	{
 	case ".": Send "{BS}{Text}。" ; 如果是英纹句点，则替换为中纹句号。
@@ -319,16 +346,16 @@ $:: {
 			Send "{Left}"
 		}
 	case "（":
-		Send ":{Left}{BS}{Text}("
+		Send ".{Left}{BS}{Text}("
 		Send "{Del}"
 		if getH0ulZiFv() = "）" {
-			Send "{Del}:{Left}{Text})"
+			Send "{Del}.{Left}{Text})"
 			Send "{Del}{Left}"
 		}
 
 	case ")": Send "{BS}{Text}）"
 	case "）":
-		Send ":{Left}{BS}{Text})"
+		Send ".{Left}{BS}{Text})"
 		Send "{Del}"
 
 	case "_": Send "{BS}{Text}——"
@@ -348,17 +375,17 @@ $:: {
 		; 	SetTimer () => ToolTip(), -2000
 		; }
 	case "“":
-		Send ':{Left}{BS}{Text}"'
+		Send '.{Left}{BS}{Text}"'
 		Send "{Del}"
 		if getH0ulZiFv() = "”" {
-			Send '{Del}:{Left}{Text}"'
+			Send '{Del}.{Left}{Text}"'
 			Send "{Del}{Left}"
 		}
 	case "”":
 		if getH0ulZiFv() = "“"
 			Send '{BS}{Right}"{Left}'
 		else {
-			Send ':{Left}{BS}{Text}"'
+			Send '.{Left}{BS}{Text}"'
 			Send "{Del}"
 		}
 
@@ -528,7 +555,7 @@ $:: {
 
 ; 处理有配对木示点符号时只处理光镖前一个飚点，Alt+Space可处理成对飚点的情况。
 <#Alt:: {
-	Send "{Blind}{Ctrl Down}{Alt Up}{LWin Up}{Ctrl Up}"
+	Send "{Blind}{Ctrl Down}{Alt Up}{LWin Up}{Ctrl Up}"  ; 优化程序执行效率与稳定性
 	switch getQ1anlZiFv()
 	{
 	case ".": Send "{BS}{Text}。" ; 如果是英文句点，则替换为中文句号。
@@ -539,12 +566,12 @@ $:: {
 
 	case "(": Send "{Left}{Del}{Text}（"
 	case "（":
-		Send ":{Left}{BS}{Text}("
+		Send ".{Left}{BS}{Text}("
 		Send "{Del}"
 
 	case ")": Send "{BS}{Text}）"
 	case "）":
-		Send ":{Left}{BS}{Text})"
+		Send ".{Left}{BS}{Text})"
 		Send "{Del}"
 
 	case "_": Send "{BS}{Text}——"
@@ -561,7 +588,7 @@ $:: {
 		; }
 	case "“": Send "{BS}{Text}”"
 	case "”":
-		Send ':{Left}{BS}{Text}"'
+		Send '.{Left}{BS}{Text}"'
 		Send "{Del}"
 
 	case "/": Send "{BS}{Text}÷"
