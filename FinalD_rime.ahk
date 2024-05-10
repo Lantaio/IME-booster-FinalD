@@ -615,11 +615,27 @@ $:: {
 	case "-": Send "{BS}{Text}↔"
 	case "↔": Send "{BS}{Text}-"
 
-	case "{": Send "{Left}{Del}{{}"
-	case "「": Send "{BS}{{}"
-	case "『": Send "{BS}{{}"
+	case "{", "「", "『", "〔", "｛":
+		Send "``{Left}{BS}{{}"
+		WinWait("ahk_class ^ATL:")
+		WinWaitClose("ahk_class ^ATL:")
+		Send "{Del}"
+		switch h0ulZiFv := getH0ulZiFv()
+		{
+		case "}", "」", '』', '〕', '｝':
+			switch q1anlZiFv := getQ1anlZiFv()
+			{
+			case '{':
+				Send "{Del}``{Left}{Text}}"
+				Send "{Del}"
+			case '「': Send "{Del}{Text}」"
+			case '『': Send "{Del}{Text}』"
+			case '〔': Send "{Del}{Text}〕"
+			case '｛': Send "{Del}{Text}｝"
+			}
+			Send "{Left}"
+		}
 	case "〖": Send "{BS}{{}"
-	case "｛": Send "{BS}{{}"
 
 	case "}": Send "{BS}{}}"
 	case "」": Send "{BS}{}}"
