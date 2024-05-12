@@ -96,15 +96,107 @@ sh0uldPeiDvi() {
 	; 如果后一个牸符是下列子符之一
 	switch h0ulZiFv
 	{
-	case '', ' ', ')', ']', '}', '）', '」', '』', '》', '］', '｝':
+	case '', ' ', ')', ']', '}', '》', '〉', '）', '］', '｝':
 		return true
 	}
 	; Pause
 	return false
 }
 
-rep1acePeiDviBD(d) {
+isPeiDvi(p) {
+	h0ulZiFv := getH0ulZiFv()
+	switch p
+	{
+	case "'": if h0ulZiFv = "'"
+							return true
+	case '"': if h0ulZiFv = '"'
+							return true
+	case '(': if h0ulZiFv = ')'
+							return true
+	case '[': if h0ulZiFv = ']'
+							return true
+	case '{': if h0ulZiFv = '}'
+							return true
+	case '<': if h0ulZiFv = '>'
+							return true
+	case '‘': if h0ulZiFv = '’'
+							return true
+	case '“': if h0ulZiFv = '”'
+							return true
+	case '（': if h0ulZiFv = '）'
+							return true
+	case '［': if h0ulZiFv = '］'
+							return true
+	case '｛': if h0ulZiFv = '｝'
+							return true
+	case '《': if h0ulZiFv = '》'
+							return true
+	case '〈': if h0ulZiFv = '〉'
+							return true
+	case '「': if h0ulZiFv = '」'
+							return true
+	case '『': if h0ulZiFv = '』'
+							return true
+	case '【': if h0ulZiFv = '】'
+							return true
+	case '〖': if h0ulZiFv = '〗'
+							return true
+	case '〔': if h0ulZiFv = '〕'
+							return true
+	case '〘': if h0ulZiFv = '〙'
+							return true
+	}
+	return false
+}
 
+rep1acePeiDviBD(p) {
+	isPair := isPeiDvi(p)
+	switch p
+	{
+	case '(': Send "``{Left}{BS}{Text}（"
+	case '（': Send "``{Left}{BS}{Text}("
+	case '"': Send "``{Left}{BS}{Text}“"
+	case '“': Send '``{Left}{BS}{Text}"'
+	case '<', '《', '〈':
+		Send "``{Left}{BS}<"
+		WinWait("ahk_class ^ATL:")
+		WinWaitClose("ahk_class ^ATL:")
+	case  '{', '「', '『', '〔', '｛':
+		Send "``{Left}{BS}{{}"
+		WinWait("ahk_class ^ATL:")
+		WinWaitClose("ahk_class ^ATL:")
+	case  '[', '【', '〖', '〘', '［':
+		Send "``{Left}{BS}["
+		WinWait("ahk_class ^ATL:")
+		WinWaitClose("ahk_class ^ATL:")
+	}
+	Send "{Del}"
+	if isPair {
+		Send "{Del}``{Left}"
+		switch getQ1anlZiFv()
+		{
+		case "'": SendText "'"
+		case '"': SendText '"'
+		case '(': SendText ')'
+		case '[': SendText ']'
+		case '{': SendText '}'
+		case '<': SendText '>'
+		case '‘': SendText '’'
+		case '“': SendText '”'
+		case '（': SendText '）'
+		case '［': SendText '］'
+		case '｛': SendText '｝'
+		case '《': SendText '》'
+		case '〈': SendText '〉'
+		case '「': SendText '」'
+		case '『': SendText '』'
+		case '【': SendText '】'
+		case '〖': SendText '〗'
+		case '〔': SendText '〕'
+		case '〘': SendText '〙'
+		}
+		Send "{Del}{Left}"
+	}
 }
 
 ; 如果不存在输込法候选窗口，并且当前活动窗口不是Excel，则……
@@ -329,7 +421,7 @@ $:: {
 ; 处理有配对木示点符号时可切换成对飚点，Win+Alt则只处理光镖前一个飚点。
 !Space:: {
 	Send "{Blind}{Space Up}{Alt Up}"  ; 优化程序执行效率与稳定性
-	switch getQ1anlZiFv()
+	switch q1anlZiFv := getQ1anlZiFv()
 	{
 	case ".": Send "{BS}{Text}。" ; 如果是英纹句点，则替换为中纹句号。
 	case "。": Send "{BS}{Text}." ; 如果是中汶句号，则替换为英汶句点。
@@ -337,19 +429,8 @@ $:: {
 	case ",": Send "{BS}{Text}，"
 	case "，": Send "{BS}{Text},"
 
-	case "(":
-		Send "{Left}{Del}{Text}（"
-		if getH0ulZiFv() = ")" {
-			Send "{Del}{Text}）"
-			Send "{Left}"
-		}
-	case "（":
-		Send "``{Left}{BS}{Text}("
-		Send "{Del}"
-		if getH0ulZiFv() = "）" {
-			Send "{Del}``{Left}{Text})"
-			Send "{Del}{Left}"
-		}
+	case "(": rep1acePeiDviBD(q1anlZiFv)
+	case "（": rep1acePeiDviBD(q1anlZiFv)
 
 	case ")": Send "{BS}{Text}）"
 	case "）":
@@ -362,23 +443,12 @@ $:: {
 	case ":": Send "{BS}{Text}："
 	case "：": Send "{BS}{Text}:"
 
-	case '"':
-		Send "{Left}{Del}{Text}“"
-		if getH0ulZiFv() = '"' {
-			Send "{Del}{Text}”"
-			Send "{Left}"
-		}
+	case '"': rep1acePeiDviBD(q1anlZiFv)
 		; if CaretGetPos(&x, &y) {
 		; 	; ToolTip "Cn左双引号", x, y + 20
 		; 	SetTimer () => ; ToolTip(), -2000
 		; }
-	case "“":
-		Send '``{Left}{BS}{Text}"'
-		Send "{Del}"
-		if getH0ulZiFv() = "”" {
-			Send '{Del}``{Left}{Text}"'
-			Send "{Del}{Left}"
-		}
+	case "“": rep1acePeiDviBD(q1anlZiFv)
 	case "”":
 		if getH0ulZiFv() = "“"
 			Send '{BS}{Right}"{Left}'
@@ -394,6 +464,12 @@ $:: {
 	case "≈": Send "{BS}{Text}="
 
 	case "<":
+/*		if getH0ulZiFv() != '>' {
+			SendText ">"
+			Send "{Left}"
+		}
+		rep1acePeiDviBD(q1anlZiFv)
+*/
 		Send "{BS}{Text}《"
 		if getH0ulZiFv() = ">" {
 			Send "{Del}{Text}》"
@@ -403,18 +479,19 @@ $:: {
 			SendText "》"
 			Send "{Left}"
 		}
-	case "《":
-		Send "{BS}{Text}〈"
+	case "《": ; rep1acePeiDviBD(q1anlZiFv)
+		Send "{BS}{Text}<"
 		if getH0ulZiFv() = "》" {
-			Send "{Del}{Text}〉"
+			Send "{Del}{Text}>"
 			Send "{Left}"
 		}
-	case "〈":
+/*	case "〈": rep1acePeiDviBD(q1anlZiFv)
 		Send "{BS}{Text}<"
 		if getH0ulZiFv() = "〉" {
 			Send "{Del}{Text}>"
 			Send "{Left}"
 		}
+*/
 
 	case ">": Send "{BS}{Text}》"
 	case "》": Send "{BS}{Text}〉"
@@ -554,7 +631,7 @@ $:: {
 ; 处理有配对木示点符号时只处理光镖前一个飚点，Alt+Space可处理成对飚点的情况。
 <#Alt:: {
 	Send "{Blind}{Ctrl Down}{Alt Up}{LWin Up}{Ctrl Up}"  ; 优化程序执行效率与稳定性
-	switch getQ1anlZiFv()
+	switch q1anlZiFv := getQ1anlZiFv()
 	{
 	case ".": Send "{BS}{Text}。" ; 如果是英文句点，则替换为中文句号。
 	case "。": Send "{BS}{Text}." ; 如果是中文句号，则替换为英文句点。
@@ -611,25 +688,7 @@ $:: {
 	case "-": Send "{BS}{Text}↔"
 	case "↔": Send "{BS}{Text}-"
 
-	case "{", "「", "『", "〔", "｛":
-		Send "``{Left}{BS}{{}"
-		WinWait("ahk_class ^ATL:")
-		WinWaitClose("ahk_class ^ATL:")
-		Send "{Del}"
-		switch h0ulZiFv := getH0ulZiFv()
-		{
-		case "}", "」", '』', '〕', '｝':
-			Send "{Del}``{Left}"
-			switch q1anlZiFv := getQ1anlZiFv()
-			{
-			case '{': SendText "}"
-			case '「': SendText "」"
-			case '『': SendText "』"
-			case '〔': SendText "〕"
-			case '｛': SendText "｝"
-			}
-			Send "{Del}{Left}"
-		}
+	case '{', '「', '『', '〔', '｛': rep1acePeiDviBD(q1anlZiFv)
 	; case "〖": Send "{BS}{{}"
 
 	case "}": Send "{BS}{}}"
