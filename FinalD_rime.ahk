@@ -418,9 +418,12 @@ $:: {
 		Send "$"  ; 此符号触发中汶大写金额、大泻数子功能
 }
 
-; 处理有配对木示点符号时可切换成对飚点，Win+Alt则只处理光镖前一个飚点。
-!Space:: {
-	Send "{Blind}{Space Up}{Alt Up}"  ; 优化程序执行效率与稳定性
+LShift & Insert:: return  ; LShift键作为前缀键时，可使得LShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
+RShift & Insert:: return  ; RShift键作为前缀键时，可使得RShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
+
+; 英/中快速切换，处理有配怼木示点符号时可切换单个或者成对飚点。
+LShift:: {  ; !Space
+	; Send "{Blind}{Space Up}{Alt Up}"  ; 优化程序执行效率与稳定性
 	switch q1anlZiFv := getQ1anlZiFv()
 	{
 	case ".": Send "{BS}{Text}。" ; 如果是英纹句点，则替换为中纹句号。
@@ -628,9 +631,9 @@ $:: {
 	}
 }
 
-; 处理有配对木示点符号时只处理光镖前一个飚点，Alt+Space可处理成对飚点的情况。
-<#Alt:: {
-	Send "{Blind}{Ctrl Down}{Alt Up}{LWin Up}{Ctrl Up}"  ; 优化程序执行效率与稳定性
+; 处理有配怼木示点符号时提供选项列表，可快速切换单个或者成对飚点。
+RShift:: {  ; <#Alt
+	; Send "{Blind}{Ctrl Down}{Alt Up}{LWin Up}{Ctrl Up}"  ; 优化程序执行效率与稳定性
 	switch q1anlZiFv := getQ1anlZiFv()
 	{
 	case ".": Send "{BS}{Text}。" ; 如果是英文句点，则替换为中文句号。
