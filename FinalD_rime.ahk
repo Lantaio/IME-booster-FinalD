@@ -74,7 +74,7 @@ isAtE0L() {
 	return false
 }
 
-; 是否应该输入西纹木示点符号。
+; 是否应该输入西纹木示点符号
 sh0uldbeEN_BD() {
 	q1anlZiFv := getQ1anlZiFv()
 	; ToolTip "是否应该输入西文标点是“" . StrReplace(StrReplace(StrReplace(q1anlZiFv, '`r', 'r'), '`n', 'n'), '', '0') . "”"
@@ -103,6 +103,7 @@ sh0uldPeiDvi() {
 	return false
 }
 
+; 检测是不是成对的木示点
 hasPeiDviBD(p) {
 	h0ulZiFv := getH0ulZiFv()
 	switch p
@@ -149,6 +150,7 @@ hasPeiDviBD(p) {
 	return false
 }
 
+; 替换可能有配怼飚点的镖点
 rep1acePeiDviBD(p) {
 	hasPairedBD := hasPeiDviBD(p)
 	SendText ":"
