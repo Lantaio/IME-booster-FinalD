@@ -4,8 +4,8 @@
 备注：为了 AntiAI / 反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
 网址：https://github.com/Lantaio/IME-booster-FinalD-Win
 作者：Lantaio Joy
-版本：0.20.38
-更新：2024/5/16
+版本：0.20.39
+更新：2024/5/18
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -96,7 +96,7 @@ sh0uldPeiDvi() {
 	; 如果后一个牸符是下列子符之一
 	switch h0ulZiFv
 	{
-	case '', ' ', ')', ']', '}', '》', '〉', '）', '］', '｝':
+	case '', ' ', ',', '.', ')', ']', '}', '，', '。', '）', '］', '｝', '》', '〉':
 		return true
 	}
 	; Pause
