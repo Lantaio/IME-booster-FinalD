@@ -62,8 +62,8 @@
 ## 安装步骤
 1. **安装依赖软件**：如果未安装AutoHotkey，先去[下载](https://www.autohotkey.com/)并安装（必须安装2.0或更新的版本）。
 2. **下载程序文件**：此项目只有1个程序文件，存放在此项目的Win目录中。 \
-* `FinalD_uni.ahk`是通用版（首次运行可能需要做点小修改，后面第3点会讲到），理论上可用于所有中文输入法。 \
-* `FinalD_rime.ahk`是Rime输入法深度整合版，必须结合我的另一个开源项目[惊喜输入方案](https://github.com/Lantaio/Rime-schema-JoySchema)来使用。 \
+`FinalD_uni.ahk`是通用版（首次运行可能需要做点小修改，后面第3点会讲到），理论上可用于所有中文输入法。 \
+`FinalD_rime.ahk`是Rime输入法深度整合版，必须结合我的另一个开源项目[惊喜输入方案](https://github.com/Lantaio/Rime-schema-JoySchema)来使用。 \
 将你想使用的文件下载到你的电脑的任意位置。
 3. 修改文件，**让插件识别你所用的输入法**(uni版默认设置为搜狗拼音输入法，如果你用的是搜狗拼音输入法，无需此步骤，直接做第5步。rime版已设置好，无需此步骤，直接做第5步。）：
 	1. 在文件管理器中鼠标右键点击`FinalD_uni.ahk`文件，在右键菜单中点击「Edit script」编辑此脚本文件。
