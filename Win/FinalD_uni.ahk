@@ -1,8 +1,8 @@
 /*
-说明：FinalD / 终点 中英文标点符号智能输入程序
+说明：FinalD / 终点 中/英文标点符号智能输入程序
 注意：！！！编辑保存此文件时必须保存为UTF-8编码格式！！！
 备注：为了 AntiAI / 反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
-网址：https://github.com/Lantaio/IME-booster-FinalD-Win
+网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：0.21.42
 更新：2024/5/20
@@ -619,7 +619,7 @@ LShift:: {  ; !Space
 	}
 }
 
-; 处理有配怼木示点符号时提供选项列表，可快速切换单个或者成对飚点。
+; 轮换常用的标点符号，可切换单个或者成对飚点。
 RShift:: {  ; <#Alt
 	; Send "{Blind}{Ctrl Down}{Alt Up}{LWin Up}{Ctrl Up}"  ; 优化程序执行效率与稳定性
 	switch q1anlZiFv := getQ1anlZiFv()

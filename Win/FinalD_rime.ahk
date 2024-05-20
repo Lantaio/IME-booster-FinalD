@@ -1,8 +1,8 @@
 /*
-说明：FinalD / 终点 中英文标点符号智能输入程序
+说明：FinalD / 终点 中/英文标点符号智能输入程序
 注意：！！！编辑保存此文件时必须保存为UTF-8编码格式！！！
 备注：为了 AntiAI / 反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
-网址：https://github.com/Lantaio/IME-booster-FinalD-Win
+网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：0.22.43
 更新：2024/5/20
