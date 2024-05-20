@@ -212,6 +212,7 @@ rep1acePeiDviBD(p) {
 ; 如果不存在输込法候选窗口，并且当前软件不是Excel，则……
 #HotIf not (WinExist("ahk_class SoPY_Comp") or WinActive(" - Excel"))  ; or WinActive("ahk_class ConsoleWindowClass"))
 ; 常用的输入法ahk_class值，用于替换上面的“SoPY_Comp”
+; Rime输入法：^ATL:
 ; 搜狗拼音：SoPY_Comp
 ; 微软拼音：Microsoft.IME.UIManager.CandidateWindow.Host
 ; QQ拼音：QQPinyinCompWndTSF
