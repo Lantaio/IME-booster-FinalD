@@ -107,6 +107,8 @@ What the hall? 呃...不要方，你听我狡辩。这张图虽然看似复杂�
 * 如果有任何疑问或建议可在[讨论区（Discussions)](https://github.com/Lantaio/IME-booster-FinalD/discussions)中提出。
 
 ## 致谢
-首先要感谢出品[AutoHotkey](https://github.com/AutoHotkey/AutoHotkey)这个神器的大神 @Lexikos 以及其他项目贡献者们奉献这么强大的自动化工具软件。🌹
+首先要感谢出品[AutoHotkey](https://github.com/AutoHotkey/AutoHotkey)这个神器的大神 @Lexikos 以及项目的其他贡献者们奉献这么强大的自动化工具软件。🌹
+
 其次要感谢[AutoHotkey中文帮助](https://wyagd001.github.io/v2/docs/index.htm)的翻译及维护大神 @wyagd001 ，大大提高了我学习AutoHotkey效率。🌹
-最后感谢那个在开发这个看似简单，实则有许多意想不到的坑的项目时数度崩溃，却总是咬牙坚持下来的自己😅
+
+最后感谢那个在开发这个看似简单，实则有许多意想不到的坑的项目时数度崩溃，却总是咬牙坚持下来的自己😅还有在这些煎熬的日子里一直陪伴着我的小猪咪😸
