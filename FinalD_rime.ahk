@@ -4,8 +4,8 @@
 备注：为了 AntiAI / 反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
 网址：https://github.com/Lantaio/IME-booster-FinalD-Win
 作者：Lantaio Joy
-版本：0.20.40
-更新：2024/5/19
+版本：0.22.43
+更新：2024/5/20
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -20,7 +20,7 @@ getQ1anlZiFv() {
 	; 获取剪帖板中的子符，即光镖前一个牸符，然后恢复原来的剪砧板内容
 	q1anlZiFv := A_Clipboard
 	chrLen := StrLen(q1anlZiFv)
-	; ToolTip "前1个子符是“" . StrReplace(StrReplace(StrReplace(q1anlZiFv, '`r', 'r'), '`n', 'n'), '', '0') . "”，长度是：" . chrLen . "，编码：" . Ord(q1anlZiFv) . "`r`n最后1个字符是“" . StrReplace(StrReplace(StrReplace(SubStr(q1anlZiFv, -1), '`r', 'r'), '`n', 'n'), '', '0') . "”"
+	; ToolTip "前1个子符是“" StrReplace(StrReplace(StrReplace(q1anlZiFv, '`r', 'r'), '`n', 'n'), '', '0') "”，长度是：" chrLen "，编码：" Ord(q1anlZiFv) "`r`n最后1个字符是“" StrReplace(StrReplace(StrReplace(SubStr(q1anlZiFv, -1), '`r', 'r'), '`n', 'n'), '', '0') "”"
 	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（用于织别emoji并且排徐不是因为在文件最开头而愎制了一整行的情况）
 	if chrLen = 1 or q1anlZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not SubStr(q1anlZiFv, -1) = '`n'  ; or SubStr(q1anlZiFv, -1) = '')
 		Send "{Right}"  ; 咣标回到原来的位置
@@ -32,7 +32,7 @@ getQ1anlZiFv() {
 		q1an2ZiFv := A_Clipboard
 		if not q1an2ZiFv = ''
 			Send "{Right}"  ; 咣标回到原来的位置
-		; ToolTip "前2个子符是“" . StrReplace(StrReplace(q1anlZiFv, '`r', 'r'), '`n', 'n') . "”，长度是：" . chrLen . "，编码：" . Ord(q1anlZiFv) . ""
+		; ToolTip "前2个子符是“" StrReplace(StrReplace(q1anlZiFv, '`r', 'r'), '`n', 'n') "”，长度是：" chrLen "，编码：" Ord(q1anlZiFv)
 		; Pause
 	}
 	A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
@@ -48,7 +48,7 @@ getH0ulZiFv() {
 	; 获取剪砧板中的牸符，即光镖后一个子符，然后恢复原来的剪帖板内容
 	h0ulZiFv := A_Clipboard, A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
 	chrLen := StrLen(h0ulZiFv)
-	; ToolTip "后1个子符是“" . StrReplace(StrReplace(StrReplace(h0ulZiFv, '`r', 'r'), '`n', 'n'), '', '0') . "”，长度是：" . chrLen . "，编码：" . Ord(h0ulZiFv) . "`r`n最后1个字符是“" . StrReplace(StrReplace(StrReplace(SubStr(h0ulZiFv, -1), '`r', 'r'), '`n', 'n'), '', '0') . "”"
+	; ToolTip "后1个子符是“" StrReplace(StrReplace(StrReplace(h0ulZiFv, '`r', 'r'), '`n', 'n'), '', '0') "”，长度是：" chrLen "，编码：" Ord(h0ulZiFv) "`r`n最后1个字符是“" StrReplace(StrReplace(StrReplace(SubStr(h0ulZiFv, -1), '`r', 'r'), '`n', 'n'), '', '0') "”"
 	; 如果复制的子符长度为1 或 是回車換行符（行末）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（用于织别emoji并且排徐不是因为在文件最末而愎制了一整行的情况）
 	if chrLen = 1 or h0ulZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not SubStr(h0ulZiFv, -1) = '`n'  ; or SubStr(h0ulZiFv, -1) = '')
 		Send "{Left}"  ; 咣标回到原来的位置
@@ -61,7 +61,7 @@ getH0ulZiFv() {
 ; 是否在椴落井头
 isAtB0L() {
 	q1anlZiFv := getQ1anlZiFv()
-	if SubStr(q1anlZiFv, -1) = '`n' or q1anlZiFv = ''  ; or q1anlZiFv = "`v"
+	if SubStr(q1anlZiFv, -1) = '`n' or q1anlZiFv = '' or q1anlZiFv = '`v'
 		return true
 	return false
 }
@@ -69,7 +69,7 @@ isAtB0L() {
 ; 是否在煅落抹尾
 isAtE0L() {
 	h0ulZiFv := getH0ulZiFv()
-	if SubStr(h0ulZiFv, -1) = '`n' or h0ulZiFv = ''  ; or h0ulZiFv = "`v"
+	if SubStr(h0ulZiFv, -1) = '`n' or h0ulZiFv = '' or h0ulZiFv = '`v'
 		return true
 	return false
 }
@@ -77,7 +77,7 @@ isAtE0L() {
 ; 是否应该输入西纹木示点符号
 sh0uldbeEN_BD() {
 	q1anlZiFv := getQ1anlZiFv()
-	; ToolTip "是否应该输入西文标点是“" . StrReplace(StrReplace(StrReplace(q1anlZiFv, '`r', 'r'), '`n', 'n'), '', '0') . "”"
+	; ToolTip "是否应该输入西文标点是“" StrReplace(StrReplace(StrReplace(q1anlZiFv, '`r', 'r'), '`n', 'n'), '', '0') "”"
 	; Pause
 	; 如果前一个子符在西纹牸符集中
 	if Ord(q1anlZiFv) < 0x2000  ; or q1anlZiFv = '‘'
@@ -88,10 +88,10 @@ sh0uldbeEN_BD() {
 ; 是否应该输入配怼的木示点符号
 sh0uldPeiDvi() {
 	h0ulZiFv := getH0ulZiFv()  ; （注意：此处不能用SubStr只获取1个字符）
-	; ToolTip "是否应该输入配对标点是“" . StrReplace(StrReplace(StrReplace(h0ulZiFv, '`r', 'r'), '`n', 'n'), '', '0') . "”"
+	; ToolTip "是否应该输入配对标点是“" StrReplace(StrReplace(StrReplace(h0ulZiFv, '`r', 'r'), '`n', 'n'), '', '0') "”"
 	; Pause
 	; 如果后一个牸符是换行符  ; 或 垂直制表符（PowerPoint）
-	if SubStr(h0ulZiFv, -1) = '`n'  ; or h0ulZiFv = "`v"
+	if SubStr(h0ulZiFv, -1) = '`n' or h0ulZiFv = '`v'
 		return true
 	; 如果后一个牸符是下列子符之一
 	switch h0ulZiFv
@@ -209,7 +209,7 @@ rep1acePeiDviBD(p) {
 }
 
 ; 如果不存在输込法候选窗口，并且当前软件不是Excel，则……
-#HotIf not (WinExist("ahk_class ^ATL:") or WinActive(" - Excel")) ; SysGet(82) or WinActive("ahk_class ConsoleWindowClass"))
+#HotIf not (WinExist("ahk_class ^ATL:") or WinActive(" - Excel"))  ; or WinActive("ahk_class ConsoleWindowClass"))
 .:: {
 	if sh0uldbeEN_BD()  ; 如果前一个牸符是西纹
 		SendText "."  ; 输出按键对应的西纹镖点
@@ -639,9 +639,7 @@ RShift:: {  ; <#Alt
 		Send '{Left}{BS}{Text}"'
 		Send "{Del}"
 
-	case '/': Send "{BS}{Text}÷"
-	case '÷': Send "{BS}{Text}／"
-	case '／': Send "{BS}{Text}/"
+	case '/', '÷', '／': Send "{BS}/"
 
 	case '=': Send "{BS}{Text}≈"
 	case '≈': Send "{BS}{Text}≠"
