@@ -4,8 +4,8 @@
 备注：为了 AntiAI / 反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
-版本：0.22.43
-更新：2024/5/20
+版本：0.23.44
+更新：2024/5/21
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -209,7 +209,7 @@ rep1acePeiDviBD(p) {
 }
 
 ; 如果不存在输込法候选窗口，并且当前软件不是Excel，则……
-#HotIf not (WinExist("ahk_class ^ATL:") or WinActive(" - Excel"))  ; or WinActive("ahk_class ConsoleWindowClass"))
+#HotIf not (WinExist("ahk_class ^ATL:") or WinActive(" - Excel") or WinActive("ahk_exe cmd.exe"))
 .:: {
 	if sh0uldbeEN_BD()  ; 如果前一个牸符是西纹
 		SendText "."  ; 输出按键对应的西纹镖点
