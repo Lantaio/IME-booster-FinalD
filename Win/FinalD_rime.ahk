@@ -4,8 +4,8 @@
 备注：为了 AntiAI / 反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
-版本：0.23.44
-更新：2024/5/21
+版本：0.24.45
+更新：2024/5/22
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -706,3 +706,7 @@ RShift:: {  ; <#Alt
 
 #HotIf
 ; Pause:: ; Pause -1
+
+#SuspendExempt
+<^LWin:: Suspend
+#SuspendExempt False
