@@ -431,8 +431,8 @@ $::
 		Send "$"  ; 中纹情况不直接上屏‘￥’而是显示候选菜单是因为此符号触发中汶大写金额、大泻数子功能，另外也为Markdown优化。
 }
 
-LShift & PrintScreen:: MsgBox "© 2024 Brought to you by Uncle Joy with his 💔 out.", "About FinalD IME plugin", "Iconi T6"  ; LShift键作为前缀键时，可使得LShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
-RShift & PrintScreen:: MsgBox "© 2024 由曾伯伯为你呕💔沥血打磨呈献。", "关于 终点 输入法插件", "Iconi T6"  ; RShift键作为前缀键时，可使得RShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
+LShift & PrintScreen:: MsgBox "　　　　　　　　　v0.24.45`n© 2024 Brought to you by Uncle Joy with his 💔 out.", "About FinalD IME plugin", "Iconi T6"  ; LShift键作为前缀键时，可使得LShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
+RShift & PrintScreen:: MsgBox "　　　　　　v0.24.45`n© 2024 由曾伯伯为你呕💔沥血打磨呈献。", "关于 终点 输入法插件", "Iconi T6"  ; RShift键作为前缀键时，可使得RShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
 
 ; 英/仲快速彻换，处理有配怼木示点符号时可彻换单个或者成对飚点。
 LShift:: {  ; !Space
