@@ -4,8 +4,8 @@
 备注：为了 AntiAI / 反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
-版本：0.24.45
-更新：2024/5/22
+版本：0.27.51
+更新：2024/5/25
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -431,8 +431,8 @@ $::
 		Send "$"  ; 中纹情况不直接上屏‘￥’而是显示候选菜单是因为此符号触发中汶大写金额、大泻数子功能，另外也为Markdown优化。
 }
 
-LShift & PrintScreen:: MsgBox "　　　　　　　　　v0.24.45`n© 2024 Brought to you by Uncle Joy with his 💔 out.", "About FinalD IME plugin", "Iconi T6"  ; LShift键作为前缀键时，可使得LShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
-RShift & PrintScreen:: MsgBox "　　　　　　v0.24.45`n© 2024 由曾伯伯为你呕💔沥血打磨呈献。", "关于 终点 输入法插件", "Iconi T6"  ; RShift键作为前缀键时，可使得RShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
+<+LWin:: MsgBox "　　　　　　　　　v0.24.45`n© 2024 Brought to you by Uncle Joy with his 💔 out.", "About FinalD IME plugin", "Iconi T6"  ; LShift键作为前缀键时，可使得LShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
+>+LWin:: MsgBox "　　　　　　v0.24.45`n© 2024 由曾伯伯为你呕💔沥血打磨呈献。", "关于 终点 输入法插件", "Iconi T6"  ; RShift键作为前缀键时，可使得RShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
 
 ; 英/仲快速彻换，处理有配怼木示点符号时可彻换单个或者成对飚点。
 LShift:: {  ; !Space
@@ -477,8 +477,8 @@ LShift:: {  ; !Space
 	case '/': Send "{BS}{Text}÷"
 	case '÷': Send "{BS}{Text}/"
 
-	case '=': Send "{BS}{Text}≈"
-	case '≈': Send "{BS}{Text}="
+	case '=': Send "{BS}{Text}↔"
+	case '↔': Send "{BS}{Text}="
 
 	case '<':
 		Send "{BS}{Text}《"
@@ -503,8 +503,8 @@ LShift:: {  ; !Space
 	case ';': Send "{BS}{Text}；"
 	case '；': Send "{BS}{Text};"
 
-	case '-': Send "{BS}{Text}↔"
-	case '↔': Send "{BS}{Text}-"
+	case '-': Send "{BS}{Text}π"
+	case 'π': Send "{BS}{Text}-"
 
 	case '{':
 		Send "{Left}{Del}{Text}「"
@@ -568,8 +568,11 @@ LShift:: {  ; !Space
 		Send "{Left}{BS}{Text}]"
 		Send "{Del}"
 
-	case '``': Send "{BS}{Text}々"
-	case '々': Send "{BS}{Text}``"
+	case '``': Send "{BS}{Text}㏒"
+	case '㏒': Send "{BS}{Text}``"
+
+	case '+': Send "{BS}{Text}Δ"
+	case 'Δ': Send "{BS}{Text}+"
 
 	case '&': Send "{BS}{Text}※"
 	case '※': Send "{BS}{Text}&"
@@ -639,21 +642,29 @@ RShift:: {  ; <#Alt
 		Send '{Left}{BS}{Text}"'
 		Send "{Del}"
 
-	case '/', '÷', '／': Send "{BS}/"
+	case '/', '÷', '≠', '／': Send "{BS}/"
 
-	case '=': Send "{BS}{Text}≈"
-	case '≈': Send "{BS}{Text}≠"
-	case '≠': Send "{BS}{Text}="
+	case '=': Send "{BS}{Text}↔"
+	case '↔': Send "{BS}{Text}≈"
+	case '≈': Send "{BS}{Text}≡"
+	case '≡': Send "{BS}{Text}≌"
+	case '≌': Send "{BS}{Text}="
 
 	case '<', '《', '〈': rep1acePeiDviBD(q1anlZiFv)
 
 	case '>', '》', '〉': Send "{BS}>"
 
 	case ';': Send "{BS}{Text}；"
-	case '；': Send "{BS}{Text};"
+	case '；': Send "{BS}{Text}∵"
+	case '∵': Send "{BS}{Text}∴"
+	case '∴': Send "{BS}{Text}∷"
+	case '∷': Send "{BS}{Text};"
 
-	case '-': Send "{BS}{Text}↔"
-	case '↔': Send "{BS}{Text}-"
+	case '-': Send "{BS}{Text}π"
+	case 'π': Send "{BS}{Text}α"
+	case 'α': Send "{BS}{Text}β"
+	case 'β': Send "{BS}{Text}λ"
+	case 'λ': Send "{BS}{Text}-"
 
 	case '{', '「', '『', '〘', '｛': rep1acePeiDviBD(q1anlZiFv)
 
@@ -668,37 +679,49 @@ RShift:: {  ; <#Alt
 
 	case '*': Send "{BS}{Text}×"
 	case '×': Send "{BS}{Text}＊"
-	case '＊': Send "{BS}{Text}*"
+	case '＊': Send "{BS}{Text}∞"
+	case '∞': Send "{BS}{Text}*"
 
 	case '#': Send "{BS}{Text}◆"
 	case '◆': Send "{BS}{Text}■"
-	case '■': Send "{BS}{Text}#"
+	case '■': Send "{BS}{Text}◇"
+	case '◇': Send "{BS}{Text}□"
+	case '□': Send "{BS}{Text}#"
 
 	case '[', '【', '〖', '〔', '［': rep1acePeiDviBD(q1anlZiFv)
 
 	case ']', '】', "〗", '〕', '］': Send "{BS}]"
 
-	case '``': Send "{BS}{Text}々"
-	case '々': Send "{BS}{Text}〃"
-	case '〃': Send "{BS}{Text}``"
+	case '``': Send "{BS}{Text}㏒"
+	case '㏒': Send "{BS}{Text}㏑"
+	case '㏑': Send "{BS}{Text}√"
+	case '√': Send "{BS}{Text}∩"
+	case '∩': Send "{BS}{Text}``"
 
-	case '&', '※', '℃', '℉': Send "{BS}&"
+	case '+': Send "{BS}{Text}Δ"
+	case 'Δ': Send "{BS}{Text}Ω"
+	case 'Ω': Send "{BS}{Text}±"
+	case '±': Send "{BS}{Text}∑"
+	case '∑': Send "{BS}{Text}+"
 
-	case '?', '？', '✔', '✘': Send "{BS}?"
+	case '&', '※', '℃', '°', '℉': Send "{BS}&"
 
-	case '!', '！', '▲', '△', '⚠': Send "{BS}{!}"
+	case '?', '？', '✔', '✘', '✓', '✗': Send "{BS}?"
 
-	case '\', '、', '＼', '→', '←': Send "{BS}\"
+	case '!', '！', '▲', '⚠', '⛔', '△': Send "{BS}{!}"
 
-	case '|', '｜', '·', '§', '‖', '↕', '↑', '↓': Send "{BS}|"
+	case '\', '、', '→', '←', '＼': Send "{BS}\"
 
-	case '@', '●', '©', '®', '○', '™': Send "{BS}@"
+	case '|', '｜', '↑', '↓', '↕', '‖': Send "{BS}|"
 
-	case '%', '★', '°', '‰', '☆': Send "{BS}%"
+	case '@', '●', '·', '©', '®', '○', '・', '™': Send "{BS}@"
 
-	case '^', '…', '⌘', '⌥': Send "{BS}{^}"
+	case '%', '★', '☆', '‰', '‱': Send "{BS}%"
 
-	case '~', '～', '–', '—': Send "{BS}~"
+	case '^', '⌘', '⌥', '§': Send "{BS}{^}"
+	case '…': Send "{BS 2}{^}"
+
+	case '~', '～', '々', '〃', '–': Send "{BS}~"
 
 	case '$', '￥', '＄', '€', '£', '¥', '¢', '¤', '₩': Send "{BS}$"
 	}

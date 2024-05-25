@@ -4,8 +4,8 @@
 备注：为了 AntiAI / 反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
-版本：0.23.44
-更新：2024/5/22
+版本：0.26.50
+更新：2024/5/25
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -405,7 +405,7 @@ _:: {
 	if sh0uldbeEN_BD()
 		SendText "|"
 	else
-		SendText "｜"  ; 此符号触发笔画反查功能，但估计此功能不常用，所以直接上屏中纹全角分隔符‘｜’，可再按右Shift键来进行笔画反查。
+		SendText "｜"
 }
 @:: SendText "@"
 /*{
@@ -448,8 +448,8 @@ $::
 		Send "￥"
 }
 
-LShift & PrintScreen:: MsgBox "　　　　　　　　　v0.23.44`n© 2024 Brought to you by Uncle Joy with his 💔 out.", "About FinalD IME plugin", "Iconi T6"  ; LShift键作为前缀键时，可使得LShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
-RShift & PrintScreen:: MsgBox "　　　　　　v0.23.44`n© 2024 由曾伯伯为你呕💔沥血打磨呈献。", "关于 终点 输入法插件", "Iconi T6"  ; RShift键作为前缀键时，可使得RShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
+<+LWin:: MsgBox "　　　　　　　　　v0.23.44`n© 2024 Brought to you by Uncle Joy with his 💔 out.", "About FinalD IME plugin", "Iconi T6"  ; LShift键作为前缀键时，可使得LShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
+>+LWin:: MsgBox "　　　　　　v0.23.44`n© 2024 由曾伯伯为你呕💔沥血打磨呈献。", "关于 终点 输入法插件", "Iconi T6"  ; RShift键作为前缀键时，可使得RShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
 
 ; 英/仲快速彻换，处理有配怼木示点符号时可彻换单个或者成对飚点。
 LShift:: {  ; !Space
@@ -494,8 +494,8 @@ LShift:: {  ; !Space
 	case '/': Send "{BS}{Text}÷"
 	case '÷': Send "{BS}{Text}/"
 
-	case '=': Send "{BS}{Text}≈"
-	case '≈': Send "{BS}{Text}="
+	case '=': Send "{BS}{Text}↔"
+	case '↔': Send "{BS}{Text}="
 
 	case '<':
 		Send "{BS}{Text}《"
@@ -520,8 +520,8 @@ LShift:: {  ; !Space
 	case ';': Send "{BS}{Text}；"
 	case '；': Send "{BS}{Text};"
 
-	case '-': Send "{BS}{Text}↔"
-	case '↔': Send "{BS}{Text}-"
+	case '-': Send "{BS}{Text}π"
+	case 'π': Send "{BS}{Text}-"
 
 	case '{':
 		Send "{Left}{Del}{Text}「"
@@ -585,8 +585,8 @@ LShift:: {  ; !Space
 		Send "{Left}{BS}{Text}]"
 		Send "{Del}"
 
-	case '``': Send "{BS}{Text}々"
-	case '々': Send "{BS}{Text}``"
+	case '``': Send "{BS}{Text}㏒"
+	case '㏒': Send "{BS}{Text}``"
 
 	case '&': Send "{BS}{Text}※"
 	case '※': Send "{BS}{Text}&"
@@ -657,12 +657,15 @@ RShift:: {  ; <#Alt
 		Send "{Del}"
 
 	case '/': Send "{BS}{Text}÷"
-	case '÷': Send "{BS}{Text}／"
+	case '÷': Send "{BS}{Text}≠"
+	case '≠': Send "{BS}{Text}／"
 	case '／': Send "{BS}{Text}/"
 
-	case '=': Send "{BS}{Text}≈"
-	case '≈': Send "{BS}{Text}≠"
-	case '≠': Send "{BS}{Text}="
+	case '=': Send "{BS}{Text}↔"
+	case '↔': Send "{BS}{Text}≈"
+	case '≈': Send "{BS}{Text}≡"
+	case '≡': Send "{BS}{Text}≌"
+	case '≌': Send "{BS}{Text}="
 
 	case '<', '《', '〈': rep1acePeiDviBD(q1anlZiFv)
 
@@ -671,10 +674,16 @@ RShift:: {  ; <#Alt
 	case '〉': Send "{BS}{Text}>"
 
 	case ';': Send "{BS}{Text}；"
-	case '；': Send "{BS}{Text};"
+	case '；': Send "{BS}{Text}∵"
+	case '∵': Send "{BS}{Text}∴"
+	case '∴': Send "{BS}{Text}∷"
+	case '∷': Send "{BS}{Text};"
 
-	case '-': Send "{BS}{Text}↔"
-	case '↔': Send "{BS}{Text}-"
+	case '-': Send "{BS}{Text}π"
+	case 'π': Send "{BS}{Text}α"
+	case 'α': Send "{BS}{Text}β"
+	case 'β': Send "{BS}{Text}λ"
+	case 'λ': Send "{BS}{Text}-"
 
 	case '{', '「', '『', '〘', '｛': rep1acePeiDviBD(q1anlZiFv)
 
@@ -693,11 +702,14 @@ RShift:: {  ; <#Alt
 
 	case '*': Send "{BS}{Text}×"
 	case '×': Send "{BS}{Text}＊"
-	case '＊': Send "{BS}{Text}*"
+	case '＊': Send "{BS}{Text}∞"
+	case '∞': Send "{BS}{Text}*"
 
 	case '#': Send "{BS}{Text}◆"
 	case '◆': Send "{BS}{Text}■"
-	case '■': Send "{BS}{Text}#"
+	case '■': Send "{BS}{Text}◇"
+	case '◇': Send "{BS}{Text}□"
+	case '□': Send "{BS}{Text}#"
 
 	case '[', '【', '〖', '〔', '［': rep1acePeiDviBD(q1anlZiFv)
 
@@ -707,13 +719,22 @@ RShift:: {  ; <#Alt
 	case '〕': Send "{BS}{Text}］"
 	case '］': Send "{BS}{Text}]"
 
-	case '``': Send "{BS}{Text}々"
-	case '々': Send "{BS}{Text}〃"
-	case '〃': Send "{BS}{Text}``"
+	case '``': Send "{BS}{Text}㏒"
+	case '㏒': Send "{BS}{Text}㏑"
+	case '㏑': Send "{BS}{Text}√"
+	case '√': Send "{BS}{Text}∩"
+	case '∩': Send "{BS}{Text}``"
+
+	case '+': Send "{BS}{Text}Δ"
+	case 'Δ': Send "{BS}{Text}Ω"
+	case 'Ω': Send "{BS}{Text}±"
+	case '±': Send "{BS}{Text}∑"
+	case '∑': Send "{BS}{Text}+"
 
 	case '&': Send "{BS}{Text}※"
 	case '※': Send "{BS}{Text}℃"
-	case '℃': Send "{BS}{Text}℉"
+	case '℃': Send "{BS}{Text}°"
+	case '°': Send "{BS}{Text}℉"
 	case '℉': Send "{BS}{Text}&"
 
 	case '?': Send "{BS}{Text}？"
@@ -724,43 +745,47 @@ RShift:: {  ; <#Alt
 	case '!': Send "{BS}{Text}！"
 	case '！': Send "{BS}{Text}▲"
 	case '▲': Send "{BS}{Text}⚠"
-	case '⚠': Send "{BS}{Text}!"
+	case '⚠': Send "{BS}{Text}⛔"
+	case '⛔': Send "{BS}{Text}!"
 
 	case '\': Send "{BS}{Text}、"
-	case '、': Send "{BS}{Text}＼"
-	case '＼': Send "{BS}{Text}→"
+	case '、': Send "{BS}{Text}→"
 	case '→': Send "{BS}{Text}←"
-	case '←': Send "{BS}{Text}\"
+	case '←': Send "{BS}{Text}＼"
+	case '＼': Send "{BS}{Text}\"
 
 	case '|': Send "{BS}{Text}｜"
-	case '｜': Send "{BS}{Text}·"
-	case '·': Send "{BS}{Text}§"
-	case '§': Send "{BS}{Text}‖"
-	case '‖': Send "{BS}{Text}|"
+	case '｜': Send "{BS}{Text}↑"
+	case '↑': Send "{BS}{Text}↓"
+	case '↓': Send "{BS}{Text}↕"
+	case '↕': Send "{BS}{Text}|"
 
 	case '@': Send "{BS}{Text}●"
-	case '●': Send "{BS}{Text}©"
+	case '●': Send "{BS}{Text}·"
+	case '·': Send "{BS}{Text}©"
 	case '©': Send "{BS}{Text}®"
-	case '®': Send "{BS}{Text}™"
-	case '™': Send "{BS}{Text}@"
+	case '®': Send "{BS}{Text}@"
 
 	case '%': Send "{BS}{Text}★"
-	case '★': Send "{BS}{Text}°"
-	case '°': Send "{BS}{Text}‰"
-	case '‰': Send "{BS}{Text}%"
+	case '★': Send "{BS}{Text}☆"
+	case '☆': Send "{BS}{Text}‰"
+	case '‰': Send "{BS}{Text}‱"
+	case '‱': Send "{BS}{Text}%"
 
 	case '^': Send "{BS}{Text}……"
 	case '…': Send "{BS 2}{Text}⌘"
 	case '⌘': Send "{BS}{Text}⌥"
-	case '⌥': Send "{BS}{Text}^"
+	case '⌥': Send "{BS}{Text}§"
+	case '§': Send "{BS}{Text}^"
 
 	case '~': Send "{BS}{Text}～"
-	case '～': Send "{BS}{Text}–"
-	case '–': Send "{BS}{Text}—"
-	case '—': Send "{BS}{Text}~"
+	case '～': Send "{BS}{Text}々"
+	case '々': Send "{BS}{Text}〃"
+	case '〃': Send "{BS}{Text}–"
+	case '–': Send "{BS}{Text}~"
 
 	case '$': Send "{BS}{Text}￥"
-	case '￥': Send "{BS}{Text}＄"
+	case '￥': Send "{BS}{Text}＄"  ; 全角美元符号
 	case '＄': Send "{BS}{Text}€"
 	case '€': Send "{BS}{Text}£"
 	case '£': Send "{BS}{Text}$"
