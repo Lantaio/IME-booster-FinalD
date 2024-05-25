@@ -4,7 +4,7 @@
 备注：为了 AntiAI / 反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
-版本：0.26.50
+版本：见全局变量Version
 更新：2024/5/25
 */
 #Requires AutoHotkey v2.0
@@ -12,6 +12,7 @@
 #UseHook
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
 
+global Version := "v0.26.50"  ; 程序版本号信息
 ; 借助剪砧板获取光镖前一个子符
 getQ1anlZiFv() {
 	q1anlZiFv := '', c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
@@ -448,8 +449,8 @@ $::
 		Send "￥"
 }
 
-<+LWin:: MsgBox "　　　　　　　　　v0.23.44`n© 2024 Brought to you by Uncle Joy with his 💔 out.", "About FinalD IME plugin", "Iconi T6"  ; LShift键作为前缀键时，可使得LShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
->+LWin:: MsgBox "　　　　　　v0.23.44`n© 2024 由曾伯伯为你呕💔沥血打磨呈献。", "关于 终点 输入法插件", "Iconi T6"  ; RShift键作为前缀键时，可使得RShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
+<+LWin:: MsgBox "　　　　　　　　　" Version "`n© 2024 Brought to you by Uncle Joy with his 💔 out.", "About FinalD IME plugin", "Iconi T6"  ; LShift键作为前缀键时，可使得LShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
+>+LWin:: MsgBox "　　　　　　" Version "`n© 2024 由曾伯伯为你呕💔沥血打磨呈献。", "关于 终点 输入法插件", "Iconi T6"  ; RShift键作为前缀键时，可使得RShift键单独作为热键时只在弹起，并且没有同时按其它键时触发。
 
 ; 英/仲快速彻换，处理有配怼木示点符号时可彻换单个或者成对飚点。
 LShift:: {  ; !Space
