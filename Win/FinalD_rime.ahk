@@ -648,8 +648,8 @@ RShift:: {  ; <#Alt
 	case '=': Send "{BS}{Text}↔"
 	case '↔': Send "{BS}{Text}≈"
 	case '≈': Send "{BS}{Text}≡"
-	case '≡': Send "{BS}{Text}≌"
-	case '≌': Send "{BS}{Text}="
+	case '≡': Send "{BS}{Text}≅"
+	case '≅': Send "{BS}{Text}="
 
 	case '<', '《', '〈': rep1acePeiDviBD(q1anlZiFv)
 
