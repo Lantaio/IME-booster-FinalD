@@ -12,7 +12,7 @@
 #UseHook
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
 
-global Version := "v0.27.51"  ; 程序版本号信息
+global Version := "v0.27.52"  ; 程序版本号信息
 ; 借助剪砧板获取光镖前一个子符
 getQ1anlZiFv() {
 	q1anlZiFv := '', c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
@@ -156,7 +156,7 @@ hasPeiDviBD(p) {
 ; 替换可能有配怼飚点的镖点
 rep1acePeiDviBD(p) {
 	hasPairedBD := hasPeiDviBD(p)
-	SendText ":"
+	SendText "!"
 	Send "{Left}{BS}"
 	switch p
 	{
@@ -181,7 +181,7 @@ rep1acePeiDviBD(p) {
 	}
 	Send "{Del}"
 	if hasPairedBD {
-		Send "{Del}{Text}:"
+		Send "{Del}{Text}!"
 		Send "{Left}"
 		switch getQ1anlZiFv()
 		{
@@ -450,7 +450,7 @@ LShift:: {  ; !Space
 
 	case ')': Send "{BS}{Text}）"
 	case '）':
-		SendText ":"
+		SendText "!"
 		Send "{Left}{BS}{Text})"
 		Send "{Del}"
 
@@ -470,7 +470,7 @@ LShift:: {  ; !Space
 		if getH0ulZiFv() = "“"
 			Send '{BS}{Right}"{Left}'
 		else {
-			SendText ":"
+			SendText "!"
 			Send '{Left}{BS}{Text}"'
 			Send "{Del}"
 		}
@@ -514,18 +514,18 @@ LShift:: {  ; !Space
 			Send "{Left}"
 		}
 	case '「':
-		SendText ":"
+		SendText "!"
 		Send "{Left}{BS}{Text}{"
 		Send "{Del}"
 		if getH0ulZiFv() = "」" {
-			Send "{Del}{Text}:"
+			Send "{Del}{Text}!"
 			Send "{Left}{Text}}"
 			Send "{Del}{Left}"
 		}
 
 	case '}': Send "{BS}{Text}」"
 	case '」':
-		SendText ":"
+		SendText "!"
 		Send "{Left}{BS}{Text}}"
 		Send "{Del}"
 
@@ -536,7 +536,7 @@ LShift:: {  ; !Space
 			Send "{BS}{Right}'{Left}"
 		}
 		else {
-			SendText ":"
+			SendText "!"
 			Send "{Left}{BS}{Text}'"
 			Send "{Del}"
 		}
@@ -554,18 +554,18 @@ LShift:: {  ; !Space
 			Send "{Left}"
 		}
 	case '【':
-		SendText ":"
+		SendText "!"
 		Send "{Left}{BS}{Text}["
 		Send "{Del}"
 		if getH0ulZiFv() = "】" {
-			Send "{Del}{Text}:"
+			Send "{Del}{Text}!"
 			Send "{Left}{Text}]"
 			Send "{Del}{Left}"
 		}
 
 	case ']': Send "{BS}{Text}】"
 	case '】':
-		SendText ":"
+		SendText "!"
 		Send "{Left}{BS}{Text}]"
 		Send "{Del}"
 
@@ -639,7 +639,7 @@ RShift:: {  ; <#Alt
 		; }
 	case '“': Send "{BS}{Text}”"
 	case '”':
-		SendText ":"
+		SendText "!"
 		Send '{Left}{BS}{Text}"'
 		Send "{Del}"
 
@@ -648,8 +648,8 @@ RShift:: {  ; <#Alt
 	case '=': Send "{BS}{Text}↔"
 	case '↔': Send "{BS}{Text}≈"
 	case '≈': Send "{BS}{Text}≡"
-	case '≡': Send "{BS}{Text}≌"
-	case '≌': Send "{BS}{Text}="
+	case '≡': Send "{BS}{Text}≅"
+	case '≅': Send "{BS}{Text}="
 
 	case '<', '《', '〈': rep1acePeiDviBD(q1anlZiFv)
 
@@ -674,7 +674,7 @@ RShift:: {  ; <#Alt
 	case "'": Send "{Left}{Del}{Text}‘"
 	case "‘": Send "{BS}{Text}’"
 	case "’":
-		SendText ":"
+		SendText "!"
 		Send "{Left}{BS}{Text}'"
 		Send "{Del}"
 
