@@ -57,7 +57,7 @@
 1. **安装依赖软件**：如果未安装AutoHotkey，先去[下载](https://www.autohotkey.com/)并安装（必须安装2.0或更新的版本）。
 2. **下载程序文件**：此项目只有1个开源的脚本程序文件，存放在此项目的Win目录中。 \
 `FinalD_un.ahk`是通用版，理论上可用于所有中文输入法。（首次运行可能需要做点小修改，后面第3点会讲到。） \
-`FinalD_rime.ahk`是Rime输入法深度整合版，必须结合我的另一个开源项目[惊喜输入方案](https://github.com/Lantaio/Rime-schema-JoySchema)来使用。 \
+`FinalD_rime.ahk`是Rime输入法定制版，必须结合我的另一个开源项目[惊喜输入方案](https://github.com/Lantaio/Rime-schema-JoySchema)来使用。 \
 将你想使用的文件下载到你的电脑的任意位置。
 3. **修改`FinalD_un.ahk`，让插件识别你所用的输入法**(un版默认设置为搜狗拼音输入法，如果你用的是搜狗拼音输入法，无需此步骤，直接做第5步。rime版已设置好，无需此步骤，直接做第5步。）：
 	1. 在『文件资源管理器』中鼠标右键点击`FinalD_un.ahk`文件，在右键菜单中点击「Edit script」编辑此脚本文件。
@@ -82,13 +82,12 @@
 * 在文件管理器里用<kbd>Shift</kbd>键连续选择多个文件时有问题，有临时[解决办法](https://github.com/Lantaio/IME-booster-FinalD/issues/7)
 * 个别需要按<kbd>Shift</kbd>键上屏的标点不能通过一直按着<kbd>Shift</kbd>键来重复发送，但你可以尝试一下，大部分常见的用作重复发送的标点符号都是可以正常连按的。
 * 不能在选择了内容的情况下输入标点符号，会出现非预期的结果。但在Obsidian和Sublime Text中编辑Markdown时，可以选择内容后按<kbd>\*</kbd>键或<kbd>`</kbd>键等来设置格式。
-* 在IntelliJ这种过度自动化的编辑器中输入‘{’时可能会出现*重复*配对‘}’的情况，请注意。
 * 输入标点符号时由于是通过选择光标前、后字符来决定上屏哪个标点，因此可能会出现短暂闪动，Word等反应慢的程序会比较明显，但我所用的代码编辑器都不明显。暂时没有解决方法。如果你对这种闪动感到严重不适，只能放弃使用此插件。
 * 段落开头第1个字符是标点符号时统一上屏英文标点。
 * 在Word和PowerPoint中，英文单、双引号会自动变换为中文单、双引号。这个问题不是此插件造成的，有[解决办法](https://github.com/Lantaio/IME-booster-FinalD/issues/4)。
 
 ## 后续操作
-* 不要忘了还有**更强大的Rime深度整合版**哦，有兴趣的话请转到我的[惊喜输入方案](https://github.com/Lantaio/Rime-schema-JoySchema)瞧瞧。
+* 不要忘了还有**更强大的Rime定制版**哦，有兴趣的话请转到我的[惊喜输入方案](https://github.com/Lantaio/Rime-schema-JoySchema)瞧瞧。
 * 如果你想将此插件**添加为开机启动项**，可以到AI网站[Kimi](https://kimi.moonshot.cn/)向它提问：“如何将AutoHotkey脚本添加为开机启动项？”
 * 如果在某些情况下你需要**临时停用此插件**的话，无须关闭此插件，只需按左<kbd>Ctrl</kbd>+<kbd>Win</kbd>快捷键组合。留意任务栏绿色H图标会有变化。当你想恢复使用此插件时重复按此快捷键组合即可。（注意：用鼠标右键点击任务栏的H图标，再点击右键菜单中的「Pause Script」没有用！）
 * 此脚本程序只是一个样板，你完全可以按你的想法来改造这个脚本程序，使其真正成为你码字的🚀助推器。在最后的『[致谢](#致谢)』中有AutoHotkey中文帮助链接地址。
