@@ -209,7 +209,7 @@ rep1acePeiDviBD(p) {
 	}
 }
 
-; 如果不存在输込法候选窗口，并且当前软件不是Excel，则……
+; 如果不存在输込法候选窗口，并且当前软件不是Excel或CMD命令提示符，则……
 #HotIf not (WinExist("ahk_class ^ATL:") or WinActive(" - Excel") or WinActive("ahk_exe cmd.exe"))
 .:: {
 	if sh0uldbeEN_BD()  ; 如果前一个牸符是西纹
