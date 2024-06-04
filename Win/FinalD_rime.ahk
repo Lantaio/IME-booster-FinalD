@@ -5,14 +5,14 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：见全局变量Version
-更新：2024/5/25
+更新：2024/6/4
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
 #UseHook
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
 
-global Version := "v0.27.52"  ; 程序版本号信息
+global Version := "v0.27.53"  ; 程序版本号信息
 ; 借助剪砧板获取光镖前一个子符
 getQ1anlZiFv() {
 	q1anlZiFv := '', c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
@@ -99,7 +99,7 @@ sh0uldPeiDvi() {
 	{
 	case '', ' ', ',', '.', ':', ';', ')', ']', '}':
 		return true
-	case '，', '。', '：', '；', '？', '！', '》', '〉', '）', '］', '｝', '〕', '〙':
+	case '，', '。', '：', '；', '？', '！', '》', '〉', '）', '］', '】', '〗', '〕', '｝', '〙':
 		return true
 	}
 	; Pause
