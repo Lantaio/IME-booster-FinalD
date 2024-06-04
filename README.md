@@ -1,8 +1,8 @@
 # *FinalD / 终点 🏁*
-*2024年5月30日*
+*2024年6月4日*
 
-FinalD_rime.ahk Rime定制版：v0.27.52 \
-FinalD_un.ahk 通用版：v0.26.51 \
+FinalD_rime.ahk Rime定制版：v0.27.52 (*2024/5/25*) \
+FinalD_un.ahk 通用版：v0.26.51 (*2024/5/25*) \
 *用<kbd>Shift</kbd>+左<kbd>Win</kbd>快捷键组合查看版本信息。[更新日志](joy/ChangeLog.md)*
 
 *温馨提示：可通过此文档右上角的〔标题列表〕按钮快速转到某个标题。可以通过后面有‘⚡️’图标的标题内容快速了解此项目，以及留意各部分的**粗体字**内容。*
@@ -57,7 +57,7 @@ FinalD_un.ahk 通用版：v0.26.51 \
 1. **安装依赖软件**：如果未安装AutoHotkey，先去[下载](https://www.autohotkey.com/)并安装（必须安装2.0或更新的版本）。
 2. **下载程序文件**：此项目只有1个开源的脚本程序文件，存放在此项目的Win目录中。 \
 FinalD_un.ahk 是通用版，理论上可用于所有中文输入法。（首次运行可能需要做点小修改，后面第3点会讲到。） \
-FinalD_rime.ahk 是Rime输入法定制版，必须结合我的另一个开源项目[惊喜输入方案](https://github.com/Lantaio/Rime-schema-JoySchema)来使用。 \
+FinalD_rime.ahk 是Rime输入法定制版，须要结合我的另一个开源项目[惊喜输入方案](https://github.com/Lantaio/Rime-schema-JoySchema)来使用。 \
 将你想使用的文件下载到你的电脑的任意位置。
 3. **修改 FinalD_un.ahk，让插件识别你所用的输入法**(un版默认设置为搜狗拼音输入法，如果你用的是搜狗拼音输入法，无需此步骤，直接做第5步。rime版已设置好，无需此步骤，直接做第5步。）：
 	1. 在『文件资源管理器』中鼠标右键点击 FinalD_un.ahk 文件，在右键菜单中点击「Edit script」编辑此脚本文件。
