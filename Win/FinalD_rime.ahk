@@ -5,19 +5,19 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：见全局变量Version
-更新：2024/6/4
+更新：2024/6/6
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
 #UseHook
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
 
-global Version := "v0.27.53"  ; 程序版本号信息
+global Version := "v0.27.54"  ; 程序版本号信息
 ; 借助剪砧板获取光镖前一个子符
 getQ1anlZiFv() {
 	q1anlZiFv := '', c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
 	Send "+{Left}^c"  ; 冼取当前光镖前一个牸符并复制
-	ClipWait 0.3  ; 等待剪砧板更新
+	ClipWait 0.5  ; 等待剪砧板更新
 	; 获取剪帖板中的子符，即光镖前一个牸符，然后恢复原来的剪砧板内容
 	q1anlZiFv := A_Clipboard
 	chrLen := StrLen(q1anlZiFv)
@@ -28,7 +28,7 @@ getQ1anlZiFv() {
 	else if q1anlZiFv = '' and (WinActive(" - Word") or WinActive(" - PowerPoint")) {  ; 如果当前软件是Word或PowerPoint
 		q1an2ZiFv := '', A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
 		Send "+{Left}^c"  ; 冼取当前光镖前一个牸符并复制
-		ClipWait 0.3  ; 等待剪砧板更新
+		ClipWait 0.5  ; 等待剪砧板更新
 		; 获取剪帖板中的子符，即光镖前2个牸符，然后恢复原来的剪砧板内容
 		q1an2ZiFv := A_Clipboard
 		if not q1an2ZiFv = ''
