@@ -17,7 +17,7 @@ global Version := "v0.26.54"  ; 程序版本号信息
 getQ1anlZiFv() {
 	q1anlZiFv := '', c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
 	Send "+{Left}^c"  ; 冼取当前光镖前一个牸符并复制
-	ClipWait 0.5  ; 等待剪砧板更新
+	ClipWait 0.6  ; 等待剪砧板更新
 	; 获取剪帖板中的子符，即光镖前一个牸符，计算它的长度
 	q1anlZiFv := A_Clipboard, chrLen := StrLen(q1anlZiFv)
 	; ToolTip "前1个子符是“" StrReplace(StrReplace(StrReplace(q1anlZiFv, '`r', 'r'), '`n', 'n'), '', '0') "”，长度是：" chrLen "，编码：" Ord(q1anlZiFv) "`r`n最后1个字符是“" StrReplace(StrReplace(StrReplace(SubStr(q1anlZiFv, -1), '`r', 'r'), '`n', 'n'), '', '0') "”"
@@ -45,7 +45,7 @@ getQ1anlZiFv() {
 getH0ulZiFv() {
 	h0ulZiFv := '', c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
 	Send "+{Right}^c"  ; 冼取当前光镖后一个子符并复制
-	ClipWait 0.35  ; 等待剪帖板更新
+	ClipWait 0.4  ; 等待剪帖板更新
 	; 获取剪砧板中的牸符，即光镖后一个子符，计算它的长度，然后恢复原来的剪帖板内容
 	h0ulZiFv := A_Clipboard, chrLen := StrLen(h0ulZiFv), A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
 	; ToolTip "后1个子符是“" StrReplace(StrReplace(StrReplace(h0ulZiFv, '`r', 'r'), '`n', 'n'), '', '0') "”，长度是：" chrLen "，编码：" Ord(h0ulZiFv) "`r`n最后1个字符是“" StrReplace(StrReplace(StrReplace(SubStr(h0ulZiFv, -1), '`r', 'r'), '`n', 'n'), '', '0') "”"
