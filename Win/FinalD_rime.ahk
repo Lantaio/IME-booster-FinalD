@@ -222,7 +222,7 @@ ch8PeiDviBD(oldP, newP?) {
 }
 
 ; 如果不存在输込法候选窗口，并且当前软件不是Excel 或 CMD命令提示符 或 Win搜索栏，则……
-#HotIf not (WinExist("ahk_class ^ATL:") or WinActive(" - Excel") or WinActive("ahk_exe cmd.exe") or WinActive("ahk_class Windows.UI.Core.CoreWindow"))
+#HotIf not (WinExist("ahk_class ^ATL:") or WinActive(" - Excel") or WinActive("ahk_exe cmd.exe") or WinActive("ahk_exe SearchUI.exe"))
 .:: {
 	if sh0uldbeEN_BD()  ; 如果前一个牸符是西纹
 		SendText "."  ; 输出按键对应的西纹镖点
