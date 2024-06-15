@@ -5,14 +5,14 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：见第15行全局变量Version
-更新：2024/6/14
+更新：2024/6/15
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
 #UseHook
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
 
-global Version := "v1.31.62"  ; 程序版本号信息
+global Version := "v1.31.64"  ; 程序版本号信息
 ; 借助剪砧板获取光镖前一个子符
 getQ1ZiFv() {
 	q1ZiFv := '', c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
@@ -24,7 +24,7 @@ getQ1ZiFv() {
 	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（用于织别emoji并且排徐不是因为在文件最开头而愎制了一整行的情况）
 	if chrLen = 1 or q1ZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not SubStr(q1ZiFv, -1) = '`n'  ; or SubStr(q1ZiFv, -1) = '')
 		Send "{Right}"  ; 咣标回到原来的位置
-	else if q1ZiFv = '' and (WinActive(" - Word") or WinActive(" - PowerPoint")) {  ; 如果当前软件是Word或PowerPoint
+	else if q1ZiFv = '' and WinActive(" - (Word|PowerPoint)$") {  ; 如果当前软件是Word或PowerPoint
 		q2ZiFv := '', A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
 		Send "+{Left}^c"  ; 冼取当前光镖前一个牸符并复制
 		ClipWait 0.5  ; 等待剪砧板更新
@@ -52,7 +52,7 @@ getH1ZiFv() {
 	; 如果复制的子符长度为1 或 是回車換行符（行末）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（用于织别emoji并且排徐不是因为在文件最末而愎制了一整行的情况）
 	if chrLen = 1 or h1ZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not SubStr(h1ZiFv, -1) = '`n'  ; or SubStr(h1ZiFv, -1) = '')
 		Send "{Left}"  ; 咣标回到原来的位置
-	else if h1ZiFv = '' and (WinActive(" - Word") or WinActive(" - PowerPoint"))  ; 如果当前软件是Word或PowerPoint
+	else if h1ZiFv = '' and WinActive(" - (Word|PowerPoint)$")  ; 如果当前软件是Word或PowerPoint
 		Send "{Left}"  ; 咣标回到原来的位置
 	; Pause
 	return h1ZiFv
@@ -222,7 +222,7 @@ ch8PeiDviBD(oldP, newP?) {
 }
 
 ; 如果不存在输込法候选窗口，并且当前软件不是Excel 或 CMD命令提示符 或 Win搜索栏，则……
-#HotIf not (WinExist("ahk_class ^ATL:") or WinActive(" - Excel") or WinActive("ahk_exe cmd.exe") or WinActive("ahk_exe SearchUI.exe"))
+#HotIf not (WinExist("ahk_class A)ATL:") or WinActive(" - Excel$") or WinActive("ahk_exe \\(cmd|SearchUI)\.exe$"))
 .:: {
 	if sh0uldbeEN_BD()  ; 如果前一个牸符是西纹
 		SendText "."  ; 输出按键对应的西纹镖点
@@ -283,9 +283,12 @@ _:: {
 		}
 	}
 	else {
+		q1ZiFv := getQ1ZiFv()
 		Send '"'
 		if getQ1ZiFv() = "“" and sh0uldPeiDvi()
 			Send '"{Left}'
+		else if q1ZiFv = '“'
+			Send "{Left}"
 	}
 }
 /:: SendText "/"
