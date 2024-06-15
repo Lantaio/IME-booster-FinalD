@@ -189,17 +189,17 @@ ch8PeiDviBD(oldP, newP) {
 		case '〈': SendText '〉'
 		}
 		Send "{Del}{Left}"
-		if q1ZiFv = '≤'
+		if newP = '≤'
 			Send "{Right}"
 	}
 }
 
-; 如果不存在输込法候选窗口，并且当前软件不是Excel或CMD命令提示符，则……
-#HotIf not (WinExist("ahk_class Microsoft.IME.UIManager.CandidateWindow.Host") or WinActive(" - Excel") or WinActive("ahk_exe cmd.exe"))
-; 下面是一些常用的输入法的ahk_class值，用于替换上一行代码中的“SoPY_Comp”。
+; 如果不存在输込法候选窗口，并且当前软件不是Excel 或 CMD命令提示符 或 Win搜索栏，则……
+#HotIf not (WinExist("ahk_class ^Microsoft.IME") or WinActive(" - Excel") or WinActive("ahk_exe cmd.exe") or WinActive("ahk_exe SearchUI.exe"))
+; 下面是一些常用的输入法的ahk_class值，用于替换上一行代码中的“Microsoft.IME”。（注意：不要把‘^’号也替换掉，保留‘^’号）
 ; 搜狗拼音：SoPY_Comp
-; Rime输入法：^ATL:
-; 微软拼音：Microsoft.IME.UIManager.CandidateWindow.Host
+; Rime输入法：ATL:
+; 微软拼音：Microsoft.IME
 ; QQ拼音：QQPinyinCompWndTSF
 ; QQ五笔：QQWubiCompWndII
 .:: {
@@ -687,21 +687,20 @@ RCtrl:: {  ; !Space
 	case '↔', '≈', '≡', '≅': Send "{BS}{Text}="
 
 	case '<': ch8PeiDviBD('<', '《')
-	case '《': ch8PeiDviBD('《', '<')
-	case '〈': ch8PeiDviBD('〈', '<')
+	case '《', '〈': ch8PeiDviBD(q1ZiFv, '<')
 	case '≤', '≦': Send "{BS}{Text}<"
 
 	case '>': Send "{BS}{Text}》"
 	case '》', '〉', '≥', '≧': Send "{BS}{Text}>"
 
 	case ';': Send "{BS}{Text}；"
-	case '；': Send "{BS}{Text};"
+	case '；', '∵', '∴', '∷': Send "{BS}{Text};"
 
 	case '-': Send "{BS}{Text}π"
 	case 'π', 'α', 'β', 'λ': Send "{BS}{Text}-"
 
 	case '{': ch8PeiDviBD('{', '「')
-	case '「', '『', '〘', '｛': ch8PeiDviBD('「', '{')
+	case '「', '『', '〘', '｛': ch8PeiDviBD(q1ZiFv, '{')
 
 	case '}': Send "{BS}{Text}」"
 	case '」', '』', '〙', '｝':
@@ -723,10 +722,7 @@ RCtrl:: {  ; !Space
 	case '◆', '■', '◇', '□': Send "{BS}{Text}#"
 
 	case '[': ch8PeiDviBD('[', '【')
-	case '【': ch8PeiDviBD('【', '[')
-	case '〖': ch8PeiDviBD('〖', '[')
-	case '〔': ch8PeiDviBD('〔', '[')
-	case '［': ch8PeiDviBD('［', '[')
+	case '【', '〖', '〔', '［': ch8PeiDviBD(q1ZiFv, '[')
 
 	case ']': Send "{BS}{Text}】"
 	case '】', '〗', '〕','］':
@@ -753,10 +749,10 @@ RCtrl:: {  ; !Space
 	case '、', '→', '←', '＼': Send "{BS}{Text}\"
 
 	case '|': Send "{BS}{Text}｜"
-	case '｜', '↑', '↓', '↕', '‖', '¦': Send "{BS}{Text}|"
+	case '｜', '↑', '↓', '↕': Send "{BS}{Text}|"
 
 	case '@': Send "{BS}{Text}●"
-	case '●', '·', '©', '®', '○': Send "{BS}{Text}@"
+	case '●', '·', '©', '®': Send "{BS}{Text}@"
 
 	case '%': Send "{BS}{Text}★"
 	case '★', '☆', '‰', '‱': Send "{BS}{Text}%"
