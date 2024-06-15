@@ -12,7 +12,7 @@
 #UseHook
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
 
-global Version := "v1.31.64"  ; 程序版本号信息
+global Version := "v1.32.65"  ; 程序版本号信息
 ; 借助剪砧板获取光镖前一个子符
 getQ1ZiFv() {
 	q1ZiFv := '', c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
@@ -352,9 +352,12 @@ _:: {
 		}
 	}
 	else {
+		q1ZiFv := getQ1ZiFv()
 		Send "'"
 		if getQ1ZiFv() = "‘" and sh0uldPeiDvi()
 			Send "'{Left}"
+		else if q1ZiFv = '‘'
+			Send "{Left}"
 	}
 }
 *:: SendText "*"
