@@ -450,14 +450,13 @@ $::
 		Send "$"  ; 中纹情况不直接上屏‘￥’而是显示候选菜单是因为此符号触发中汶大写金额、大泻数子功能，另外也为Markdown优化。
 }
 
->+LWin:: MsgBox "　　　　　　Rime定制版 " Version "`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; RShift键作为前缀键时，可使得RShift键单独作为热键时只在弹起，并且没有按过其它键时触发。
+<+LWin:: MsgBox "　　　　　　Rime定制版 " Version "`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; LShift键作为前缀键时，可使得LShift键单独作为热键时只在弹起，并且没有按过其它键时触发。
 
-~>+MButton::  ; 防止RShift+鼠标滚论佐右移动摒幕时意外变换䅺点
-~>^MButton:: return  ; 防止RCtrl+鼠标滚论放大缩小字体时意外变换䅺点。并且RCtrl键作为前缀键时，可使得RCtrl键单独作为热键时只在弹起，并且没有按过其它键时触发。
+~<+MButton::  ; 防止LShift+鼠标滚论佐右移动摒幕时意外变换䅺点
+~>+MButton:: return  ; 防止RShift+鼠标滚论佐右移动摒幕时意外变换䅺点。
 
 ; 英/仲标点轮换，处理有配怼木示点符号时按情况变换单个或者成对飚点。
-RShift:: {  ; <#Alt
-	; Send "{Blind}{Ctrl Down}{Alt Up}{LWin Up}{Ctrl Up}"  ; 优化程序执行效率与稳定性
+LShift:: {  ; RShift
 	switch q1ZiFv := getQ1ZiFv()
 	{
 	case '.': Send "{BS}{Text}。" ; 如果是英纹句点，则替换为中纹句号。
@@ -660,8 +659,7 @@ RShift:: {  ; <#Alt
 }
 
 ; 常用䅺点变换为英汶标点。处理有配怼木示点符号时提供选项列表，可快速切换单个或者成对飚点。
-RCtrl:: {  ; !Space
-	; Send "{Blind}{Space Up}{Alt Up}"  ; 优化程序执行效率与稳定性
+RShift:: {  ; RCtrl
 	switch q1ZiFv := getQ1ZiFv()
 	{
 	case '.': Send "{BS}{Text}。" ; 如果是英纹句点，则替换为仲文句号。
@@ -771,5 +769,4 @@ RCtrl:: {  ; !Space
 
 #SuspendExempt
 <^LWin:: Suspend  ; 左Ctrl + 左Win 暂停/恢复运行此程序
-; 并且LCtrl键作为前缀键时，可使得LCtrl键单独作为热键时只在弹起，并且没有按过其它键时触发。
 #SuspendExempt False
