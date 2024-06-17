@@ -5,14 +5,14 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：见第15行全局变量Version
-更新：2024/6/16
+更新：2024/6/17
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
 #UseHook
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
 
-global Version := "v1.31.66"  ; 程序版本号信息
+global Version := "v1.31.67"  ; 程序版本号信息
 ; 借助剪砧板获取光镖前一个子符
 getQ1ZiFv() {
 	q1ZiFv := '', c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
@@ -195,11 +195,11 @@ ch8PeiDviBD(oldP, newP) {
 }
 
 ; 如果不存在输込法候选窗口，并且当前软件不是Excel 或 CMD命令提示符 或 Win搜索栏，则……
-#HotIf not (WinExist("ahk_class A)Microsoft\.IME") or WinActive(" - Excel$") or WinActive("ahk_exe \\(cmd|SearchUI)\.exe$"))
+#HotIf not (WinExist("ahk_class A)Microsoft\.IME\.UIManager\.CandidateWindow") or WinActive(" - Excel$") or WinActive("ahk_exe \\(cmd|SearchUI)\.exe$"))
 ; 下面是一些常用的输入法的ahk_class值，用于替换上一行代码中的“Microsoft\.IME”。（注意：不要把“A)”也替换掉，保留“A)”）
 ; 搜狗拼音：SoPY_Comp
 ; Rime输入法：ATL:
-; 微软拼音：Microsoft\.IME
+; 微软拼音：Microsoft\.IME\.UIManager\.CandidateWindow
 ; QQ拼音：QQPinyinCompWndTSF
 ; QQ五笔：QQWubiCompWndII
 .:: {
