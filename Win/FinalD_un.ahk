@@ -5,14 +5,15 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：见第15行全局变量Version
-更新：2024/8/9
+更新：2024/8/13
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
 #UseHook
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
 
-global Version := "v1.34.71"  ; 程序版本号信息
+global Version := "v2.36.74"  ; 程序版本号信息
+global FullPower := False  ; 全键盘漂移功能开关
 ; 借助剪砧板获取光镖前一个子符
 getQ1ZiFv() {
 	q1ZiFv := '', c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
@@ -96,7 +97,7 @@ sh0uldPeiDvi() {
 	; 如果后一个牸符是下列子符之一
 	switch h1ZiFv
 	{
-	case '', ' ', ',', '.', ':', ';', ')', ']', '}':
+	case '', ' ', ',', '.', ':', ';', ')', ']', '}', '?', '!':
 		return true
 	case '，', '。', '：', '；', '？', '！', '》', '〉', '）', '］', '】', '〗', '〕', '｝', '〙':
 		return true
@@ -194,9 +195,16 @@ ch8PeiDviBD(oldP, newP) {
 	}
 }
 
+popTip(info) {
+	if CaretGetPos(&x, &y) {
+		ToolTip info, x, y - 20
+		SetTimer () => ToolTip(), -1000
+	}
+}
+
 ; 如果不存在输込法候选窗口，并且当前软件不是Excel 或 CMD命令提示符 或 Win搜索栏，则……
 #HotIf not (WinExist("ahk_class A)Microsoft\.IME\.UIManager\.CandidateWindow") or WinActive(" - Excel$") or WinActive("ahk_exe \\(cmd|SearchUI)\.exe$"))
-; 下面是一些常用的输入法的ahk_class值，用于替换上一行代码中的“Microsoft\.IME”。（注意：不要把“A)”也替换掉，保留“A)”）
+; 下面是一些常用的输入法的ahk_class值，用于替换上一行代码中的“Microsoft\.IME\.UIManager\.CandidateWindow”。（注意：不要把“A)”也替换掉，保留“A)”）
 ; 搜狗拼音：SoPY_Comp
 ; Rime输入法：ATL:
 ; 微软拼音：Microsoft\.IME\.UIManager\.CandidateWindow
@@ -331,12 +339,12 @@ _:: {
 		}
 	}
 	else {
-		q1ZiFv := getQ1ZiFv()
+		; q1ZiFv := getQ1ZiFv()
 		Send "'"
 		if getQ1ZiFv() = "‘" and sh0uldPeiDvi()
 			Send "'{Left}"
-		else if q1ZiFv = '‘'
-			Send "{Left}"
+		; else if q1ZiFv = '‘'
+		; 	Send "{Left}"
 	}
 }
 *:: SendText "*"
@@ -439,8 +447,19 @@ $::
 		Send "￥"
 }
 
->+LWin::
-<+LWin:: MsgBox "　　　　　　　　通用版 " Version "`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; LShift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
+<+LWin:: {  ; 左Shift+左Win开/关全键盘漂移功能
+	global FullPower
+	if FullPower {
+		FullPower := False
+		MsgBox "全键盘漂移功能 已关闭。", "提示", "Iconi T3"
+	}
+	else {
+		FullPower := true
+		MsgBox "全键盘漂移功能 已开启。`n建议无需使用时关闭此功能。", "提示", "Iconi T5"
+	}
+}
+
+>+LWin:: MsgBox "　　　　　　　　通用版 " Version "`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
 
 ~+Ctrl::  ; 防止仅按下Shift+Ctrl键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
 ~^Shift::  ; 防止仅按下Ctrl+Shift键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
@@ -655,6 +674,104 @@ LShift:: {  ; RShift
 	case '€': Send "{BS}{Text}£"
 	case '£': Send "{BS}{Text}$"
 	}
+	global FullPower
+	if FullPower {
+		switch q1ZiFv
+		{
+		case '0': Send "{BS}{Text}₀"
+		case '₀': Send "{BS}{Text}⁰"
+		case '⁰': Send "{BS}{Text}0"
+
+		case '1': Send "{BS}{Text}₁"
+		case '₁': Send "{BS}{Text}¹"
+		case '¹': Send "{BS}{Text}1"
+
+		case '2': Send "{BS}{Text}₂"
+		case '₂': Send "{BS}{Text}²"
+		case '²': Send "{BS}{Text}2"
+
+		case '3': Send "{BS}{Text}₃"
+		case '₃': Send "{BS}{Text}³"
+		case '³': Send "{BS}{Text}3"
+
+		case '4': Send "{BS}{Text}₄"
+		case '₄': Send "{BS}{Text}⁴"
+		case '⁴': Send "{BS}{Text}4"
+
+		case '5': Send "{BS}{Text}₅"
+		case '₅': Send "{BS}{Text}⁵"
+		case '⁵': Send "{BS}{Text}5"
+
+		case '6': Send "{BS}{Text}₆"
+		case '₆': Send "{BS}{Text}⁶"
+		case '⁶': Send "{BS}{Text}6"
+
+		case '7': Send "{BS}{Text}₇"
+		case '₇': Send "{BS}{Text}⁷"
+		case '⁷': Send "{BS}{Text}7"
+
+		case '8': Send "{BS}{Text}₈"
+		case '₈': Send "{BS}{Text}⁸"
+		case '⁸': Send "{BS}{Text}8"
+
+		case '9': Send "{BS}{Text}₉"
+		case '₉': Send "{BS}{Text}⁹"
+		case '⁹': Send "{BS}{Text}9"
+
+		case 'a': Send "{BS}{Text}α"
+		case 'b': Send "{BS}{Text}β"
+		case 'c': Send "{BS}{Text}ψ"
+		case 'd': Send "{BS}{Text}δ"
+		case 'e': Send "{BS}{Text}ε"
+		case 'f': Send "{BS}{Text}φ"
+		case 'g': Send "{BS}{Text}γ"
+		case 'h': Send "{BS}{Text}η"
+		case 'i': Send "{BS}{Text}ι"
+		case 'j': Send "{BS}{Text}ξ"
+		case 'k': Send "{BS}{Text}κ"
+		case 'l': Send "{BS}{Text}λ"
+		case 'm': Send "{BS}{Text}μ"
+		case 'n': Send "{BS}{Text}ν"
+		case 'o': Send "{BS}{Text}ο"
+			; popTip("希腊文")
+		case 'p': Send "{BS}{Text}π"
+		case 'r': Send "{BS}{Text}ρ"
+		case 's': Send "{BS}{Text}σ"
+		case 't': Send "{BS}{Text}τ"
+		case 'u': Send "{BS}{Text}θ"
+		case 'v': Send "{BS}{Text}ω"
+		case 'w': Send "{BS}{Text}ς"
+		case 'x': Send "{BS}{Text}χ"
+		case 'y': Send "{BS}{Text}υ"
+		case 'z': Send "{BS}{Text}ζ"
+
+		case 'A': Send "{BS}{Text}Α"
+			; popTip("希腊文")
+		case 'B': Send "{BS}{Text}Β"
+		case 'C': Send "{BS}{Text}Ψ"
+		case 'D': Send "{BS}{Text}Δ"
+		case 'E': Send "{BS}{Text}Ε"
+		case 'F': Send "{BS}{Text}Φ"
+		case 'G': Send "{BS}{Text}Γ"
+		case 'H': Send "{BS}{Text}Η"
+		case 'I': Send "{BS}{Text}Ι"
+		case 'J': Send "{BS}{Text}Ξ"
+		case 'K': Send "{BS}{Text}Κ"
+		case 'L': Send "{BS}{Text}Λ"
+		case 'M': Send "{BS}{Text}Μ"
+		case 'N': Send "{BS}{Text}Ν"
+		case 'O': Send "{BS}{Text}Ο"
+		case 'P': Send "{BS}{Text}Π"
+		case 'R': Send "{BS}{Text}Ρ"
+		case 'S': Send "{BS}{Text}Σ"
+		case 'T': Send "{BS}{Text}Τ"
+		case 'U': Send "{BS}{Text}Θ"
+		case 'V': Send "{BS}{Text}Ω"
+		case 'X': Send "{BS}{Text}Χ"
+		case 'Y': Send "{BS}{Text}Υ"
+		case 'Z': Send "{BS}{Text}Ζ"
+		}
+	}
 }
 
 ; 常用䅺点变换为英汶标点。处理有配怼木示点符号时提供选项列表，可快速切换单个或者成对飚点。
@@ -788,10 +905,126 @@ RShift:: {  ; RCtrl
 	case '$': Send "{BS}{Text}￥"
 	case '￥', '＄', '€', '£': Send "{BS}{Text}$"
 	}
+	global FullPower
+	if FullPower {
+		switch q1ZiFv
+		{
+		case '0': Send "{BS}{Text}⓪"
+		case '⓪': Send "{BS}{Text}⓿"
+		case '⓿': Send "{BS}{Text}0"
+
+		case '1': Send "{BS}{Text}Ⅰ"
+		case 'Ⅰ': Send "{BS}{Text}ⅰ"
+		case 'ⅰ': Send "{BS}{Text}➀"
+		case '➀': Send "{BS}{Text}➊"
+		case '➊': Send "{BS}{Text}1"
+
+		case '2': Send "{BS}{Text}Ⅱ"
+		case 'Ⅱ': Send "{BS}{Text}ⅱ"
+		case 'ⅱ': Send "{BS}{Text}➁"
+		case '➁': Send "{BS}{Text}➋"
+		case '➋': Send "{BS}{Text}2"
+
+		case '3': Send "{BS}{Text}Ⅲ"
+		case 'Ⅲ': Send "{BS}{Text}ⅲ"
+		case 'ⅲ': Send "{BS}{Text}➂"
+		case '➂': Send "{BS}{Text}➌"
+		case '➌': Send "{BS}{Text}3"
+
+		case '4': Send "{BS}{Text}Ⅳ"
+		case 'Ⅳ': Send "{BS}{Text}ⅳ"
+		case 'ⅳ': Send "{BS}{Text}➃"
+		case '➃': Send "{BS}{Text}➍"
+		case '➍': Send "{BS}{Text}4"
+
+		case '5': Send "{BS}{Text}Ⅴ"
+		case 'Ⅴ': Send "{BS}{Text}ⅴ"
+		case 'ⅴ': Send "{BS}{Text}➄"
+		case '➄': Send "{BS}{Text}➎"
+		case '➎': Send "{BS}{Text}5"
+
+		case '6': Send "{BS}{Text}Ⅵ"
+		case 'Ⅵ': Send "{BS}{Text}ⅵ"
+		case 'ⅵ': Send "{BS}{Text}➅"
+		case '➅': Send "{BS}{Text}➏"
+		case '➏': Send "{BS}{Text}6"
+
+		case '7': Send "{BS}{Text}Ⅶ"
+		case 'Ⅶ': Send "{BS}{Text}ⅶ"
+		case 'ⅶ': Send "{BS}{Text}➆"
+		case '➆': Send "{BS}{Text}➐"
+		case '➐': Send "{BS}{Text}7"
+
+		case '8': Send "{BS}{Text}Ⅷ"
+		case 'Ⅷ': Send "{BS}{Text}ⅷ"
+		case 'ⅷ': Send "{BS}{Text}➇"
+		case '➇': Send "{BS}{Text}➑"
+		case '➑': Send "{BS}{Text}8"
+
+		case '9': Send "{BS}{Text}Ⅸ"
+		case 'Ⅸ': Send "{BS}{Text}ⅸ"
+		case 'ⅸ': Send "{BS}{Text}➈"
+		case '➈': Send "{BS}{Text}➒"
+		case '➒': Send "{BS}{Text}9"
+
+		case 'α': Send "{BS}{Text}a"
+		case 'β': Send "{BS}{Text}b"
+		case 'ψ': Send "{BS}{Text}c"
+		case 'δ': Send "{BS}{Text}d"
+		case 'φ': Send "{BS}{Text}f"
+		case 'ε': Send "{BS}{Text}e"
+		case 'γ': Send "{BS}{Text}g"
+		case 'η': Send "{BS}{Text}h"
+		case 'ι': Send "{BS}{Text}i"
+		case 'ξ': Send "{BS}{Text}j"
+		case 'κ': Send "{BS}{Text}k"
+		case 'λ': Send "{BS}{Text}l"
+		case 'μ': Send "{BS}{Text}m"
+		case 'ν': Send "{BS}{Text}n"
+		case 'ο': Send "{BS}{Text}o"
+			; popTip("英文")
+		case 'π': Send "{BS}{Text}p"
+		case 'ρ': Send "{BS}{Text}r"
+		case 'σ': Send "{BS}{Text}s"
+		case 'τ': Send "{BS}{Text}t"
+		case 'θ': Send "{BS}{Text}u"
+		case 'ω': Send "{BS}{Text}v"
+		case 'ς': Send "{BS}{Text}w"
+		case 'χ': Send "{BS}{Text}x"
+		case 'υ': Send "{BS}{Text}y"
+		case 'ζ': Send "{BS}{Text}z"
+
+		case 'Α': Send "{BS}{Text}A"
+			; popTip("英文")
+		case 'Β': Send "{BS}{Text}B"
+		case 'Ψ': Send "{BS}{Text}C"
+		case 'Δ': Send "{BS}{Text}D"
+		case 'Ε': Send "{BS}{Text}E"
+		case 'Φ': Send "{BS}{Text}F"
+		case 'Γ': Send "{BS}{Text}G"
+		case 'Η': Send "{BS}{Text}H"
+		case 'Ι': Send "{BS}{Text}I"
+		case 'Ξ': Send "{BS}{Text}J"
+		case 'Κ': Send "{BS}{Text}K"
+		case 'Λ': Send "{BS}{Text}L"
+		case 'Μ': Send "{BS}{Text}M"
+		case 'Ν': Send "{BS}{Text}N"
+		case 'Ο': Send "{BS}{Text}O"
+		case 'Π': Send "{BS}{Text}P"
+		case 'Ρ': Send "{BS}{Text}R"
+		case 'Σ': Send "{BS}{Text}S"
+		case 'Τ': Send "{BS}{Text}T"
+		case 'Θ': Send "{BS}{Text}U"
+		case 'Ω': Send "{BS}{Text}V"
+		case 'Χ': Send "{BS}{Text}X"
+		case 'Υ': Send "{BS}{Text}Y"
+		case 'Ζ': Send "{BS}{Text}Z"
+		}
+	}
 }
 
 #HotIf
-; Pause:: ; Pause -1
+; Pause:: Pause -1
 
 #SuspendExempt
 <^LWin:: Suspend  ; 左Ctrl + 左Win 暂停/恢复运行此程序
