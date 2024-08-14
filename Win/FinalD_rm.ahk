@@ -514,10 +514,6 @@ LShift:: {  ; RShift
 	case '∷': Send "{BS}{Text}:"
 
 	case '"': ch8PeiDviBD('"', '“')
-		; if CaretGetPos(&x, &y) {
-		; 	; ToolTip "Cn左双引号", x, y + 20
-		; 	SetTimer () => ; ToolTip(), -2000
-		; }
 	case '“': ch8PeiDviBD('“', '"')
 	case '”':
 		if getH1ZiFv() = "“"
@@ -686,7 +682,60 @@ LShift:: {  ; RShift
 	if FullPower {
 		switch q1ZiFv
 		{
-		case '0': Send "{BS}{Text}₀"
+		case 'a': Send "{BS}{Text}α"  ; 小写英文字母变换为小写希腊字母。
+		case 'b': Send "{BS}{Text}β"
+		case 'c': Send "{BS}{Text}ψ"
+		case 'd': Send "{BS}{Text}δ"
+		case 'e': Send "{BS}{Text}ε"
+		case 'f': Send "{BS}{Text}φ"
+		case 'g': Send "{BS}{Text}γ"
+		case 'h': Send "{BS}{Text}η"
+		case 'i': Send "{BS}{Text}ι"
+		case 'j': Send "{BS}{Text}ξ"
+		case 'k': Send "{BS}{Text}κ"
+		case 'l': Send "{BS}{Text}λ"
+		case 'm': Send "{BS}{Text}μ"
+		case 'n': Send "{BS}{Text}ν"
+		case 'o': Send "{BS}{Text}ο"
+			; popTip("希腊文")
+		case 'p': Send "{BS}{Text}π"
+		case 'r': Send "{BS}{Text}ρ"
+		case 's': Send "{BS}{Text}σ"
+		case 't': Send "{BS}{Text}τ"
+		case 'u': Send "{BS}{Text}θ"
+		case 'v': Send "{BS}{Text}ω"
+		case 'w': Send "{BS}{Text}ς"
+		case 'x': Send "{BS}{Text}χ"
+		case 'y': Send "{BS}{Text}υ"
+		case 'z': Send "{BS}{Text}ζ"
+
+		case 'A': Send "{BS}{Text}Α"  ; 大写英文字母变换为大写希腊字母。
+			; popTip("希腊文")
+		case 'B': Send "{BS}{Text}Β"
+		case 'C': Send "{BS}{Text}Ψ"
+		case 'D': Send "{BS}{Text}Δ"
+		case 'E': Send "{BS}{Text}Ε"
+		case 'F': Send "{BS}{Text}Φ"
+		case 'G': Send "{BS}{Text}Γ"
+		case 'H': Send "{BS}{Text}Η"
+		case 'I': Send "{BS}{Text}Ι"
+		case 'J': Send "{BS}{Text}Ξ"
+		case 'K': Send "{BS}{Text}Κ"
+		case 'L': Send "{BS}{Text}Λ"
+		case 'M': Send "{BS}{Text}Μ"
+		case 'N': Send "{BS}{Text}Ν"
+		case 'O': Send "{BS}{Text}Ο"
+		case 'P': Send "{BS}{Text}Π"
+		case 'R': Send "{BS}{Text}Ρ"
+		case 'S': Send "{BS}{Text}Σ"
+		case 'T': Send "{BS}{Text}Τ"
+		case 'U': Send "{BS}{Text}Θ"
+		case 'V': Send "{BS}{Text}Ω"
+		case 'X': Send "{BS}{Text}Χ"
+		case 'Y': Send "{BS}{Text}Υ"
+		case 'Z': Send "{BS}{Text}Ζ"
+
+		case '0': Send "{BS}{Text}₀"  ; 左Shift键数字漂移功能。
 		case '₀': Send "{BS}{Text}⁰"
 		case '⁰': Send "{BS}{Text}0"
 
@@ -725,59 +774,6 @@ LShift:: {  ; RShift
 		case '9': Send "{BS}{Text}₉"
 		case '₉': Send "{BS}{Text}⁹"
 		case '⁹': Send "{BS}{Text}9"
-
-		case 'a': Send "{BS}{Text}α"
-		case 'b': Send "{BS}{Text}β"
-		case 'c': Send "{BS}{Text}ψ"
-		case 'd': Send "{BS}{Text}δ"
-		case 'e': Send "{BS}{Text}ε"
-		case 'f': Send "{BS}{Text}φ"
-		case 'g': Send "{BS}{Text}γ"
-		case 'h': Send "{BS}{Text}η"
-		case 'i': Send "{BS}{Text}ι"
-		case 'j': Send "{BS}{Text}ξ"
-		case 'k': Send "{BS}{Text}κ"
-		case 'l': Send "{BS}{Text}λ"
-		case 'm': Send "{BS}{Text}μ"
-		case 'n': Send "{BS}{Text}ν"
-		case 'o': Send "{BS}{Text}ο"
-			; popTip("希腊文")
-		case 'p': Send "{BS}{Text}π"
-		case 'r': Send "{BS}{Text}ρ"
-		case 's': Send "{BS}{Text}σ"
-		case 't': Send "{BS}{Text}τ"
-		case 'u': Send "{BS}{Text}θ"
-		case 'v': Send "{BS}{Text}ω"
-		case 'w': Send "{BS}{Text}ς"
-		case 'x': Send "{BS}{Text}χ"
-		case 'y': Send "{BS}{Text}υ"
-		case 'z': Send "{BS}{Text}ζ"
-
-		case 'A': Send "{BS}{Text}Α"
-			; popTip("希腊文")
-		case 'B': Send "{BS}{Text}Β"
-		case 'C': Send "{BS}{Text}Ψ"
-		case 'D': Send "{BS}{Text}Δ"
-		case 'E': Send "{BS}{Text}Ε"
-		case 'F': Send "{BS}{Text}Φ"
-		case 'G': Send "{BS}{Text}Γ"
-		case 'H': Send "{BS}{Text}Η"
-		case 'I': Send "{BS}{Text}Ι"
-		case 'J': Send "{BS}{Text}Ξ"
-		case 'K': Send "{BS}{Text}Κ"
-		case 'L': Send "{BS}{Text}Λ"
-		case 'M': Send "{BS}{Text}Μ"
-		case 'N': Send "{BS}{Text}Ν"
-		case 'O': Send "{BS}{Text}Ο"
-		case 'P': Send "{BS}{Text}Π"
-		case 'R': Send "{BS}{Text}Ρ"
-		case 'S': Send "{BS}{Text}Σ"
-		case 'T': Send "{BS}{Text}Τ"
-		case 'U': Send "{BS}{Text}Θ"
-		case 'V': Send "{BS}{Text}Ω"
-		case 'X': Send "{BS}{Text}Χ"
-		case 'Y': Send "{BS}{Text}Υ"
-		case 'Z': Send "{BS}{Text}Ζ"
 		}
 	}
 }
@@ -816,10 +812,6 @@ RShift:: {  ; RCtrl
 
 	case '"':
 		Send "{Left}{Del}{Text}“"
-		; if CaretGetPos(&x, &y) {
-		; 	; ToolTip "Cn左双引号", x, y + 20
-		; 	SetTimer () => ; ToolTip(), -2000
-		; }
 	case '“': Send "{BS}{Text}”"
 	case '”':
 		SendText "!"
@@ -896,65 +888,7 @@ RShift:: {  ; RCtrl
 	if FullPower {
 		switch q1ZiFv
 		{
-		case '0': Send "{BS}{Text}⓪"
-		case '⓪': Send "{BS}{Text}⓿"
-		case '⓿': Send "{BS}{Text}0"
-
-		case '1': Send "{BS}{Text}Ⅰ"
-		case 'Ⅰ': Send "{BS}{Text}ⅰ"
-		case 'ⅰ': Send "{BS}{Text}➀"
-		case '➀': Send "{BS}{Text}➊"
-		case '➊': Send "{BS}{Text}1"
-
-		case '2': Send "{BS}{Text}Ⅱ"
-		case 'Ⅱ': Send "{BS}{Text}ⅱ"
-		case 'ⅱ': Send "{BS}{Text}➁"
-		case '➁': Send "{BS}{Text}➋"
-		case '➋': Send "{BS}{Text}2"
-
-		case '3': Send "{BS}{Text}Ⅲ"
-		case 'Ⅲ': Send "{BS}{Text}ⅲ"
-		case 'ⅲ': Send "{BS}{Text}➂"
-		case '➂': Send "{BS}{Text}➌"
-		case '➌': Send "{BS}{Text}3"
-
-		case '4': Send "{BS}{Text}Ⅳ"
-		case 'Ⅳ': Send "{BS}{Text}ⅳ"
-		case 'ⅳ': Send "{BS}{Text}➃"
-		case '➃': Send "{BS}{Text}➍"
-		case '➍': Send "{BS}{Text}4"
-
-		case '5': Send "{BS}{Text}Ⅴ"
-		case 'Ⅴ': Send "{BS}{Text}ⅴ"
-		case 'ⅴ': Send "{BS}{Text}➄"
-		case '➄': Send "{BS}{Text}➎"
-		case '➎': Send "{BS}{Text}5"
-
-		case '6': Send "{BS}{Text}Ⅵ"
-		case 'Ⅵ': Send "{BS}{Text}ⅵ"
-		case 'ⅵ': Send "{BS}{Text}➅"
-		case '➅': Send "{BS}{Text}➏"
-		case '➏': Send "{BS}{Text}6"
-
-		case '7': Send "{BS}{Text}Ⅶ"
-		case 'Ⅶ': Send "{BS}{Text}ⅶ"
-		case 'ⅶ': Send "{BS}{Text}➆"
-		case '➆': Send "{BS}{Text}➐"
-		case '➐': Send "{BS}{Text}7"
-
-		case '8': Send "{BS}{Text}Ⅷ"
-		case 'Ⅷ': Send "{BS}{Text}ⅷ"
-		case 'ⅷ': Send "{BS}{Text}➇"
-		case '➇': Send "{BS}{Text}➑"
-		case '➑': Send "{BS}{Text}8"
-
-		case '9': Send "{BS}{Text}Ⅸ"
-		case 'Ⅸ': Send "{BS}{Text}ⅸ"
-		case 'ⅸ': Send "{BS}{Text}➈"
-		case '➈': Send "{BS}{Text}➒"
-		case '➒': Send "{BS}{Text}9"
-
-		case 'α': Send "{BS}{Text}a"
+		case 'α': Send "{BS}{Text}a"  ; 小写希腊字母变换为小写英文字母。
 		case 'β': Send "{BS}{Text}b"
 		case 'ψ': Send "{BS}{Text}c"
 		case 'δ': Send "{BS}{Text}d"
@@ -981,7 +915,7 @@ RShift:: {  ; RCtrl
 		case 'υ': Send "{BS}{Text}y"
 		case 'ζ': Send "{BS}{Text}z"
 
-		case 'Α': Send "{BS}{Text}A"
+		case 'Α': Send "{BS}{Text}A"  ; 大写希腊字母变换为大写英文字母。
 			; popTip("英文")
 		case 'Β': Send "{BS}{Text}B"
 		case 'Ψ': Send "{BS}{Text}C"
@@ -1006,6 +940,55 @@ RShift:: {  ; RCtrl
 		case 'Χ': Send "{BS}{Text}X"
 		case 'Υ': Send "{BS}{Text}Y"
 		case 'Ζ': Send "{BS}{Text}Z"
+
+		case '0': Send "{BS}{Text}⓪"  ; 右Shift键数字漂移功能。
+		case '⓪': Send "{BS}{Text}⓿"
+		case '⓿': Send "{BS}{Text}0"
+
+		case '1': Send "{BS}{Text}Ⅰ"
+		case 'Ⅰ': Send "{BS}{Text}➀"
+		case '➀': Send "{BS}{Text}➊"
+		case '➊': Send "{BS}{Text}1"
+
+		case '2': Send "{BS}{Text}Ⅱ"
+		case 'Ⅱ': Send "{BS}{Text}➁"
+		case '➁': Send "{BS}{Text}➋"
+		case '➋': Send "{BS}{Text}2"
+
+		case '3': Send "{BS}{Text}Ⅲ"
+		case 'Ⅲ': Send "{BS}{Text}➂"
+		case '➂': Send "{BS}{Text}➌"
+		case '➌': Send "{BS}{Text}3"
+
+		case '4': Send "{BS}{Text}Ⅳ"
+		case 'Ⅳ': Send "{BS}{Text}➃"
+		case '➃': Send "{BS}{Text}➍"
+		case '➍': Send "{BS}{Text}4"
+
+		case '5': Send "{BS}{Text}Ⅴ"
+		case 'Ⅴ': Send "{BS}{Text}➄"
+		case '➄': Send "{BS}{Text}➎"
+		case '➎': Send "{BS}{Text}5"
+
+		case '6': Send "{BS}{Text}Ⅵ"
+		case 'Ⅵ': Send "{BS}{Text}➅"
+		case '➅': Send "{BS}{Text}➏"
+		case '➏': Send "{BS}{Text}6"
+
+		case '7': Send "{BS}{Text}Ⅶ"
+		case 'Ⅶ': Send "{BS}{Text}➆"
+		case '➆': Send "{BS}{Text}➐"
+		case '➐': Send "{BS}{Text}7"
+
+		case '8': Send "{BS}{Text}Ⅷ"
+		case 'Ⅷ': Send "{BS}{Text}➇"
+		case '➇': Send "{BS}{Text}➑"
+		case '➑': Send "{BS}{Text}8"
+
+		case '9': Send "{BS}{Text}Ⅸ"
+		case 'Ⅸ': Send "{BS}{Text}➈"
+		case '➈': Send "{BS}{Text}➒"
+		case '➒': Send "{BS}{Text}9"
 		}
 	}
 }
