@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：见第15行全局变量Version
-更新：2024/8/13
+更新：2024/8/17
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -727,45 +727,53 @@ LShift:: {  ; RShift
 		case 'Y': Send "{BS}{Text}Υ"
 		case 'Z': Send "{BS}{Text}Ζ"
 
-		case '0': Send "{BS}{Text}₀"  ; 左Shift键数字漂移功能。
-		case '₀': Send "{BS}{Text}⁰"
-		case '⁰': Send "{BS}{Text}0"
+		case '0': Send "{BS}{Text}⓪"  ; 左Shift键数字漂移功能。
+		case '⓪': Send "{BS}{Text}0"
 
-		case '1': Send "{BS}{Text}₁"
-		case '₁': Send "{BS}{Text}¹"
-		case '¹': Send "{BS}{Text}1"
+		case '1': Send "{BS}{Text}Ⅰ"
+		case 'Ⅰ': Send "{BS}{Text}ⅰ"
+		case 'ⅰ': Send "{BS}{Text}➀"
+		case '➀': Send "{BS}{Text}1"
 
-		case '2': Send "{BS}{Text}₂"
-		case '₂': Send "{BS}{Text}²"
-		case '²': Send "{BS}{Text}2"
+		case '2': Send "{BS}{Text}Ⅱ"
+		case 'Ⅱ': Send "{BS}{Text}ⅱ"
+		case 'ⅱ': Send "{BS}{Text}➁"
+		case '➁': Send "{BS}{Text}2"
 
-		case '3': Send "{BS}{Text}₃"
-		case '₃': Send "{BS}{Text}³"
-		case '³': Send "{BS}{Text}3"
+		case '3': Send "{BS}{Text}Ⅲ"
+		case 'Ⅲ': Send "{BS}{Text}ⅲ"
+		case 'ⅲ': Send "{BS}{Text}➂"
+		case '➂': Send "{BS}{Text}3"
 
-		case '4': Send "{BS}{Text}₄"
-		case '₄': Send "{BS}{Text}⁴"
-		case '⁴': Send "{BS}{Text}4"
+		case '4': Send "{BS}{Text}Ⅳ"
+		case 'Ⅳ': Send "{BS}{Text}ⅳ"
+		case 'ⅳ': Send "{BS}{Text}➃"
+		case '➃': Send "{BS}{Text}4"
 
-		case '5': Send "{BS}{Text}₅"
-		case '₅': Send "{BS}{Text}⁵"
-		case '⁵': Send "{BS}{Text}5"
+		case '5': Send "{BS}{Text}Ⅴ"
+		case 'Ⅴ': Send "{BS}{Text}ⅴ"
+		case 'ⅴ': Send "{BS}{Text}➄"
+		case '➄': Send "{BS}{Text}5"
 
-		case '6': Send "{BS}{Text}₆"
-		case '₆': Send "{BS}{Text}⁶"
-		case '⁶': Send "{BS}{Text}6"
+		case '6': Send "{BS}{Text}Ⅵ"
+		case 'Ⅵ': Send "{BS}{Text}ⅵ"
+		case 'ⅵ': Send "{BS}{Text}➅"
+		case '➅': Send "{BS}{Text}6"
 
-		case '7': Send "{BS}{Text}₇"
-		case '₇': Send "{BS}{Text}⁷"
-		case '⁷': Send "{BS}{Text}7"
+		case '7': Send "{BS}{Text}Ⅶ"
+		case 'Ⅶ': Send "{BS}{Text}ⅶ"
+		case 'ⅶ': Send "{BS}{Text}➆"
+		case '➆': Send "{BS}{Text}7"
 
-		case '8': Send "{BS}{Text}₈"
-		case '₈': Send "{BS}{Text}⁸"
-		case '⁸': Send "{BS}{Text}8"
+		case '8': Send "{BS}{Text}Ⅷ"
+		case 'Ⅷ': Send "{BS}{Text}ⅷ"
+		case 'ⅷ': Send "{BS}{Text}⓼"
+		case '⓼': Send "{BS}{Text}8"
 
-		case '9': Send "{BS}{Text}₉"
-		case '₉': Send "{BS}{Text}⁹"
-		case '⁹': Send "{BS}{Text}9"
+		case '9': Send "{BS}{Text}Ⅸ"
+		case 'Ⅸ': Send "{BS}{Text}ⅸ"
+		case 'ⅸ': Send "{BS}{Text}⓽"
+		case '⓽': Send "{BS}{Text}9"
 		}
 	}
 }
@@ -954,53 +962,54 @@ RShift:: {  ; RCtrl
 		case 'Υ': Send "{BS}{Text}Y"
 		case 'Ζ': Send "{BS}{Text}Z"
 
-		case '0': Send "{BS}{Text}⓪"  ; 右Shift键数字漂移功能。
-		case '⓪': Send "{BS}{Text}⓿"
+		case '0': Send "{BS}{Text}₀"  ; 右Shift键数字漂移功能。
+		case '₀': Send "{BS}{Text}⁰"
+		case '⁰': Send "{BS}{Text}⓿"
 		case '⓿': Send "{BS}{Text}0"
 
-		case '1': Send "{BS}{Text}Ⅰ"
-		case 'Ⅰ': Send "{BS}{Text}➀"
-		case '➀': Send "{BS}{Text}➊"
+		case '1': Send "{BS}{Text}₁"
+		case '₁': Send "{BS}{Text}¹"
+		case '¹': Send "{BS}{Text}➊"
 		case '➊': Send "{BS}{Text}1"
 
-		case '2': Send "{BS}{Text}Ⅱ"
-		case 'Ⅱ': Send "{BS}{Text}➁"
-		case '➁': Send "{BS}{Text}➋"
+		case '2': Send "{BS}{Text}₂"
+		case '₂': Send "{BS}{Text}²"
+		case '²': Send "{BS}{Text}➋"
 		case '➋': Send "{BS}{Text}2"
 
-		case '3': Send "{BS}{Text}Ⅲ"
-		case 'Ⅲ': Send "{BS}{Text}➂"
-		case '➂': Send "{BS}{Text}➌"
+		case '3': Send "{BS}{Text}₃"
+		case '₃': Send "{BS}{Text}³"
+		case '³': Send "{BS}{Text}➌"
 		case '➌': Send "{BS}{Text}3"
 
-		case '4': Send "{BS}{Text}Ⅳ"
-		case 'Ⅳ': Send "{BS}{Text}➃"
-		case '➃': Send "{BS}{Text}➍"
+		case '4': Send "{BS}{Text}₄"
+		case '₄': Send "{BS}{Text}⁴"
+		case '⁴': Send "{BS}{Text}➍"
 		case '➍': Send "{BS}{Text}4"
 
-		case '5': Send "{BS}{Text}Ⅴ"
-		case 'Ⅴ': Send "{BS}{Text}➄"
-		case '➄': Send "{BS}{Text}➎"
+		case '5': Send "{BS}{Text}₅"
+		case '₅': Send "{BS}{Text}⁵"
+		case '⁵': Send "{BS}{Text}➎"
 		case '➎': Send "{BS}{Text}5"
 
-		case '6': Send "{BS}{Text}Ⅵ"
-		case 'Ⅵ': Send "{BS}{Text}➅"
-		case '➅': Send "{BS}{Text}➏"
+		case '6': Send "{BS}{Text}₆"
+		case '₆': Send "{BS}{Text}⁶"
+		case '⁶': Send "{BS}{Text}➏"
 		case '➏': Send "{BS}{Text}6"
 
-		case '7': Send "{BS}{Text}Ⅶ"
-		case 'Ⅶ': Send "{BS}{Text}➆"
-		case '➆': Send "{BS}{Text}➐"
+		case '7': Send "{BS}{Text}₇"
+		case '₇': Send "{BS}{Text}⁷"
+		case '⁷': Send "{BS}{Text}➐"
 		case '➐': Send "{BS}{Text}7"
 
-		case '8': Send "{BS}{Text}Ⅷ"
-		case 'Ⅷ': Send "{BS}{Text}➇"
-		case '➇': Send "{BS}{Text}➑"
+		case '8': Send "{BS}{Text}₈"
+		case '₈': Send "{BS}{Text}⁸"
+		case '⁸': Send "{BS}{Text}➑"
 		case '➑': Send "{BS}{Text}8"
 
-		case '9': Send "{BS}{Text}Ⅸ"
-		case 'Ⅸ': Send "{BS}{Text}➈"
-		case '➈': Send "{BS}{Text}➒"
+		case '9': Send "{BS}{Text}₉"
+		case '₉': Send "{BS}{Text}⁹"
+		case '⁹': Send "{BS}{Text}➒"
 		case '➒': Send "{BS}{Text}9"
 		}
 	}

@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：见第15行全局变量Version
-更新：2024/8/13
+更新：2024/8/17
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -735,7 +735,7 @@ LShift:: {  ; RShift
 		case 'Y': Send "{BS}{Text}Υ"
 		case 'Z': Send "{BS}{Text}Ζ"
 
-		case '0': Send "{BS}{Text}⓪"  ; 右Shift键数字漂移功能。
+		case '0': Send "{BS}{Text}⓪"  ; 左Shift键数字漂移功能。
 		case '⓪': Send "{BS}{Text}0"
 
 		case '1': Send "{BS}{Text}Ⅰ"
@@ -949,7 +949,7 @@ RShift:: {  ; RCtrl
 		case 'Υ': Send "{BS}{Text}Y"
 		case 'Ζ': Send "{BS}{Text}Z"
 
-		case '0': Send "{BS}{Text}₀"  ; 左Shift键数字漂移功能。
+		case '0': Send "{BS}{Text}₀"  ; 右Shift键数字漂移功能。
 		case '₀': Send "{BS}{Text}⁰"
 		case '⁰': Send "{BS}{Text}⓿"
 		case '⓿': Send "{BS}{Text}0"
