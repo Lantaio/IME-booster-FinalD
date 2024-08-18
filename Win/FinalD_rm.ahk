@@ -5,15 +5,16 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：见第15行全局变量Version
-更新：2024/8/17
+更新：2024/8/18
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
 #UseHook
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
 
-global Version := "v2.37.73"  ; 程序版本号信息
+global Version := "v2.37.74"  ; 程序版本号信息
 global FullPower := False  ; 全键盘漂移功能开关
+
 ; 借助剪砧板获取光镖前一个子符
 getQ1ZiFv() {
 	q1ZiFv := '', c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
@@ -107,6 +108,8 @@ sh0uldPeiDvi() {
 }
 
 ; 检测是不是成对的木示点
+; 参数：
+;   p 要检测哪个标点是否有相配对的标点
 hasPeiDviBD(p) {
 	h1ZiFv := getH1ZiFv()
 	switch p
@@ -154,6 +157,9 @@ hasPeiDviBD(p) {
 }
 
 ; 替换可能有配怼飚点的镖点（有候选框）
+; 参数：
+;   oldP 将要被替换的标点
+;   newP （可选参数）用于替换的标点
 ch8PeiDviBD(oldP, newP?) {
 	hasPairedBD := hasPeiDviBD(oldP)
 	SendText "!"
@@ -219,10 +225,15 @@ ch8PeiDviBD(oldP, newP?) {
 	}
 }
 
-popTip(info) {
+; 显示提示信息
+; 参数：
+;   info 提示信息内容
+;   t 提示信息显示时长，以秒为单位
+popTip(info, t) {
+	t := t * 1000  ; 将显示时长转换为以毫秒作为单位
 	if CaretGetPos(&x, &y) {
 		ToolTip info, x, y - 20
-		SetTimer () => ToolTip(), -1000
+		SetTimer () => ToolTip(), - t
 	}
 }
 
@@ -459,11 +470,11 @@ $::
 	global FullPower
 	if FullPower {
 		FullPower := False
-		MsgBox "全键盘漂移功能 已关闭。", "提示", "Iconi T3"
+		MsgBox "全键盘漂移功能 已关闭。", "FinalD/终点 输入法插件", "Iconi T3"
 	}
 	else {
 		FullPower := true
-		MsgBox "全键盘漂移功能 已开启。`n建议无需使用时关闭此功能。", "提示", "Iconi T5"
+		MsgBox "全键盘漂移功能 已开启。`n建议无需使用时关闭此功能。", "FinalD/终点 输入法插件", "Icon! T5"
 	}
 }
 
@@ -697,7 +708,7 @@ LShift:: {  ; RShift
 		case 'm': Send "{BS}{Text}μ"
 		case 'n': Send "{BS}{Text}ν"
 		case 'o': Send "{BS}{Text}ο"
-			; popTip("希腊文")
+			; popTip("希腊文", 1)
 		case 'p': Send "{BS}{Text}π"
 		case 'r': Send "{BS}{Text}ρ"
 		case 's': Send "{BS}{Text}σ"
@@ -710,7 +721,7 @@ LShift:: {  ; RShift
 		case 'z': Send "{BS}{Text}ζ"
 
 		case 'A': Send "{BS}{Text}Α"  ; 大写英文字母变换为大写希腊字母。
-			; popTip("希腊文")
+			; popTip("希腊文", 1)
 		case 'B': Send "{BS}{Text}Β"
 		case 'C': Send "{BS}{Text}Ψ"
 		case 'D': Send "{BS}{Text}Δ"
@@ -911,7 +922,7 @@ RShift:: {  ; RCtrl
 		case 'μ': Send "{BS}{Text}m"
 		case 'ν': Send "{BS}{Text}n"
 		case 'ο': Send "{BS}{Text}o"
-			; popTip("英文")
+			; popTip("英文", 1)
 		case 'π': Send "{BS}{Text}p"
 		case 'ρ': Send "{BS}{Text}r"
 		case 'σ': Send "{BS}{Text}s"
@@ -924,7 +935,7 @@ RShift:: {  ; RCtrl
 		case 'ζ': Send "{BS}{Text}z"
 
 		case 'Α': Send "{BS}{Text}A"  ; 大写希腊字母变换为大写英文字母。
-			; popTip("英文")
+			; popTip("英文", 1)
 		case 'Β': Send "{BS}{Text}B"
 		case 'Ψ': Send "{BS}{Text}C"
 		case 'Δ': Send "{BS}{Text}D"
