@@ -4,7 +4,7 @@
 备注：为了 AntiAI/反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
-版本：见第15行全局变量Version
+版本：运行此程序后按右Shift+左Win查看
 更新：2024/8/18
 */
 #Requires AutoHotkey v2.0
@@ -12,7 +12,6 @@
 #UseHook
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
 
-global Version := "v2.37.74"  ; 程序版本号信息
 global FullPower := False  ; 全键盘漂移功能开关
 
 ; 借助剪砧板获取光镖前一个子符
@@ -478,7 +477,7 @@ $::
 	}
 }
 
->+LWin:: MsgBox "　　　　　　Rime定制版 " Version "`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
+>+LWin:: MsgBox "　　　　　　Rime定制版 v2.37.74`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
 
 ~+Ctrl::  ; 防止仅按下Shift+Ctrl键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
 ~^Shift::  ; 防止仅按下Ctrl+Shift键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
