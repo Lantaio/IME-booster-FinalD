@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按右Shift+左Win查看
-更新：2024/8/18
+更新：2024/8/25
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -212,8 +212,14 @@ popTip(info, t) {
 	}
 }
 
+; 以下为 输入法组 定义，此程序在输入法候选窗口中禁用。
+GroupAdd "IME", "ahk_class A)SoPY_Comp"  ; 搜狗输入法
+GroupAdd "IME", "ahk_class A)ATL:"  ; Rime输入法
+GroupAdd "IME", "ahk_class A)Microsoft\.IME\.UIManager\.CandidateWindow"  ; 微软拼音输入法
+GroupAdd "IME", "ahk_class A)QQPinyinCompWndTSF"  ; QQ拼音输入法
+GroupAdd "IME", "ahk_class A)QQWubiCompWndII"  ; QQ五笔输入法
 ; 如果不存在输込法候选窗口，并且当前软件不是Excel 或 CMD命令提示符 或 Win搜索栏，则……
-#HotIf not (WinExist("ahk_class A)Microsoft\.IME\.UIManager\.CandidateWindow") or WinActive(" - Excel$") or WinActive("ahk_exe \\(cmd|SearchUI)\.exe$"))
+#HotIf not (WinExist("ahk_group IME") or WinActive(" - Excel") or WinActive("ahk_exe \\(cmd|SearchUI)\.exe$"))
 ; 下面是一些常用的输入法的ahk_class值，用于替换上一行代码中的“Microsoft\.IME\.UIManager\.CandidateWindow”。（注意：不要把“A)”也替换掉，保留“A)”）
 ; 搜狗拼音：SoPY_Comp
 ; Rime输入法：ATL:
@@ -469,7 +475,7 @@ $::
 	}
 }
 
->+LWin:: MsgBox "　　　　　　　　通用版 v2.36.75`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
+>+LWin:: MsgBox "　　　　　　　　通用版 v2.37.76`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
 
 ~+Ctrl::  ; 防止仅按下Shift+Ctrl键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
 ~^Shift::  ; 防止仅按下Ctrl+Shift键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
