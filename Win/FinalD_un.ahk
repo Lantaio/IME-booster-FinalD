@@ -462,10 +462,8 @@ LShift:: {
 	case ';', '☐', '☑', '☒': Send "{BS}{Text}；"
 	case '；': Send "{BS}{Text};"
 
-	case '-': Send "{BS}{Text}∈"
-	case '∈': Send "{BS}{Text}⊂"
-	case '⊂': Send "{BS}{Text}⊆"
-	case '⊆': Send "{BS}{Text}-"
+	case '-': Send "{BS}{Text}¬"
+	case '¬', '∧', '∨': Send "{BS}{Text}-"
 
 	case '{', '『', '｛': ch8PeiDviBD(q1ZiFv, '「')
 	case '「': ch8PeiDviBD('「', '{')
@@ -529,9 +527,9 @@ LShift:: {
 	case '%': Send "{BS}{Text}★"
 	case '★', '‰', '☆', '✪': Send "{BS}{Text}%"
 
-	case '⌘', '⌥', '⇧', '↩', '⌫', '⇪': Send "{BS}{Text}^"
 	case '^': Send "{BS}{Text}……"
-	case '…': Send "{BS 2}{^}"
+	case '…': Send "{BS 2}{Text}^"
+	case '⌘', '⌥', '⇧', '↩': Send "{BS}{Text}^"
 
 	case '~': Send "{BS}{Text}～"
 	case '～', '々', '〃', '≌': Send "{BS}{Text}~"
@@ -722,8 +720,9 @@ RShift:: {
 	case '·': Send "{BS}{Text}＊"
 	case '＊': Send "{BS}{Text}∏"
 
-	case '#': Send "{BS}{Text}◆"
-	case '◆', '■', '◇', '□': Send "{BS}{Text}#"
+	case '#', '◆', '□': Send "{BS}{Text}■"
+	case '■': Send "{BS}{Text}◇"
+	case '◇': Send "{BS}{Text}□"
 
 	case '[', '【', '［': ch8PeiDviBD(q1ZiFv, '〖')
 	case '〖': ch8PeiDviBD('〖', '［')
@@ -763,7 +762,7 @@ RShift:: {
 
 	case '@', '●', '○': Send "{BS}{Text}©"
 	case '©': Send "{BS}{Text}®"
-	case ®': Send "{BS}{Text}™"
+	case '®': Send "{BS}{Text}™"
 	case '™': Send "{BS}{Text}○"
 
 	case '%', '★', '✪': Send "{BS}{Text}‰"

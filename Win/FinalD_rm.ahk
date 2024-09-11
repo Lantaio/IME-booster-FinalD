@@ -541,9 +541,9 @@ LShift:: {
 	case '%': Send "{BS}{Text}★"
 	case '★', '‰', '☆', '✪': Send "{BS}{Text}%"
 
-	case '⌘', '⌥', '⇧', '↩', '⌫', '⇪': Send "{BS}{Text}^"
 	case '^': Send "{BS}{Text}……"
-	case '…': Send "{BS 2}{^}"
+	case '…': Send "{BS 2}{Text}^"
+	case '⌘', '⌥', '⇧', '↩', '⌫', '⇪': Send "{BS}{Text}^"
 
 	case '~': Send "{BS}{Text}～"
 	case '～', '々', '〃', '≌': Send "{BS}{Text}~"
