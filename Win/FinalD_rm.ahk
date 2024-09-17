@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按右Shift+左Win查看
-更新：2024/9/9
+更新：2024/9/17
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -416,7 +416,7 @@ $:: {
 	}
 }
 
->+LWin:: MsgBox "　　　　　　Rime定制版 v3.40.80`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
+>+LWin:: MsgBox "　　　　　　Rime定制版 v3.40.81`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
 
 ~+Ctrl::  ; 防止仅按下Shift+Ctrl键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
 ~^Shift::  ; 防止仅按下Ctrl+Shift键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
@@ -430,7 +430,7 @@ LShift:: {
 	case '.', '℃', '°', '℉': Send "{BS}{Text}。" ; 如果是英纹句点或扩展符号，则替换为仲文句号。
 	case '。': Send "{BS}{Text}." ; 如果是仲文句号，则替换为英纹句点。
 
-	case ',', '∈', '⊂', '⊆': Send "{BS}{Text}，"
+	case ',', '∈', '⊆', '⊂': Send "{BS}{Text}，"
 	case '，': Send "{BS}{Text},"
 
 	case '(', '〔', '〘': ch8PeiDviBD(q1ZiFv, '（')
@@ -444,7 +444,7 @@ LShift:: {
 
 	case '_': Send "{BS}{Text}——"
 	case '—': Send "{BS 2}{Text}_"
-	case '∩', '∪': Send "{BS}{Text}_"
+	case '∪', '∩': Send "{BS}{Text}_"
 
 	case ':', '∵', '∴', '∷': Send "{BS}{Text}："
 	case '：': Send "{BS}{Text}:"
@@ -464,7 +464,7 @@ LShift:: {
 	case '÷', '／', '≠', '√': Send "{BS}{Text}/"
 
 	case '=': Send "{BS}{Text}≈"
-	case '≈', '⇔', '⇒', '≡': Send "{BS}{Text}="
+	case '≈', '⇒', '⇔', '≡': Send "{BS}{Text}="
 
 	case '<', '〈': ch8PeiDviBD(q1ZiFv, '《')
 	case '《': ch8PeiDviBD('《', '<')
@@ -477,7 +477,7 @@ LShift:: {
 	case '；': Send "{BS}{Text};"
 
 	case '-': Send "{BS}{Text}¬"
-	case '¬', '∧', '∨': Send "{BS}{Text}-"
+	case '¬', '∨', '∧': Send "{BS}{Text}-"
 
 	case '{', '『', '｛': ch8PeiDviBD(q1ZiFv, '「')
 	case '「': ch8PeiDviBD('「', '{')
@@ -539,7 +539,7 @@ LShift:: {
 	case '●', '©', '®', '™', '○', '№': Send "{BS}{Text}@"
 
 	case '%': Send "{BS}{Text}★"
-	case '★', '‰', '☆', '✪': Send "{BS}{Text}%"
+	case '★', '☆', '‰', '✪': Send "{BS}{Text}%"
 
 	case '^': Send "{BS}{Text}……"
 	case '…': Send "{BS 2}{Text}^"
@@ -667,9 +667,9 @@ RShift:: {
 	case '℃': Send "{BS}{Text}°"
 	case '°': Send "{BS}{Text}℉"
 
-	case ',', '，', '⊆': Send "{BS}{Text}∈"
-	case '∈': Send "{BS}{Text}⊂"
-	case '⊂': Send "{BS}{Text}⊆"
+	case ',', '，', '⊂': Send "{BS}{Text}∈"
+	case '∈': Send "{BS}{Text}⊆"
+	case '⊆': Send "{BS}{Text}⊂"
 
 	case '(', '（', '〘': ch8PeiDviBD(q1ZiFv, '〔')
 	case '〔': ch8PeiDviBD('〔', '〘')
@@ -677,9 +677,9 @@ RShift:: {
 	case ')', '）', '〙': Send "{BS}{Text}〕"
 	case '〕': Send "{BS}{Text}〙"
 
-	case '_', '∪': Send "{BS}{Text}∩"
-	case '—': Send "{BS 2}{Text}∩"
-	case '∩': Send "{BS}{Text}∪"
+	case '_', '∩': Send "{BS}{Text}∪"
+	case '—': Send "{BS 2}{Text}∪"
+	case '∪': Send "{BS}{Text}∩"
 
 	case ':', '：', '∷': Send "{BS}{Text}∵"
 	case '∵': Send "{BS}{Text}∴"
@@ -697,9 +697,9 @@ RShift:: {
 	case '／': Send "{BS}{Text}≠"
 	case '≠': Send "{BS}{Text}√"
 
-	case '=', '≈', '≡': Send "{BS}{Text}⇔"
-	case '⇔': Send "{BS}{Text}⇒"
-	case '⇒': Send "{BS}{Text}≡"
+	case '=', '≈', '≡': Send "{BS}{Text}⇒"
+	case '⇒': Send "{BS}{Text}⇔"
+	case '⇔': Send "{BS}{Text}≡"
 
 	case '<', '《', '〈': ch8PeiDviBD(q1ZiFv)
 	case '≤', '«', '‹', '≦', '⟨': Send "{BS}<"
@@ -710,8 +710,8 @@ RShift:: {
 	case '☐': Send "{BS}{Text}☑"
 	case '☑': Send "{BS}{Text}☒"
 
-	case '-', '¬', '∨': Send "{BS}{Text}∧"
-	case '∧': Send "{BS}{Text}∨"
+	case '-', '¬', '∧': Send "{BS}{Text}∨"
+	case '∨': Send "{BS}{Text}∧"
 
 	case '{', '「', '｛': ch8PeiDviBD(q1ZiFv, '『')
 	case '『': ch8PeiDviBD('『', '｛')
@@ -769,9 +769,9 @@ RShift:: {
 
 	case '@', '●', '©', '®', '™', '○', '№': Send "{BS}@"
 
-	case '%', '★', '✪': Send "{BS}{Text}‰"
-	case '‰': Send "{BS}{Text}☆"
-	case '☆': Send "{BS}{Text}✪"
+	case '%', '★', '✪': Send "{BS}{Text}☆"
+	case '☆': Send "{BS}{Text}‰"
+	case '‰': Send "{BS}{Text}✪"
 
 	case '^', '⌘', '⌥', '⇧', '↩', '⌫', '⇪': Send "{BS}{^}"
 	case '…': Send "{BS 2}{^}"
