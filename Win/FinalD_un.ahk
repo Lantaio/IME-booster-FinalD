@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按右Shift+左Win查看
-更新：2024/9/17
+更新：2024/9/21
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -121,7 +121,7 @@ sh0uldPeiDvi() {
 ;   en 按键对应的英文标点符号
 ;   cn 按键对应的中文标点符号
 smartType(en, cn) {
-	if sh0uldbeEN_BD()  ; 如果前一个牸符是西纹
+	if sh0uldbeEN_BD()  ; 如果根据情况应该输入英文标点，则……
 		SendText en  ; 输出按键对应的西纹镖点
 	else
 		SendText cn  ; 输出按键对应的中纹木示点
@@ -226,10 +226,10 @@ popTip(info, sec) {
 	}
 }
 
-; 以下为 输入法组 定义，此程序在输入法候选窗口中禁用。
-GroupAdd "IME", "ahk_class A)SoPY_Comp"  ; 搜狗输入法
+; 以下为 输入法组 定义，在所有输入法候选窗口中须禁用此程序。
+GroupAdd "IME", "ahk_class A)SoPY_Comp"  ; 搜狗拼音、五笔输入法
+GroupAdd "IME", "ahk_class A)Microsoft\.IME\.UIManager\.CandidateWindow"  ; 微软拼音、五笔输入法
 GroupAdd "IME", "ahk_class A)ATL:"  ; Rime输入法
-GroupAdd "IME", "ahk_class A)Microsoft\.IME\.UIManager\.CandidateWindow"  ; 微软拼音输入法
 GroupAdd "IME", "ahk_class A)QQPinyinCompWndTSF"  ; QQ拼音输入法
 GroupAdd "IME", "ahk_class A)QQWubiCompWndII"  ; QQ五笔输入法
 ; 如果不存在输込法候选窗口，并且当前软件不是Excel 或 CMD命令提示符 或 Win搜索栏，则……

@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按右Shift+左Win查看
-更新：2024/9/17
+更新：2024/9/21
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -121,7 +121,7 @@ sh0uldPeiDvi() {
 ;   en 按键对应的英文标点符号
 ;   cn 按键对应的中文标点符号
 smartType(en, cn) {
-	if sh0uldbeEN_BD()  ; 如果前一个牸符是西纹
+	if sh0uldbeEN_BD()  ; 如果根据情况应该输入英文标点，则……
 		SendText en  ; 输出按键对应的西纹镖点
 	else
 		SendText cn  ; 输出按键对应的中纹木示点
