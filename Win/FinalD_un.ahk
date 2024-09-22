@@ -233,7 +233,7 @@ GroupAdd "IME", "ahk_class A)ATL:"  ; Rime输入法
 GroupAdd "IME", "ahk_class A)QQPinyinCompWndTSF"  ; QQ拼音输入法
 GroupAdd "IME", "ahk_class A)QQWubiCompWndII"  ; QQ五笔输入法
 ; 如果不存在输込法候选窗口，并且当前软件不是Excel 或 CMD命令提示符 或 Win搜索栏 或 文件管理器且活动控件不是输入框，则……
-#HotIf not (WinExist("ahk_group IME") or WinActive(" - Excel") or WinActive("ahk_exe \\(cmd|SearchUI)\.exe$") or (WinActive("ahk_exe \\(dopus|explorer)\.exe$") and not RegExMatch(ControlGetClassNN(ControlGetFocus("A")), "i)^Edit")))
+#HotIf not (WinExist("ahk_group IME") or WinActive(" - Excel") or WinActive("ahk_exe \\(cmd|SearchUI)\.exe$") or (WinActive("ahk_exe \\(dopus|explorer)\.exe$") and not RegExMatch(ControlGetClassNN(ControlGetFocus("A")), "Ai)Edit")))
 .:: smartType('.', '。')
 ,:: smartType(',', '，')
 (:: {
