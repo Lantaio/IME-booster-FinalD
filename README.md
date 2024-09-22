@@ -1,10 +1,10 @@
 # *FinalD / 终点 🏁*
-*2024年9月21日*
+*2024年9月22日*
 
 📣️**公告**：3.x版已经推出，标点漂移方案有重大改进，具体见[主要功能](#主要功能%EF%B8%8F)或[更新日志](joy/ChangeLog.md)。
 
-[FinalD_un.ahk](Win/FinalD_un.ahk) 通用版：v3.40.84 (*2024/9/21*) \
-[FinalD_rm.ahk](Win/FinalD_rm.ahk) Rime定制版：v3.40.82 (*2024/9/21*) \
+[FinalD_un.ahk](Win/FinalD_un.ahk) 通用版：v3.40.85 (*2024/9/22*) \
+[FinalD_rm.ahk](Win/FinalD_rm.ahk) Rime定制版：v3.40.83 (*2024/9/22*) \
 *（运行程序后用快捷键右<kbd>Shift</kbd>+左<kbd>Win</kbd>查看版本信息。）*
 
 ℹ*提示：可通过此文档右上角的〔标题列表〕按钮快速转到某个标题。可通过后面有‘⚡️’图标的标题内容快速了解此项目，以及留意各部分的**粗体字**内容。*
