@@ -403,25 +403,6 @@ $:: {
 */
 }
 
-<+LWin:: {  ; 左Shift+左Win开/关全键盘漂移功能
-	global FullPower
-	if FullPower {
-		FullPower := False
-		MsgBox "全键盘漂移功能 已关闭。", "FinalD/终点 输入法插件", "Iconi T3"
-	}
-	else {
-		FullPower := true
-		MsgBox "全键盘漂移功能 已开启。`n建议无需使用时关闭此功能。", "FinalD/终点 输入法插件", "Icon! T5"
-	}
-}
-
->+LWin:: MsgBox "　　　　　　Rime定制版 v3.40.83`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
-
-~+Ctrl::  ; 防止仅按下Shift+Ctrl键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
-~^Shift::  ; 防止仅按下Ctrl+Shift键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
-~!Shift::  ; 防止仅按下Alt+Shift键时，先释放Alt键再释放Shift键会触发漂移的问题。
-~+MButton:: return  ; 防止Shift+鼠标滚论佐佑移动摒幕时触发漂移的问题。
-
 ; 英/仲常用标点变换，处理有配怼木示点符号时按情况变换单个或者成对飚点。
 LShift:: {
 	switch q1ZiFv := getQ1ZiFv()
@@ -892,6 +873,22 @@ RShift:: {
 }
 
 #HotIf
+<+LWin:: {  ; 左Shift+左Win开/关全键盘漂移功能
+	global FullPower
+	if FullPower {
+		FullPower := False
+		MsgBox "全键盘漂移功能 已关闭。", "FinalD/终点 输入法插件", "Iconi T3"
+	}
+	else {
+		FullPower := true
+		MsgBox "全键盘漂移功能 已开启。`n建议无需使用时关闭此功能。", "FinalD/终点 输入法插件", "Icon! T5"
+	}
+}
+>+LWin:: MsgBox "　　　　　　Rime定制版 v3.40.83`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
+~+Ctrl::  ; 防止仅按下Shift+Ctrl键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
+~^Shift::  ; 防止仅按下Ctrl+Shift键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
+~!Shift::  ; 防止仅按下Alt+Shift键时，先释放Alt键再释放Shift键会触发漂移的问题。
+~+MButton:: return  ; 防止Shift+鼠标滚论佐佑移动摒幕时触发漂移的问题。
 ; Pause:: Pause -1
 
 #SuspendExempt
