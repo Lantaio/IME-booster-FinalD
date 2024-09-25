@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按右Shift+左Win查看
-更新：2024/9/23
+更新：2024/9/25
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -884,7 +884,7 @@ RShift:: {
 		MsgBox "全键盘漂移功能 已开启。`n建议无需使用时关闭此功能。", "FinalD/终点 输入法插件", "Icon! T5"
 	}
 }
->+LWin:: MsgBox "　　　　　　Rime定制版 v3.40.84`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
+>+Esc:: MsgBox "　　　　　　Rime定制版 v3.40.85`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
 ~+Ctrl::  ; 防止仅按下Shift+Ctrl键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
 ~^Shift::  ; 防止仅按下Ctrl+Shift键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
 ~!Shift::  ; 防止仅按下Alt+Shift键时，先释放Alt键再释放Shift键会触发漂移的问题。
