@@ -421,18 +421,20 @@ _:: {
 	}
 }
 ]:: {
-	q1ZiFv := getQ1ZiFv()
+	; q1ZiFv := getQ1ZiFv()
 	if OptimizeCNApp and WinActive("ahk_group CNApp") {
 		SendText "】"
-		if q1ZiFv = '【' {
+/*		if q1ZiFv = '【' {
 			Send "{Left}"
 		}
+*/
 	}
 	else {
 		SendText "]"
-		if q1ZiFv = '[' {
+/*		if q1ZiFv = '[' {
 			Send "{Left}"
 		}
+*/
 	}
 }
 `:: SendText "``"
