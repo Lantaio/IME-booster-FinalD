@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按左Shift+Esc查看
-更新：2024/12/1
+更新：2024/12/6
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -13,14 +13,19 @@
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
 
 global FullKBD := false  ; 全键盘漂移的功能开关
-global OptimizeCNApp := true  ; 优化中文语境应用程序的功能开关
+global BetterCN := true  ; 优化中文语境应用程序的功能开关
 
 ; 以下为 中文语境应用程序组 定义（不建议将用于写Markdown的程序添加到此）
-GroupAdd "CNApp", "ahk_exe \\notepad\.exe$"  ; 记事本
-; GroupAdd "CNApp", "ahk_exe \\notepad\+\+\.exe$"  ; 将此软件用于编程时须将此行变成注释
-GroupAdd "CNApp", "ahk_exe \\(QQ|WeChat)\.exe$"  ; QQ 或 微信
-GroupAdd "CNApp", "标记文字$ ahk_exe \\TdxW\.exe$"  ; 通达信中的“标记文字”窗口
-GroupAdd "CNApp", "ahk_exe \\(WINWORD|POWERPNT)\.EXE$"  ; 微软Office Word 或 PowerPoint
+GroupAdd "CN", "ahk_exe \\notepad\.exe$"  ; 记事本
+; GroupAdd "CN", "ahk_exe \\notepad\+\+\.exe$"  ; 将此软件用于编程时须将此行变成注释
+GroupAdd "CN", "ahk_exe \\(QQ|WeChat)\.exe$"  ; QQ 或 微信
+GroupAdd "CN", "标记文字$ ahk_exe \\TdxW\.exe$"  ; 通达信中的“标记文字”窗口
+GroupAdd "CN", "ahk_exe \\(WINWORD|POWERPNT)\.EXE$"  ; 微软Office Word 或 PowerPoint
+
+; 以下为 不适用须要排除的应用程序组 定义
+GroupAdd "Excluded", "^(?!Microsoft Visual Basic) ahk_exe \\EXCEL\.EXE"  ; Excel（VBA窗口除外）
+GroupAdd "Excluded", "ahk_exe \\cmd\.exe$"  ; CMD命令提示符
+GroupAdd "Excluded", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 ; 借助剪砧板获取光镖前一个子符
 ; 返回值：
@@ -147,9 +152,9 @@ sh0uldPeiDvi(bP?) {
 ;   en 按键对应的英文标点符号
 ;   cn 按键对应的中文标点符号
 smartType(en, cn) {
-	global OptimizeCNApp
+	global BetterCN
 	; 如果对中文语境应用程序优化开关打开 并且 顶层程序是中文语境软件
-	if OptimizeCNApp and WinActive("ahk_group CNApp")
+	if BetterCN and WinActive("ahk_group CN")
 		; 如果按键是‘.’、‘:’或‘~’ 并且 前一个字符是数字
 		if en ~= "\.|:|~" and IsInteger(getQ1ZiFv())
 			SendText en
@@ -284,8 +289,8 @@ popTip(info, sec) {
 	}
 }
 
-; 如果不存在输込法候选窗口，并且当前软件不是Excel 或 CMD命令提示符 或 Win搜索栏 或 文件管理器且活动控件不是输入框
-#HotIf not (WinExist("ahk_class A)ATL:") or WinActive(" - Excel") or WinActive("ahk_exe \\(cmd|SearchUI)\.exe$") or (WinActive("ahk_exe \\(dopus|explorer)\.exe$") and not RegExMatch(ControlGetClassNN(ControlGetFocus("A")), "Ai)Edit")))
+; 如果不存在输込法候选窗口，并且当前软件不是 须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
+#HotIf not (WinExist("ahk_class A)ATL:") or WinActive("ahk_group Excluded") or (WinActive("ahk_exe \\(dopus|explorer)\.exe$") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
 .:: smartType('.', '。')
 ,:: smartType(',', '，')
 (:: {
@@ -405,7 +410,7 @@ _:: {
 #:: SendText "#"
 [:: {
 	; 如果对中文语境应用程序优化开关打开 并且 顶层程序是中文语境软件
-	if OptimizeCNApp and WinActive("ahk_group CNApp") {
+	if BetterCN and WinActive("ahk_group CN") {
 		SendText "【"
 		if sh0uldPeiDvi() {
 			SendText "】"
@@ -422,7 +427,7 @@ _:: {
 }
 ]:: {
 	; q1ZiFv := getQ1ZiFv()
-	if OptimizeCNApp and WinActive("ahk_group CNApp") {
+	if BetterCN and WinActive("ahk_group CN") {
 		SendText "】"
 /*		if q1ZiFv = '【' {
 			Send "{Left}"
@@ -953,17 +958,17 @@ RShift:: {
 	}
 }
 >+LWin:: {  ; 右Shift+左Win开/关中文语境应用程序优化功能
-	global OptimizeCNApp
-	if OptimizeCNApp {
-		OptimizeCNApp := false
+	global BetterCN
+	if BetterCN {
+		BetterCN := false
 		MsgBox "此插件在所有应用程序上的体验一致。", "FinalD/终点 输入法插件", "Iconi T3"
 	}
 	else {
-		OptimizeCNApp := true
+		BetterCN := true
 		MsgBox "此插件针对中文语境应用程序优化。", "FinalD/终点 输入法插件", "Iconi T3"
 	}
 }
-<+Esc:: MsgBox "　　　　　　Rime定制版 v4.42.90`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
+<+Esc:: MsgBox "　　　　　　Rime定制版 v4.43.92`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
 ~+Ctrl::  ; 防止仅按下Shift+Ctrl键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
 ~^Shift::  ; 防止仅按下Ctrl+Shift键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
 ~!Shift::  ; 防止仅按下Alt+Shift键时，先释放Alt键再释放Shift键会触发漂移的问题。
