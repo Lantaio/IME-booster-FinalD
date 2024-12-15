@@ -5,15 +5,16 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按左Shift+Esc查看
-更新：2024/12/6
+更新：2024/12/15
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
 #UseHook
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
 
-global FullKBD := False  ; 全键盘漂移功能开关
-global BetterCN := true  ; 优化中文语境应用程序的功能开关
+global BetterCN := true  ; 中文语境应用程序优化 功能开关
+global FullKBD := false  ; 全键盘漂移 功能开关
+global Smart :=true  ; 智能中/英标点输入和自动配对 功能开关
 
 ; 以下为 中文语境应用程序组 定义（不建议将用于写Markdown的程序添加到此）
 GroupAdd "CN", "ahk_exe \\notepad\.exe$"  ; 记事本
@@ -23,9 +24,16 @@ GroupAdd "CN", "标记文字$ ahk_exe \\TdxW\.exe$"  ; 通达信中的“标记�
 GroupAdd "CN", "ahk_exe \\(WINWORD|POWERPNT)\.EXE$"  ; 微软Office Word 或 PowerPoint
 
 ; 以下为 不适用须要排除的应用程序组 定义
-GroupAdd "Excluded", "^(?!Microsoft Visual Basic) ahk_exe \\EXCEL\.EXE"  ; Excel（VBA窗口除外）
-GroupAdd "Excluded", "ahk_exe \\cmd\.exe$"  ; CMD命令提示符
-GroupAdd "Excluded", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
+GroupAdd "Exclude", "ahk_exe \\cmd\.exe$"  ; CMD命令提示符
+
+; 以下为 文件管理器应用程序组 定义
+GroupAdd "FileManager", "ahk_exe \\dopus\.exe$"  ; Directory Opus
+GroupAdd "FileManager", "ahk_exe \\explorer\.exe$"  ; Win系统的资源管理器
+GroupAdd "FileManager", "ahk_exe \\Totalcmd\.exe$"  ; Total Commander
+
+; 以下为 不支持智能标点输入和自动配对功能的应用程序组 定义
+GroupAdd "UnSmart", "^(?!Microsoft Visual Basic) ahk_exe \\EXCEL\.EXE"  ; Excel（VBA窗口除外）
+GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 ; 以下为 输入法组 定义（在所有输入法候选窗口中须禁用此程序。）
 GroupAdd "IME", "ahk_class A)SoPY_Comp"  ; 搜狗拼音、五笔输入法
@@ -272,8 +280,8 @@ popTip(info, sec) {
 	}
 }
 
-; 如果不存在输込法候选窗口，并且当前软件不是 须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
-#HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Excluded") or (WinActive("ahk_exe \\(dopus|explorer)\.exe$") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
+; 如果 智能标点开关打开，并且不存在输込法候选窗口，并且当前软件不是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
+#HotIf Smart and not (WinExist("ahk_class A)ATL:") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
 .:: smartType('.', '。')
 ,:: smartType(',', '，')
 (:: {
@@ -457,6 +465,8 @@ $:: {
 	smartType('$', '￥')
 }
 
+; 如果不存在输込法候选窗口，并且当前软件不是 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
+#HotIf not (WinExist("ahk_class A)ATL:") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
 ; 英/仲常用标点变换，处理有配怼木示点符号时按情况变换单个或者成对飚点。
 LShift:: {
 	switch q1ZiFv := getQ1ZiFv()
@@ -943,39 +953,56 @@ RShift:: {
 }
 
 #HotIf
-<+LWin:: {  ; 左Shift+左Win开/关全键盘漂移功能
+<^LWin:: {  ; 左Ctrl+左Win 开/关（表格）兼容模式。
+	global Smart
+	if Smart {
+		Smart := false
+		MsgBox "终点插件（表格）兼容模式 已开启。`n即 智能标点和自动配对功能 已关闭！", "终点 输入法插件", "Icon! T5"
+	}
+	else {
+		Smart := true
+		MsgBox "终点插件 表格兼容模式 已关闭。`n即 智能标点和自动配对功能 已开启。", "终点 输入法插件", "Iconi T5"
+	}
+}
+<+LWin:: {  ; 左Shift+左Win 开/关 全键盘漂移功能。另外，Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
 	global FullKBD
 	if FullKBD {
-		FullKBD := False
-		MsgBox "全键盘漂移功能 已关闭。", "FinalD/终点 输入法插件", "Iconi T3"
+		FullKBD := false
+		MsgBox "终点插件 全键盘漂移功能 已关闭。", "终点 输入法插件", "Iconi T3"
 	}
 	else {
 		FullKBD := true
-		MsgBox "全键盘漂移功能 已开启！`n建议无需使用时关闭此功能。", "FinalD/终点 输入法插件", "Icon! T3"
+		MsgBox "终点插件 全键盘漂移功能 已开启。`n建议无需使用时关闭此功能。", "终点 输入法插件", "Icon! T5"
 	}
 }
->+LWin:: {  ; 右Shift+左Win开/关中文语境应用程序优化功能
+>+LWin:: {  ; 右Shift+左Win 开/关 中文语境应用程序优化功能。
 	global BetterCN
 	if BetterCN {
 		BetterCN := false
-		MsgBox "此插件在所有应用程序上的体验一致。", "FinalD/终点 输入法插件", "Iconi T3"
+		MsgBox "终点插件 在所有应用程序上的体验一致。", "终点 输入法插件", "Iconi T3"
 	}
 	else {
 		BetterCN := true
-		MsgBox "此插件针对中文语境应用程序优化。", "FinalD/终点 输入法插件", "Iconi T3"
+		MsgBox "终点插件 针对中文语境应用程序优化。", "终点 输入法插件", "Iconi T3"
 	}
 }
-<+Esc:: MsgBox "　　　　　　　　通用版 v4.43.94`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
-
+<#!i:: MsgBox "　　　终点输入法插件 Rime定制版 v5.45.100`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; 左Win+Alt+i 显示此程序的版本信息。
 ~+Ctrl::  ; 防止仅按下Shift+Ctrl键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
+~+Alt::  ; 防止仅按下Shift+Alt键时，先释放Alt键再释放Shift键会触发漂移的问题。
+~#Shift::  ; 防止仅按下Win+Shift键时，先释放Win键再释放Shift键会触发漂移的问题。
 ~^Shift::  ; 防止仅按下Ctrl+Shift键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
 ~!Shift::  ; 防止仅按下Alt+Shift键时，先释放Alt键再释放Shift键会触发漂移的问题。
+~#^Shift::  ; 防止仅按下Win+Ctrl+Shift键时，先释放Win 和Ctrl最后释放Shift键会触发漂移的问题。
+~#!Shift::  ; 防止仅按下Win+Alt+Shift键时，先释放Win和Alt最后释放Shift键会触发漂移的问题。
+~^!Shift::  ; 防止仅按下Ctrl+Alt+Shift键时，先释放Ctrl和Alt最后释放Shift键会触发漂移的问题。
+~#^!Shift::  ; 防止仅按下Win+Ctrl+Alt+Shift键时，先释放Win、Ctrl和Alt最后释放Shift键会触发漂移的问题。
 ~+MButton:: return  ; 防止Shift+鼠标滚论佐佑移动摒幕时触发漂移的问题。
+; 通常用于在调试时让程序继续运行。
 Pause:: {
 	ToolTip ""
 	Pause -1
 }
 
 #SuspendExempt
-<^LWin:: Suspend  ; 左Ctrl + 左Win 暂停/恢复运行此程序
+<#!h:: Suspend  ; 左Win+Alt+h 运行/暂停 此程序。
 #SuspendExempt False
