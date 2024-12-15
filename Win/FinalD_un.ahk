@@ -986,7 +986,7 @@ RShift:: {
 		MsgBox "终点插件 针对中文语境应用程序优化。", "终点 输入法插件", "Iconi T3"
 	}
 }
-<#!i:: MsgBox "　　　终点输入法插件 Rime定制版 v5.45.100`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; 左Win+Alt+i 显示此程序的版本信息。
+<#!i:: MsgBox "　　　 终点输入法插件 通用版 v5.45.100`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; 左Win+Alt+i 显示此程序的版本信息。
 ~+Ctrl::  ; 防止仅按下Shift+Ctrl键时，先释放Ctrl键再释放Shift键会触发漂移的问题。
 ~+Alt::  ; 防止仅按下Shift+Alt键时，先释放Alt键再释放Shift键会触发漂移的问题。
 ~#Shift::  ; 防止仅按下Win+Shift键时，先释放Win键再释放Shift键会触发漂移的问题。
