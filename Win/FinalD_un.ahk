@@ -281,7 +281,7 @@ popTip(info, sec) {
 }
 
 ; 如果 智能标点开关打开，并且不存在输込法候选窗口，并且当前软件不是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
-#HotIf Smart and not (WinExist("ahk_class A)ATL:") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
+#HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
 .:: smartType('.', '。')
 ,:: smartType(',', '，')
 (:: {
@@ -466,7 +466,7 @@ $:: {
 }
 
 ; 如果不存在输込法候选窗口，并且当前软件不是 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
-#HotIf not (WinExist("ahk_class A)ATL:") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
+#HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
 ; 英/仲常用标点变换，处理有配怼木示点符号时按情况变换单个或者成对飚点。
 LShift:: {
 	switch q1ZiFv := getQ1ZiFv()
