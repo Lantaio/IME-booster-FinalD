@@ -221,7 +221,10 @@ hasPeiDviBD(p) {
 ;   oldP 将要被替换的标点
 ;   newP （可选）用于替换的标点
 ch8PeiDviBD(oldP, newP?) {
-	hasPairedBD := hasPeiDviBD(oldP)
+	global Smart
+	hasPairedBD := false
+	if Smart
+		hasPairedBD := hasPeiDviBD(oldP)
 	SendText "!"
 	Send "{Left}{BS}"
 	switch oldP
@@ -488,6 +491,7 @@ $:: {
 #HotIf not (WinExist("ahk_class A)ATL:") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
 ; 英/仲常用标点变换，处理有配怼木示点符号时按情况变换单个或者成对飚点。
 LShift:: {
+	global Smart
 	switch q1ZiFv := getQ1ZiFv()
 	{
 	case '.', '℃', '°', '℉': Send "{BS}{Text}。" ; 如果是英纹句点或扩展符号，则替换为仲文句号。
@@ -515,13 +519,9 @@ LShift:: {
 	case '"': ch8PeiDviBD('"', '“')
 	case '“': ch8PeiDviBD('“', '"')
 	case '”':
-		if getH1ZiFv() = "“"
-			Send '{BS}{Right}"{Left}'
-		else {
-			SendText "!"
-			Send '{Left}{BS}{Text}"'
-			Send "{Del}"
-		}
+		SendText "!"
+		Send '{Left}{BS}{Text}"'
+		Send "{Del}"
 
 	case '/': Send "{BS}{Text}÷"
 	case '÷', '／', '≠', '√': Send "{BS}{Text}/"
@@ -554,14 +554,9 @@ LShift:: {
 	case "'": ch8PeiDviBD("'", '‘')
 	case "‘": ch8PeiDviBD('‘', "'")
 	case "’":
-		if getH1ZiFv() = "‘" {
-			Send "{BS}{Right}'{Left}"
-		}
-		else {
-			SendText "!"
-			Send "{Left}{BS}{Text}'"
-			Send "{Del}"
-		}
+		SendText "!"
+		Send "{Left}{BS}{Text}'"
+		Send "{Del}"
 
 	case '*': Send "{BS}{Text}×"
 	case '×', '·', '＊', '∏': Send "{BS}{Text}*"
@@ -989,7 +984,7 @@ RShift:: {
 		MsgBox "终点插件 针对中文语境应用程序优化。", "终点 输入法插件", "Iconi T3"
 	}
 }
-<#!i:: MsgBox "　　　终点输入法插件 Rime定制版 v5.45.98`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; 左Win+Alt+i 显示此程序的版本信息。
+<#!i:: MsgBox "　　　终点输入法插件 Rime定制版 v5.45.99`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; 左Win+Alt+i 显示此程序的版本信息。
 ~+Ctrl::  ; 防止仅按下 Shift+Ctrl 时，先释放Ctrl键再释放Shift键会触发漂移的问题。
 ~+Alt::  ; 防止仅按下 Shift+Alt 时，先释放Alt键再释放Shift键会触发漂移的问题。
 ~#Shift::  ; 防止仅按下 Win+Shift 时，先释放Win键再释放Shift键会触发漂移的问题。
