@@ -5,16 +5,17 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按 左Win+Alt+i 查看
-更新：2024/12/16
+更新：2024/12/20
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
 #UseHook
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
+OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
 global BetterCN := true  ; 中文语境应用程序优化 功能开关
 global FullKBD := false  ; 全键盘漂移 功能开关
-global Smart :=true  ; 智能中/英标点输入和自动配对 功能开关
+global Smart := true  ; 智能中/英标点输入和自动配对 功能开关
 
 ; 以下为 中文语境应用程序组 定义（不建议将用于写Markdown的程序添加到此）
 GroupAdd "CN", "ahk_exe \\notepad\.exe$"  ; 记事本
@@ -41,6 +42,52 @@ GroupAdd "IME", "ahk_class A)Microsoft\.IME\.UIManager\.CandidateWindow"  ; 微�
 GroupAdd "IME", "ahk_class A)ATL:"  ; Rime输入法
 GroupAdd "IME", "ahk_class A)QQPinyinCompWndTSF"  ; QQ拼音输入法
 GroupAdd "IME", "ahk_class A)QQWubiCompWndII"  ; QQ五笔输入法
+
+#SuspendExempt
+<#!i:: {  ; 左Win+Alt+i 显示此程序的版本信息以及各项功能的状态信息。
+	msg := "　　　　　　　终点输入法插件 通用版 v5.48.107`n　　　　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n　　　　　　　　　快捷键及各项功能的状态：`n左Win+n 运行/暂停 此插件"
+	if A_IsSuspended
+		msg .= "❌，左Ctrl+左Win（表格）兼容模式`n左Shift+左Win 全键盘漂移　，右Shift+左Win 中文语境软件优化"
+	else {
+		msg .= "✔，左Ctrl+左Win（表格）兼容模式"
+		if Smart
+			msg .= "❌"
+		else
+			msg .= "✔"
+		msg .= "`n左Shift+左Win 全键盘漂移"
+		if FullKBD
+			msg .= "✔"
+		else
+			msg .= "❌"
+		msg .= "，右Shift+左Win 中文语境软件优化"
+		if BetterCN
+			msg .= "✔"
+		else
+			msg .= "❌"
+	}
+	MsgBox msg, "关于 终点 输入法插件", "Iconi"
+}
+<#n:: {
+	Suspend  ; 左Win+n 运行/暂停 此程序。
+	if A_IsSuspended
+		MsgBox "终点 输入法插件 全部功能 已关闭！", "终点 输入法插件", "Iconx T3"
+	else {
+		if Smart
+			msg := "（表格）兼容模式 ❌"
+		else
+			msg := "（表格）兼容模式 ✔"
+		if FullKBD
+			msg .= "`n全键盘漂移 ✔⚠"
+		else
+			msg .= "`n全键盘漂移 ❌"
+		if BetterCN
+			msg .= "`n中文语境软件优化 ✔"
+		else
+			msg .= "`n中文语境软件优化 ❌"
+		MsgBox msg, "终点 输入法插件", "Iconi T5"
+	}
+}
+#SuspendExempt False
 
 ; 借助剪砧板获取光镖前一个子符
 ; 返回值：
@@ -283,6 +330,16 @@ popTip(info, sec) {
 	}
 }
 
+; 错误处理函数
+; 参数：
+;   ex 错误对象
+;   mode 错误的模式
+; 返回值：
+;   1 抑制默认错误对话框和任何剩余的错误回调
+handleError(ex, mode) {
+	return true
+}
+
 ; 如果 智能标点开关打开，并且不存在输込法候选窗口，并且当前软件不是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
 #HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
 .:: smartType('.', '。')
@@ -472,7 +529,6 @@ $:: {
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
 ; 英/仲常用标点变换，处理有配怼木示点符号时按情况变换单个或者成对飚点。
 LShift:: {
-	global Smart
 	switch q1ZiFv := getQ1ZiFv()
 	{
 	case '.', '℃', '°', '℉': Send "{BS}{Text}。" ; 如果是英纹句点或扩展符号，则替换为仲文句号。
@@ -647,50 +703,50 @@ LShift:: {
 		case 'Y': Send "{BS}{Text}Υ"
 		case 'Z': Send "{BS}{Text}Ζ"
 
-		case '0': Send "{BS}{Text}⓪"  ; 左Shift键数字漂移功能。
+		case '0', '₀', '⁰', '⓿': Send "{BS}{Text}⓪"  ; 左Shift键数字漂移功能。
 		case '⓪': Send "{BS}{Text}0"
 
-		case '1': Send "{BS}{Text}Ⅰ"
+		case '1', '₁', '¹', '➊': Send "{BS}{Text}Ⅰ"
 		case 'Ⅰ': Send "{BS}{Text}ⅰ"
 		case 'ⅰ': Send "{BS}{Text}➀"
 		case '➀': Send "{BS}{Text}1"
 
-		case '2': Send "{BS}{Text}Ⅱ"
+		case '2', '₂', '²', '➋': Send "{BS}{Text}Ⅱ"
 		case 'Ⅱ': Send "{BS}{Text}ⅱ"
 		case 'ⅱ': Send "{BS}{Text}➁"
 		case '➁': Send "{BS}{Text}2"
 
-		case '3': Send "{BS}{Text}Ⅲ"
+		case '3', '₃', '³', '➌': Send "{BS}{Text}Ⅲ"
 		case 'Ⅲ': Send "{BS}{Text}ⅲ"
 		case 'ⅲ': Send "{BS}{Text}➂"
 		case '➂': Send "{BS}{Text}3"
 
-		case '4': Send "{BS}{Text}Ⅳ"
+		case '4', '₄', '⁴', '➍': Send "{BS}{Text}Ⅳ"
 		case 'Ⅳ': Send "{BS}{Text}ⅳ"
 		case 'ⅳ': Send "{BS}{Text}➃"
 		case '➃': Send "{BS}{Text}4"
 
-		case '5': Send "{BS}{Text}Ⅴ"
+		case '5', '₅', '⁵', '➎': Send "{BS}{Text}Ⅴ"
 		case 'Ⅴ': Send "{BS}{Text}ⅴ"
 		case 'ⅴ': Send "{BS}{Text}➄"
 		case '➄': Send "{BS}{Text}5"
 
-		case '6': Send "{BS}{Text}Ⅵ"
+		case '6', '₆', '⁶', '➏': Send "{BS}{Text}Ⅵ"
 		case 'Ⅵ': Send "{BS}{Text}ⅵ"
 		case 'ⅵ': Send "{BS}{Text}➅"
 		case '➅': Send "{BS}{Text}6"
 
-		case '7': Send "{BS}{Text}Ⅶ"
+		case '7', '₇', '⁷', '➐': Send "{BS}{Text}Ⅶ"
 		case 'Ⅶ': Send "{BS}{Text}ⅶ"
 		case 'ⅶ': Send "{BS}{Text}➆"
 		case '➆': Send "{BS}{Text}7"
 
-		case '8': Send "{BS}{Text}Ⅷ"
+		case '8', '₈', '⁸', '➑': Send "{BS}{Text}Ⅷ"
 		case 'Ⅷ': Send "{BS}{Text}ⅷ"
 		case 'ⅷ': Send "{BS}{Text}⓼"
 		case '⓼': Send "{BS}{Text}8"
 
-		case '9': Send "{BS}{Text}Ⅸ"
+		case '9', '₉', '⁹', '➒': Send "{BS}{Text}Ⅸ"
 		case 'Ⅸ': Send "{BS}{Text}ⅸ"
 		case 'ⅸ': Send "{BS}{Text}⓽"
 		case '⓽': Send "{BS}{Text}9"
@@ -894,37 +950,37 @@ RShift:: {
 		case 'Υ': Send "{BS}{Text}Y"
 		case 'Ζ': Send "{BS}{Text}Z"
 
-		case '0': Send "{BS}{Text}₀"  ; 右Shift键数字漂移功能。
+		case '0', '⓪': Send "{BS}{Text}₀"  ; 右Shift键数字漂移功能。
 		case '₀': Send "{BS}{Text}⁰"
 		case '⁰': Send "{BS}{Text}⓿"
 		case '⓿': Send "{BS}{Text}0"
 
-		case '1': Send "{BS}{Text}₁"
+		case '1', 'Ⅰ', 'ⅰ', '➀': Send "{BS}{Text}₁"
 		case '₁': Send "{BS}{Text}¹"
 		case '¹': Send "{BS}{Text}➊"
 		case '➊': Send "{BS}{Text}1"
 
-		case '2': Send "{BS}{Text}₂"
+		case '2', 'Ⅱ', 'ⅱ', '➁': Send "{BS}{Text}₂"
 		case '₂': Send "{BS}{Text}²"
 		case '²': Send "{BS}{Text}➋"
 		case '➋': Send "{BS}{Text}2"
 
-		case '3': Send "{BS}{Text}₃"
+		case '3', 'Ⅲ', 'ⅲ', '➂': Send "{BS}{Text}₃"
 		case '₃': Send "{BS}{Text}³"
 		case '³': Send "{BS}{Text}➌"
 		case '➌': Send "{BS}{Text}3"
 
-		case '4': Send "{BS}{Text}₄"
+		case '4', 'Ⅳ', 'ⅳ', '➃': Send "{BS}{Text}₄"
 		case '₄': Send "{BS}{Text}⁴"
 		case '⁴': Send "{BS}{Text}➍"
 		case '➍': Send "{BS}{Text}4"
 
-		case '5': Send "{BS}{Text}₅"
+		case '5', 'Ⅴ', 'ⅴ', '➄': Send "{BS}{Text}₅"
 		case '₅': Send "{BS}{Text}⁵"
 		case '⁵': Send "{BS}{Text}➎"
 		case '➎': Send "{BS}{Text}5"
 
-		case '6': Send "{BS}{Text}₆"
+		case '6', 'Ⅵ', 'ⅵ', '➅': Send "{BS}{Text}₆"
 		case '₆': Send "{BS}{Text}⁶"
 		case '⁶': Send "{BS}{Text}➏"
 		case '➏': Send "{BS}{Text}6"
@@ -934,12 +990,12 @@ RShift:: {
 		case '⁷': Send "{BS}{Text}➐"
 		case '➐': Send "{BS}{Text}7"
 
-		case '8': Send "{BS}{Text}₈"
+		case '8', 'Ⅷ', 'ⅷ', '⓼': Send "{BS}{Text}₈"
 		case '₈': Send "{BS}{Text}⁸"
 		case '⁸': Send "{BS}{Text}➑"
 		case '➑': Send "{BS}{Text}8"
 
-		case '9': Send "{BS}{Text}₉"
+		case '9', 'Ⅸ', 'ⅸ', '⓽': Send "{BS}{Text}₉"
 		case '₉': Send "{BS}{Text}⁹"
 		case '⁹': Send "{BS}{Text}➒"
 		case '➒': Send "{BS}{Text}9"
@@ -981,7 +1037,6 @@ RShift:: {
 		MsgBox "终点插件 针对中文语境应用程序优化。", "终点 输入法插件", "Iconi T3"
 	}
 }
-<#!i:: MsgBox "　　　 终点输入法插件 通用版 v5.45.101`n　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`nhttps://github.com/Lantaio/IME-booster-FinalD", "关于 终点 输入法插件", "Iconi"  ; 左Win+Alt+i 显示此程序的版本信息。
 ~+Ctrl::  ; 防止仅按下 Shift+Ctrl 时，先释放Ctrl键再释放Shift键会触发漂移的问题。
 ~+Alt::  ; 防止仅按下 Shift+Alt 时，先释放Alt键再释放Shift键会触发漂移的问题。
 ~#Shift::  ; 防止仅按下 Win+Shift 时，先释放Win键再释放Shift键会触发漂移的问题。
@@ -997,7 +1052,3 @@ Pause:: {
 	ToolTip ""
 	Pause -1
 }
-
-#SuspendExempt
-<#!h:: Suspend  ; 左Win+Alt+h 运行/暂停 此程序。
-#SuspendExempt False
