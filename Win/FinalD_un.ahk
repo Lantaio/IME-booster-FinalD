@@ -1,16 +1,16 @@
 /*
-说明：FinalD/终点 字符及标点快速输入（漂移）程序
+说明：FinalD/终点 输入法插件，标点及扩展符号快速输入/变换程序
 注意：！！！编辑保存此文件时必须保存为UTF-8编码格式！！！
 备注：为了 AntiAI/反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按 左Win+Alt+i 查看
-更新：2024/12/20
+更新：2024/12/24
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
 #UseHook
-SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式
+SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（※此模式默认区分大小写）
 OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
 global BetterCN := true  ; 中文语境应用程序优化 功能开关
@@ -45,7 +45,7 @@ GroupAdd "IME", "ahk_class A)QQWubiCompWndII"  ; QQ五笔输入法
 
 #SuspendExempt
 <#!i:: {  ; 左Win+Alt+i 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　　终点输入法插件 通用版 v5.48.107`n　　　　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n　　　　　　　　　快捷键及各项功能的状态：`n左Win+n 运行/暂停 此插件"
+	msg := "　　　　　　　终点输入法插件 通用版 v5.48.108`n　　　　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n　　　　　　　　　快捷键及各项功能的状态：`n左Win+n 运行/暂停 此插件"
 	if A_IsSuspended
 		msg .= "❌，左Ctrl+左Win（表格）兼容模式`n左Shift+左Win 全键盘漂移　，右Shift+左Win 中文语境软件优化"
 	else {
@@ -72,10 +72,11 @@ GroupAdd "IME", "ahk_class A)QQWubiCompWndII"  ; QQ五笔输入法
 	if A_IsSuspended
 		MsgBox "终点 输入法插件 全部功能 已关闭！", "终点 输入法插件", "Iconx T3"
 	else {
+		msg := "终点 输入法插件 已开启。"
 		if Smart
-			msg := "（表格）兼容模式 ❌"
+			msg .= "`n（表格）兼容模式 ❌"
 		else
-			msg := "（表格）兼容模式 ✔"
+			msg .= "`n（表格）兼容模式 ✔"
 		if FullKBD
 			msg .= "`n全键盘漂移 ✔⚠"
 		else
@@ -146,24 +147,6 @@ getH1ZiFv() {
 	return h1ZiFv
 }
 
-; 是否在椴落井头
-/*isAtB0L() {
-	q1ZiFv := getQ1ZiFv()
-	if SubStr(q1ZiFv, -1) = '`n' or q1ZiFv = '' or q1ZiFv = '`v'
-		return true
-	return false
-}
-*/
-
-; 是否在煅落抹尾
-/*isAtE0L() {
-	h1ZiFv := getH1ZiFv()
-	if SubStr(h1ZiFv, -1) = '`n' or h1ZiFv = '' or h1ZiFv = '`v'
-		return true
-	return false
-}
-*/
-
 ; 是否应该输入西纹木示点符号
 ; 参数：
 ;   q1ZiFv （可选）提供前一字符
@@ -214,7 +197,6 @@ sh0uldPeiDvi(bP?) {
 ;   en 按键对应的英文标点符号
 ;   cn 按键对应的中文标点符号
 smartType(en, cn) {
-	global BetterCN
 	; 如果对中文语境应用程序优化开关打开 并且 顶层程序是中文语境软件
 	if BetterCN and WinActive("ahk_group CN")
 		; 如果按键是‘.’、‘:’或‘~’ 并且 前一个字符是数字
@@ -275,7 +257,6 @@ hasPeiDviBD(p) {
 ;   oldP 将要被替换的标点
 ;   newP （可选）用于替换的标点
 ch8PeiDviBD(oldP, newP?) {
-	global Smart
 	hasPairedBD := false
 	if Smart
 		hasPairedBD := hasPeiDviBD(oldP)
@@ -515,9 +496,8 @@ _:: {
 	Send "{Blind}{6 Up}{LShift Up}"
 	smartType('^', '……')
 }
-~::  ; SendText "~"
-{
-	; Send "{Blind}{`` Up}{RShift Up}"
+~:: {
+	; Send "{Blind}{`` Up}{RShift Up}"  ; 将此行注释以便可以连按
 	smartType('~', '～')
 }
 $:: {
@@ -646,7 +626,6 @@ LShift:: {
 	case '$': Send "{BS}{Text}￥"
 	case '￥', '＄', '€', '£', '¥', '¢': Send "{BS}{Text}$"
 	}
-	global FullKBD
 	if FullKBD {
 		switch q1ZiFv
 		{
@@ -893,7 +872,6 @@ RShift:: {
 	case '€': Send "{BS}{Text}£"
 	case '£': Send "{BS}{Text}¢"
 	}
-	global FullKBD
 	if FullKBD {
 		switch q1ZiFv
 		{
