@@ -4,8 +4,8 @@
 备注：为了 AntiAI/反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
-版本：运行此程序后按 左Win+Alt+i 查看
-更新：2024/12/24
+版本：运行此程序后按 左Win+n 查看
+更新：2024/12/29
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -44,8 +44,8 @@ GroupAdd "IME", "ahk_class A)QQPinyinCompWndTSF"  ; QQ拼音输入法
 GroupAdd "IME", "ahk_class A)QQWubiCompWndII"  ; QQ五笔输入法
 
 #SuspendExempt
-<#!i:: {  ; 左Win+Alt+i 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　　终点输入法插件 通用版 v5.48.108`n　　　　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n　　　　　　　　　快捷键及各项功能的状态：`n左Win+n 运行/暂停 此插件"
+<#n:: {  ; 左Win+n 显示此程序的版本信息以及各项功能的状态信息。
+	msg := "　　　　　　　终点输入法插件 通用版 v5.48.108`n　　　　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n　　　　　　　　　快捷键及各项功能的状态：`n左Win+c 运行/暂停 此插件"
 	if A_IsSuspended
 		msg .= "❌，左Ctrl+左Win（表格）兼容模式`n左Shift+左Win 全键盘漂移　，右Shift+左Win 中文语境软件优化"
 	else {
@@ -67,8 +67,8 @@ GroupAdd "IME", "ahk_class A)QQWubiCompWndII"  ; QQ五笔输入法
 	}
 	MsgBox msg, "关于 终点 输入法插件", "Iconi"
 }
-<#n:: {
-	Suspend  ; 左Win+n 运行/暂停 此程序。
+<#c:: {  ; 左Win+c 运行/暂停 此程序。
+	Suspend
 	if A_IsSuspended
 		MsgBox "终点 输入法插件 全部功能 已关闭！", "终点 输入法插件", "Iconx T3"
 	else {
@@ -151,7 +151,7 @@ getH1ZiFv() {
 ; 参数：
 ;   q1ZiFv （可选）提供前一字符
 ; 返回值：
-;   true/false
+;   true / false
 sh0uldbeEN_BD(q1ZiFv?) {
 	if not isSet(q1ZiFv)
 		q1ZiFv := getQ1ZiFv()
@@ -168,7 +168,7 @@ sh0uldbeEN_BD(q1ZiFv?) {
 ; 参数：
 ;   bP （可选）起始标点
 ; 返回值：
-;   true/false
+;   true / false
 sh0uldPeiDvi(bP?) {
 	h1ZiFv := getH1ZiFv()  ; （※ 此处不能用SubStr只获取1个字符）
 /*	ToolTip "是否应该输入配对标点是“" StrReplace(StrReplace(StrReplace(h1ZiFv, '`r', 'r'), '`n', 'n'), '', 'μ') "”"
@@ -214,7 +214,7 @@ smartType(en, cn) {
 ; 参数：
 ;   p 检测后一字符是否为此标点
 ; 返回值：
-;   true/false
+;   true / false
 ifH1ZiFvIs(p) {
 	if p = getH1ZiFv()
 		return true
@@ -225,7 +225,7 @@ ifH1ZiFvIs(p) {
 ; 参数：
 ;   p 要检测哪个标点是否有相配对的标点
 ; 返回值：
-;   true/false
+;   true / false
 hasPeiDviBD(p) {
 	switch p
 	{
