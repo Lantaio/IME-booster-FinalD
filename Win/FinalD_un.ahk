@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按 左Win+n 查看
-更新：2024/12/29
+更新：2025/1/5
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -45,7 +45,7 @@ GroupAdd "IME", "ahk_class A)QQWubiCompWndII"  ; QQ五笔输入法
 
 #SuspendExempt
 <#n:: {  ; 左Win+n 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　　终点输入法插件 通用版 v5.48.108`n　　　　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n　　　　　　　　　快捷键及各项功能的状态：`n左Win+c 运行/暂停 此插件"
+	msg := "　　　　　　　终点输入法插件 通用版 v5.48.109`n　　　　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n　　　　　　　　　快捷键及各项功能的状态：`n左Win+c 运行/暂停 此插件"
 	if A_IsSuspended
 		msg .= "❌，左Ctrl+左Win（表格）兼容模式`n左Shift+左Win 全键盘漂移　，右Shift+左Win 中文语境软件优化"
 	else {
@@ -578,8 +578,8 @@ LShift:: {
 	case '*': Send "{BS}{Text}×"
 	case '×', '·', '＊', '∏': Send "{BS}{Text}*"
 
-	case '#': Send "{BS}{Text}◆"
-	case '◆', '■', '◇', '□': Send "{BS}{Text}#"
+	case '#': Send "{BS}{Text}■"
+	case '■', '◆', '◇', '□': Send "{BS}{Text}#"
 
 	case '[': ch8PeiDviBD('[', '【')
 	case '【', '〖', '［': ch8PeiDviBD(q1ZiFv, '[')
@@ -610,11 +610,11 @@ LShift:: {
 	case '|', '↑', '↕', '↓', '‖': Send "{BS}{Text}｜"
 	case '｜': Send "{BS}{Text}|"
 
-	case '@': Send "{BS}{Text}●"
+	case '@': Send "{BS}{Text}©"
 	case '●', '©', '®', '™', '○': Send "{BS}{Text}@"
 
-	case '%': Send "{BS}{Text}★"
-	case '★', '☆', '‰', '✪': Send "{BS}{Text}%"
+	case '%': Send "{BS}{Text}‰"
+	case '‰', '★', '☆', '✪': Send "{BS}{Text}%"
 
 	case '^': Send "{BS}{Text}……"
 	case '…': Send "{BS 2}{Text}^"
@@ -808,8 +808,8 @@ RShift:: {
 	case '·': Send "{BS}{Text}＊"
 	case '＊': Send "{BS}{Text}∏"
 
-	case '#', '◆', '□': Send "{BS}{Text}■"
-	case '■': Send "{BS}{Text}◇"
+	case '#', '■', '□': Send "{BS}{Text}◆"
+	case '◆': Send "{BS}{Text}◇"
 	case '◇': Send "{BS}{Text}□"
 
 	case '[', '【', '［': ch8PeiDviBD(q1ZiFv, '〖')
@@ -848,14 +848,14 @@ RShift:: {
 	case '↕': Send "{BS}{Text}↓"
 	case '↓': Send "{BS}{Text}‖"
 
-	case '@', '●', '○': Send "{BS}{Text}©"
-	case '©': Send "{BS}{Text}®"
+	case '@', '©', '○': Send "{BS}{Text}●"
+	case '●': Send "{BS}{Text}®"
 	case '®': Send "{BS}{Text}™"
 	case '™': Send "{BS}{Text}○"
 
-	case '%', '★', '✪': Send "{BS}{Text}☆"
-	case '☆': Send "{BS}{Text}‰"
-	case '‰': Send "{BS}{Text}✪"
+	case '%', '‰', '✪': Send "{BS}{Text}★"
+	case '★': Send "{BS}{Text}☆"
+	case '☆': Send "{BS}{Text}✪"
 
 	case '^', '↩': Send "{BS}{Text}⌘"
 	case '…': Send "{BS 2}{Text}⌘"
