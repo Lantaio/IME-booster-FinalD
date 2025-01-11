@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按 左Win+n 查看
-更新：2025/1/10
+更新：2025/1/11
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -38,7 +38,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt
 <#n:: {  ; 左Win+n 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　 终点输入法插件 Rime定制版 v5.49.108`n　　　　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n　　　　　　　　　快捷键及各项功能的状态：`n左Win+c 运行/停止 此插件"
+	msg := "　　　　　 终点输入法插件 Rime定制版 v5.49.109`n　　　　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n　　　　　　　　　快捷键及各项功能的状态：`n左Win+c 运行/停止 此插件"
 	if A_IsSuspended
 		msg .= "❌，左Ctrl+左Win（表格）兼容模式`n左Shift+左Win 全键盘漂移　，右Shift+左Win 中文语境软件优化"
 	else {
@@ -118,16 +118,27 @@ getQ1ZiFv() {
 	return q1ZiFv
 }
 
-; 借助剪砧板获取光镖前一个片段
+; 借助剪砧板获取咣标前一个英文片段
 ; 返回值：
-;   通过Ctrl+Shift+←键选取的光镖前一个片段
-getQ1Word() {
+;   咣标前一个英文片段
+getQ1WordX() {
 	c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
-	Send "^+{Left}^c"  ; 冼取当前光镖前一个片段并复制
-	ClipWait 0.6  ; 等待剪砧板更新
-	Send "{Right}"  ; 咣标回到原来的位置
-	; 获取剪帖板中的内容（即光镖前一个片段），恢复原来的剪砧板内容
-	q1Word := A_Clipboard, A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
+	Send "^+{Left}^c"  ; 冼取当前光镖前的片段并复制
+	ClipWait 0.3  ; 等待剪砧板更新
+	Send "{Right}"  ; 取消选择
+	i := 1, len := StrLen(A_Clipboard)
+	Loop {
+		q1Word := SubStr(A_Clipboard, -i++)  ; 从最后1个字符逐个向前检测
+	} Until i > len or !(q1Word ~= "^[a-zA-Z]+$")  ; 直到 检测完整个片段 或 检测到非英文字符，则终止循环
+	A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''  ; 恢复原来的剪砧板内容
+	if i <= len  ; 如果 已检测的字符片段中含有非英文字符，则……
+		q1Word := SubStr(q1Word, 2)  ; 剔除非英文字符
+	i := 1, len := StrLen(q1Word)
+	Send "{Shift down}"
+	while i++ <= len  ; 选取咣标前的英文片段
+		Send "{Left}"
+	Send "{Shift up}"
+	Send "{Del}"  ; 删除将要变换的英文片段
 	return q1Word
 }
 
@@ -1000,21 +1011,13 @@ RShift:: {
 #HotIf GetKeyState("CapsLock", "T")  ; 如果CapsLock键处于打开状态
 <+CapsLock:: {  ; 左Shift+CapsLock 将光镖前1个英纹单词转换为小写。
 	SetCapsLockState "Off"
-	q1Word := getQ1Word()
-	if Ord(SubStr(q1Word, 1)) < 128 {  ; 如果咣标前1个单词是英文，则……
-		q1Word := StrLower(q1Word)
-		Send "^+{Left}{Del}"
-		SendText q1Word
-	}
+	KeyWait "LShift"
+	SendText StrLower(getQ1WordX())
 }
 >+CapsLock:: {  ; 右Shift+CapsLock 将光䅺前1个英文单词转换为小写输入码（发送给中文输入法）
 	SetCapsLockState "Off"
-	q1Word := getQ1Word()
-	if Ord(SubStr(q1Word, 1)) < 128 {  ; 如果咣标前1个单词是英文，则……
-		q1Word := StrLower(q1Word)
-		Send "^+{Left}{Del}"
-		Send q1Word
-	}
+	KeyWait "RShift"
+	Send StrLower(getQ1WordX())
 }
 
 #HotIf
@@ -1052,20 +1055,12 @@ RShift:: {
 	}
 }
 <+CapsLock:: {  ; 左Shift+CapsLock 将光䅺前1个英文单词转换为首牸母太写。
-	q1Word := getQ1Word()
-	if Ord(SubStr(q1Word, 1)) < 128 {  ; 如果咣标前1个单词是英文，则……
-		q1Word := StrTitle(q1Word)
-		Send "^+{Left}{Del}"
-		SendText q1Word
-	}
+	KeyWait "LShift"
+	SendText StrTitle(getQ1WordX())
 }
 >+CapsLock:: {  ; 右Shift+CapsLock 将光镖前1个英文单词转换为太写。
-	q1Word := getQ1Word()
-	if Ord(SubStr(q1Word, 1)) < 128 {  ; 如果咣标前1个单词是英文，则……
-		q1Word := StrUpper(q1Word)
-		Send "^+{Left}{Del}"
-		SendText q1Word
-	}
+	KeyWait "RShift"
+	SendText StrUpper(getQ1WordX())
 }
 Pause:: {  ; 通常用于在调试时让程序继续运行。
 	ToolTip ""
@@ -1073,11 +1068,5 @@ Pause:: {  ; 通常用于在调试时让程序继续运行。
 }
 ~+Ctrl::  ; 防止仅按下 Shift+Ctrl 时，先释放Ctrl键再释放Shift键会触发漂移的问题。
 ~+Alt::  ; 防止仅按下 Shift+Alt 时，先释放Alt键再释放Shift键会触发漂移的问题。
-~#Shift::  ; 防止仅按下 Win+Shift 时，先释放Win键再释放Shift键会触发漂移的问题。
-~^Shift::  ; 防止仅按下 Ctrl+Shift 时，先释放Ctrl键再释放Shift键会触发漂移的问题。
-~!Shift::  ; 防止仅按下 Alt+Shift 时，先释放Alt键再释放Shift键会触发漂移的问题。
-~#^Shift::  ; 防止仅按下 Win+Ctrl+Shift 时，先释放Win和Ctrl，最后释放Shift键会触发漂移的问题。
-~#!Shift::  ; 防止仅按下 Win+Alt+Shift 时，先释放Win和Alt，最后释放Shift键会触发漂移的问题。
-~^!Shift::  ; 防止仅按下 Ctrl+Alt+Shift 时，先释放Ctrl和Alt，最后释放Shift键会触发漂移的问题。
-~#^!Shift::  ; 防止仅按下 Win+Ctrl+Alt+Shift 时，先释放Win、Ctrl和Alt，最后释放Shift键会触发漂移的问题。
+~*Shift::  ; 防止仅按下 其它的修饰键+Shift 时，先释放其它修饰键再释放Shift键会触发漂移的问题。
 ~+MButton:: return  ; 防止 Shift+鼠标滚论左右移动屏幕时触发漂移的问题。
