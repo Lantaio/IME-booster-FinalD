@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按 左Win+n 查看
-更新：2025/1/11
+更新：2025/1/12
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -37,8 +37,8 @@ GroupAdd "UnSmart", "^(?!Microsoft Visual Basic) ahk_exe \\EXCEL\.EXE"  ; Excel�
 GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt
-<#n:: {  ; 左Win+n 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　 终点输入法插件 Rime定制版 v5.49.110`n　　　　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n　　　　　　　　　快捷键及各项功能的状态：`n左Win+c 运行/停止 此插件"
+<#0:: {  ; 左Win+0 显示此程序的版本信息以及各项功能的状态信息。
+	msg := "　　　　　 终点输入法插件 Rime定制版 v5.50.114`n　　　　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n　　　　　　　　　快捷键及各项功能的状态：`n左Win+c 运行/停止 此插件"
 	if A_IsSuspended
 		msg .= "❌，左Ctrl+左Win（表格）兼容模式`n左Shift+左Win 全键盘漂移　，右Shift+左Win 中文语境软件优化"
 	else {
@@ -60,7 +60,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 	}
 	MsgBox msg, "关于 终点 输入法插件", "Iconi"
 }
-<#c:: {  ; 左Win+c 运行/暂停 此程序。
+<#BS:: {  ; 左Win+Backspace 运行/暂停 此程序。
 	Suspend
 	if A_IsSuspended
 		MsgBox "终点 输入法插件 全部功能 已关闭！", "终点 输入法插件", "Iconx T3"
@@ -199,74 +199,85 @@ sh0uldPeiDvi(bP?) {
 	if isSet(bP) and bP ~= "'|`"|‘|“"
 		return false
 	; 如果后一个牸符是下列子符之一
-	switch h1ZiFv
-	{
-	case ',', '.', ':', ';', ')', ']', '}', '>', '?', '!':
-		return true
-	case '，', '。', '：', '；', '？', '！', '）', '］', '】', '〗', '〕', '〙', '｝', '》', '〉':
-		return true
+	switch h1ZiFv {
+		case ',', '.', ':', ';', ')', ']', '}', '>', '?', '!': return true
+		case '，', '。', '：', '；', '？', '！', '）', '］', '】', '〗', '〕', '〙', '｝', '》', '〉': return true
 	}
 	; Pause
 	return false
 }
 
-; 智能上屏中/英标点符号
+; 智能选择要上屏英文标点还是中文标点
 ; 参数：
 ;   en 按键对应的英文标点符号
 ;   cn 按键对应的中文标点符号
-smartType(en, cn) {
+; 返回值：
+;   根据情况选择要上屏的标点
+smartChoice(en, cn) {
 	; 如果对中文语境应用程序优化开关打开 并且 顶层程序是中文语境软件
 	if BetterCN and WinActive("ahk_group CN")
 		; 如果按键是‘.’、‘:’或‘~’ 并且 前一个字符是数字
 		if en ~= "\.|:|~" and IsInteger(getQ1ZiFv())
-			SendText en
+			Return en
 		else
-			SendText cn
+			Return cn
 	else if sh0uldbeEN_BD()  ; 否则（即所有程序使用一致的输入体验时），如果根据情况应该输入英文标点
-		SendText en
+		Return en
 	else
-		SendText cn
+		Return cn
 }
 
-; 检测后一字符是否为给定的标点
+; 检测是否有成对的木示点
 ; 参数：
-;   p 检测后一字符是否为此标点
+;   before 检测这个字符（如果是前标点）是否有相配怼的标点
+;   after 提供后标点以检测是否和参数before是成怼的标点
 ; 返回值：
 ;   true / false
-ifH1ZiFvIs(p) {
-	if p = getH1ZiFv()
-		return true
-	return false
-}
-
-; 检测是不是成对的木示点
-; 参数：
-;   p 要检测哪个标点是否有相配对的标点
-; 返回值：
-;   true / false
-hasPeiDviBD(p) {
-	switch p
-	{
-	case '(': return ifH1ZiFvIs(')')
-	case '（': return ifH1ZiFvIs('）')
-	case '"': return ifH1ZiFvIs('"')
-	case '“': return ifH1ZiFvIs('”')
-	case "'": return ifH1ZiFvIs("'")
-	case '‘': return ifH1ZiFvIs('’')
-	case '{': return ifH1ZiFvIs('}')
-	case '「': return ifH1ZiFvIs('」')
-	case '『': return ifH1ZiFvIs('』')
-	case '〘': return ifH1ZiFvIs('〙')
-	case '｛': return ifH1ZiFvIs('｝')
-	case '[': return ifH1ZiFvIs(']')
-	case '【': return ifH1ZiFvIs('】')
-	case '〖': return ifH1ZiFvIs('〗')
-	case '〔': return ifH1ZiFvIs('〕')
-	case '［': return ifH1ZiFvIs('］')
-	case '<': return ifH1ZiFvIs('>')
-	case '《': return ifH1ZiFvIs('》')
-	case '〈': return ifH1ZiFvIs('〉')
-	}
+hasPeiDviBD(before, after?) {
+	if isSet(after)  ; 如果 提供了后标点，则……
+		switch before {
+			case '(': return after = ')'
+			case '（': return after = '）'
+			case '"': return after = '"'
+			case '“': return after = '”'
+			case "'": return after = "'"
+			case '‘': return after = '’'
+			case '{': return after = '}'
+			case '「': return after = '」'
+			case '『': return after = '』'
+			case '〘': return after = '〙'
+			case '｛': return after = '｝'
+			case '[': return after = ']'
+			case '【': return after = '】'
+			case '〖': return after = '〗'
+			case '〔': return after = '〕'
+			case '［': return after = '］'
+			case '<': return after = '>'
+			case '《': return after = '》'
+			case '〈': return after = '〉'
+		}
+	else  ; 否则（即没有提供后标点参数），则……
+		switch before {
+			case '(': return getH1ZiFv() = ')'
+			case '（': return getH1ZiFv() = '）'
+			case '"': return getH1ZiFv() = '"'
+			case '“': return getH1ZiFv() = '”'
+			case "'": return getH1ZiFv() = "'"
+			case '‘': return getH1ZiFv() = '’'
+			case '{': return getH1ZiFv() = '}'
+			case '「': return getH1ZiFv() = '」'
+			case '『': return getH1ZiFv() = '』'
+			case '〘': return getH1ZiFv() = '〙'
+			case '｛': return getH1ZiFv() = '｝'
+			case '[': return getH1ZiFv() = ']'
+			case '【': return getH1ZiFv() = '】'
+			case '〖': return getH1ZiFv() = '〗'
+			case '〔': return getH1ZiFv() = '〕'
+			case '［': return getH1ZiFv() = '］'
+			case '<': return getH1ZiFv() = '>'
+			case '《': return getH1ZiFv() = '》'
+			case '〈': return getH1ZiFv() = '〉'
+		}
 	return false
 }
 
@@ -280,63 +291,61 @@ ch8PeiDviBD(oldP, newP?) {
 		hasPairedBD := hasPeiDviBD(oldP)
 	SendText "!"
 	Send "{Left}{BS}"
-	switch oldP
-	{
-	case '(', '（', '〔', '〘', '"', '“', "'", '‘': SendText newP
-	case '{', '「', '『', '｛':
-		if isSet(newP)
-			SendText newP
-		else {
-			Send "{{}"
-			WinWait("ahk_class ^ATL:")
-			WinWaitClose("ahk_class ^ATL:")
-		}
-	case '[', '【', '〖', '［':
-		if isSet(newP)
-			SendText newP
-		else {
-			Send "["
-			WinWait("ahk_class ^ATL:")
-			WinWaitClose("ahk_class ^ATL:")
-		}
-	case '<', '《', '〈':
-		if isSet(newP)
-			SendText newP
-		else {
-			Send "<"
-			WinWait("ahk_class ^ATL:")
-			WinWaitClose("ahk_class ^ATL:")
-		}
+	switch oldP {
+		case '(', '（', '〔', '〘', '"', '“', "'", '‘': SendText newP
+		case '{', '「', '『', '｛':
+			if isSet(newP)
+				SendText newP
+			else {
+				Send "{{}"
+				WinWait("ahk_class ^ATL:")
+				WinWaitClose("ahk_class ^ATL:")
+			}
+		case '[', '【', '〖', '［':
+			if isSet(newP)
+				SendText newP
+			else {
+				Send "["
+				WinWait("ahk_class ^ATL:")
+				WinWaitClose("ahk_class ^ATL:")
+			}
+		case '<', '《', '〈':
+			if isSet(newP)
+				SendText newP
+			else {
+				Send "<"
+				WinWait("ahk_class ^ATL:")
+				WinWaitClose("ahk_class ^ATL:")
+			}
 	}
 	Send "{Del}"
 	if hasPairedBD {
 		Send "{Del}{Text}!"
 		Send "{Left}"
-		q1p := getQ1ZiFv()
-		switch q1p
-		{
-		case '(': SendText ')'
-		case '（': SendText '）'
-		case '"': SendText '"'
-		case '“': SendText '”'
-		case "'": SendText "'"
-		case '‘': SendText '’'
-		case '{': SendText '}'
-		case '「': SendText '」'
-		case '『': SendText '』'
-		case '〘': SendText '〙'
-		case '｛': SendText '｝'
-		case '[': SendText ']'
-		case '【': SendText '】'
-		case '〖': SendText '〗'
-		case '〔': SendText '〕'
-		case '［': SendText '］'
-		case '<': SendText '>'
-		case '《': SendText '》'
-		case '〈': SendText '〉'
+		newBD := getQ1ZiFv()  ; 新变换的前标点
+		switch newBD {
+			case '(': SendText ')'
+			case '（': SendText '）'
+			case '"': SendText '"'
+			case '“': SendText '”'
+			case "'": SendText "'"
+			case '‘': SendText '’'
+			case '{': SendText '}'
+			case '「': SendText '」'
+			case '『': SendText '』'
+			case '〘': SendText '〙'
+			case '｛': SendText '｝'
+			case '[': SendText ']'
+			case '【': SendText '】'
+			case '〖': SendText '〗'
+			case '〔': SendText '〕'
+			case '［': SendText '］'
+			case '<': SendText '>'
+			case '《': SendText '》'
+			case '〈': SendText '〉'
 		}
 		Send "{Del}{Left}"
-		if q1p = '≤' or  q1p = '≦' or  q1p = '«' or  q1p = '‹' or  q1p = '⟨'
+		if newBD ~= "≤|≦|«|‹|⟨"  ; 如果 新变换的前标点是其中之一
 			Send "{Right}"
 	}
 }
@@ -365,8 +374,8 @@ handleError(ex, mode) {
 
 ; 如果 智能标点开关打开，并且不存在输込法候选窗口，并且当前软件不是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
 #HotIf Smart and not (WinExist("ahk_class A)ATL:") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
-.:: smartType('.', '。')
-,:: smartType(',', '，')
+.:: SendText smartChoice('.', '。')
+,:: SendText smartChoice(',', '，')
 (:: {
 	Send "{Blind}{9 Up}{LShift Up}"
 	if sh0uldbeEN_BD() {
@@ -386,15 +395,19 @@ handleError(ex, mode) {
 }
 ):: {
 	Send "{Blind}{0 Up}{LShift Up}"
-	smartType(')', '）')
+	q1ZiFv := getQ1ZiFv()
+	thisZiFv := smartChoice(')', '）')
+	SendText thisZiFv
+	if hasPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
+		Send "{Left}"
 }
 _:: {
 	Send "{Blind}{- Up}{LShift Up}"
-	smartType('_', '——')
+	SendText smartChoice('_', '——')
 }
 ::: {
 	; Send "{Blind}{; Up}{LShift Up}"
-	smartType(':', '：')
+	SendText smartChoice(':', '：')
 }
 ":: {
 	Send "{Blind}{' Up}{LShift Up}"
@@ -434,9 +447,13 @@ _:: {
 }
 >:: {
 	Send "{Blind}{. Up}{LShift Up}"
-	smartType('>', '》')
+	q1ZiFv := getQ1ZiFv()
+	thisZiFv := smartChoice('>', '》')
+	SendText thisZiFv
+	if hasPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
+		Send "{Left}"
 }
-`;:: smartType(';', '；')
+`;:: SendText smartChoice(';', '；')
 -:: SendText "-"
 {:: {
 	Send "{Blind}{[ Up}{LShift Up}"
@@ -457,7 +474,11 @@ _:: {
 }
 }:: {
 	Send "{Blind}{] Up}{LShift Up}"
-	smartType('}', '」')
+	q1ZiFv := getQ1ZiFv()
+	thisZiFv := smartChoice('}', '」')
+	SendText thisZiFv
+	if hasPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
+		Send "{Left}"
 }
 ':: {
 	q1ZiFv := getQ1ZiFv()
@@ -491,7 +512,7 @@ _:: {
 			Send "{Left}"
 		}
 	}
-	else {  ; （如果不是中文语境）为Markdown优化，英、中汶都直接上屏‘[’。
+	else {  ; （如果不是中文语境）为Markdown优化，英、中文都直接上屏‘[’。
 		SendText "["
 		if sh0uldPeiDvi() {
 			SendText "]"
@@ -500,20 +521,16 @@ _:: {
 	}
 }
 ]:: {
-	; q1ZiFv := getQ1ZiFv()
+	q1ZiFv := getQ1ZiFv()
 	if BetterCN and WinActive("ahk_group CN") {
 		SendText "】"
-/*		if q1ZiFv = '【' {
+		if q1ZiFv = '【'  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
 			Send "{Left}"
-		}
-*/
 	}
 	else {
 		SendText "]"
-/*		if q1ZiFv = '[' {
+		if q1ZiFv = '['  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
 			Send "{Left}"
-		}
-*/
 	}
 }
 `:: SendText "``"
@@ -521,27 +538,27 @@ _:: {
 &:: SendText "&"
 ?:: {
 	Send "{Blind}{/ Up}{LShift Up}"
-	smartType('?', '？')
+	SendText smartChoice('?', '？')
 }
 !:: {
 	Send "{Blind}{1 Up}{LShift Up}"
-	smartType('!', '！')
+	SendText smartChoice('!', '！')
 }
-\:: smartType('\', '、')
+\:: SendText smartChoice('\', '、')
 |:: {
 	Send "{Blind}{\ Up}{LShift Up}"
-	smartType('|', '｜')  ; 此符号触发笔画反查功能，但估计此功能不常用，所以直接上屏中纹全角分隔符‘｜’，可再按右Shift键来进行笔画反查。
+	SendText smartChoice('|', '｜')  ; 此符号触发笔画反查功能，但估计此功能不常用，所以直接上屏中纹全角分隔符‘｜’，可再按右Shift键来进行笔画反查。
 }
 @:: SendText "@"
 %:: SendText "%"  ; 为Markdown优化，英、中纹都上屏‘%’。
 ^:: Send "{Blind}6"  ; 此符号触发输入扩展符号功能，因此直接交由Rime输入法处理。
 ~:: {
 	; Send "{Blind}{`` Up}{RShift Up}"  ; 将此行注释以便可以连按
-	smartType('~', '～')
+	SendText smartChoice('~', '～')
 }
 $:: {
 	Send "{Blind}{4 Up}{RShift Up}"
-	smartType('$', '￥')
+	SendText smartChoice('$', '￥')
 /*	if sh0uldbeEN_BD()
 		SendText "$"
 	else
@@ -553,460 +570,454 @@ $:: {
 #HotIf not (WinExist("ahk_class A)ATL:") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
 ; 英/仲常用标点变换，处理有配怼木示点符号时按情况变换单个或者成对飚点。
 LShift:: {
-	switch q1ZiFv := getQ1ZiFv()
-	{
-	case '.', '℃', '°', '℉': Send "{BS}{Text}。" ; 如果是英纹句点或扩展符号，则替换为仲文句号。
-	case '。': Send "{BS}{Text}." ; 如果是仲文句号，则替换为英纹句点。
+	switch q1ZiFv := getQ1ZiFv() {
+		case '.', '℃', '°', '℉': Send "{BS}{Text}。" ; 如果是英纹句点或扩展符号，则替换为仲文句号。
+		case '。': Send "{BS}{Text}." ; 如果是仲文句号，则替换为英纹句点。
 
-	case ',', '∈', '⊆', '⊂': Send "{BS}{Text}，"
-	case '，': Send "{BS}{Text},"
+		case ',', '∈', '⊆', '⊂': Send "{BS}{Text}，"
+		case '，': Send "{BS}{Text},"
 
-	case '(', '〔', '〘': ch8PeiDviBD(q1ZiFv, '（')
-	case '（': ch8PeiDviBD('（', '(')
+		case '(', '〔', '〘': ch8PeiDviBD(q1ZiFv, '（')
+		case '（': ch8PeiDviBD('（', '(')
 
-	case ')', '〕', '〙': Send "{BS}{Text}）"
-	case '）':
-		SendText "!"
-		Send "{Left}{BS}{Text})"
-		Send "{Del}"
+		case ')', '〕', '〙': Send "{BS}{Text}）"
+		case '）':
+			SendText "!"
+			Send "{Left}{BS}{Text})"
+			Send "{Del}"
 
-	case '_': Send "{BS}{Text}——"
-	case '—': Send "{BS 2}{Text}_"
-	case '∪', '∩': Send "{BS}{Text}_"
+		case '_': Send "{BS}{Text}——"
+		case '—': Send "{BS 2}{Text}_"
+		case '∪', '∩': Send "{BS}{Text}_"
 
-	case ':', '∵', '∴', '∷': Send "{BS}{Text}："
-	case '：': Send "{BS}{Text}:"
+		case ':', '∵', '∴', '∷': Send "{BS}{Text}："
+		case '：': Send "{BS}{Text}:"
 
-	case '"': ch8PeiDviBD('"', '“')
-	case '“': ch8PeiDviBD('“', '"')
-	case '”':
-		SendText "!"
-		Send '{Left}{BS}{Text}"'
-		Send "{Del}"
+		case '"': ch8PeiDviBD('"', '“')
+		case '“': ch8PeiDviBD('“', '"')
+		case '”':
+			SendText "!"
+			Send '{Left}{BS}{Text}"'
+			Send "{Del}"
 
-	case '/': Send "{BS}{Text}÷"
-	case '÷', '／', '≠', '√': Send "{BS}{Text}/"
+		case '/': Send "{BS}{Text}÷"
+		case '÷', '／', '≠', '√': Send "{BS}{Text}/"
 
-	case '=': Send "{BS}{Text}≈"
-	case '≈', '⇒', '⇔', '≡': Send "{BS}{Text}="
+		case '=': Send "{BS}{Text}≈"
+		case '≈', '⇒', '⇔', '≡': Send "{BS}{Text}="
 
-	case '<', '〈': ch8PeiDviBD(q1ZiFv, '《')
-	case '《': ch8PeiDviBD('《', '<')
-	case '≤', '«', '‹', '≦', '⟨': Send "{BS}{Text}《"
+		case '<', '〈': ch8PeiDviBD(q1ZiFv, '《')
+		case '《': ch8PeiDviBD('《', '<')
+		case '≤', '«', '‹', '≦', '⟨': Send "{BS}{Text}《"
 
-	case '>', '〉', '≥', '»', '›', '≧', '⟩': Send "{BS}{Text}》"
-	case '》': Send "{BS}{Text}>"
+		case '>', '〉', '≥', '»', '›', '≧', '⟩': Send "{BS}{Text}》"
+		case '》': Send "{BS}{Text}>"
 
-	case ';', '☐', '☑', '☒': Send "{BS}{Text}；"
-	case '；': Send "{BS}{Text};"
+		case ';', '☐', '☑', '☒': Send "{BS}{Text}；"
+		case '；': Send "{BS}{Text};"
 
-	case '-': Send "{BS}{Text}¬"
-	case '¬', '∨', '∧': Send "{BS}{Text}-"
+		case '-': Send "{BS}{Text}¬"
+		case '¬', '∨', '∧': Send "{BS}{Text}-"
 
-	case '{', '『', '｛': ch8PeiDviBD(q1ZiFv, '「')
-	case '「': ch8PeiDviBD('「', '{')
+		case '{', '『', '｛': ch8PeiDviBD(q1ZiFv, '「')
+		case '「': ch8PeiDviBD('「', '{')
 
-	case '}', '』', '｝': Send "{BS}{Text}」"
-	case '」':
-		SendText "!"
-		Send "{Left}{BS}{Text}}"
-		Send "{Del}"
+		case '}', '』', '｝': Send "{BS}{Text}」"
+		case '」':
+			SendText "!"
+			Send "{Left}{BS}{Text}}"
+			Send "{Del}"
 
-	case "'": ch8PeiDviBD("'", '‘')
-	case "‘": ch8PeiDviBD('‘', "'")
-	case "’":
-		SendText "!"
-		Send "{Left}{BS}{Text}'"
-		Send "{Del}"
+		case "'": ch8PeiDviBD("'", '‘')
+		case "‘": ch8PeiDviBD('‘', "'")
+		case "’":
+			SendText "!"
+			Send "{Left}{BS}{Text}'"
+			Send "{Del}"
 
-	case '*': Send "{BS}{Text}×"
-	case '×', '·', '＊', '∏': Send "{BS}{Text}*"
+		case '*': Send "{BS}{Text}×"
+		case '×', '·', '＊', '∏': Send "{BS}{Text}*"
 
-	case '#': Send "{BS}{Text}■"
-	case '■', '◆', '◇', '□': Send "{BS}{Text}#"
+		case '#': Send "{BS}{Text}■"
+		case '■', '◆', '◇', '□': Send "{BS}{Text}#"
 
-	case '[': ch8PeiDviBD('[', '【')
-	case '【', '〖', '［': ch8PeiDviBD(q1ZiFv, '[')
+		case '[': ch8PeiDviBD('[', '【')
+		case '【', '〖', '［': ch8PeiDviBD(q1ZiFv, '[')
 
-	case ']': Send "{BS}{Text}】"
-	case '】', '〗', '］':
-		SendText "!"
-		Send "{Left}{BS}{Text}]"
-		Send "{Del}"
+		case ']': Send "{BS}{Text}】"
+		case '】', '〗', '］':
+			SendText "!"
+			Send "{Left}{BS}{Text}]"
+			Send "{Del}"
 
-	case '′', '″', '‴': Send "{BS}{Text}``"
+		case '′', '″', '‴': Send "{BS}{Text}``"
 
-	case '+': Send "{BS}{Text}±"
-	case '±', '∑', '∫', '∮': Send "{BS}{Text}+"
+		case '+': Send "{BS}{Text}±"
+		case '±', '∑', '∫', '∮': Send "{BS}{Text}+"
 
-	case '&': Send "{BS}{Text}※"
-	case '※', '§', '∞', '∝': Send "{BS}{Text}&"
+		case '&': Send "{BS}{Text}※"
+		case '※', '§', '∞', '∝': Send "{BS}{Text}&"
 
-	case '?', '✔', '❌', '✘', '⭕': Send "{BS}{Text}？"
-	case '？': Send "{BS}{Text}?"
+		case '?', '✔', '❌', '✘', '⭕': Send "{BS}{Text}？"
+		case '？': Send "{BS}{Text}?"
 
-	case '!', '▲', '⚠', '△': Send "{BS}{Text}！"
-	case '！': Send "{BS}{Text}!"
+		case '!', '▲', '⚠', '△': Send "{BS}{Text}！"
+		case '！': Send "{BS}{Text}!"
 
-	case '\': Send "{BS}{Text}、"
-	case '、', '→', '↔', '←': Send "{BS}{Text}\"
+		case '\': Send "{BS}{Text}、"
+		case '、', '→', '↔', '←': Send "{BS}{Text}\"
 
-	case '|', '↑', '↕', '↓', '‖', '¦': Send "{BS}{Text}｜"
-	case '｜': Send "{BS}{Text}|"
+		case '|', '↑', '↕', '↓', '‖', '¦': Send "{BS}{Text}｜"
+		case '｜': Send "{BS}{Text}|"
 
-	case '@': Send "{BS}{Text}©"
-	case '●', '©', '®', '™', '○', '№': Send "{BS}{Text}@"
+		case '@': Send "{BS}{Text}©"
+		case '●', '©', '®', '™', '○', '№': Send "{BS}{Text}@"
 
-	case '%': Send "{BS}{Text}‰"
-	case '‰', '★', '☆', '✪': Send "{BS}{Text}%"
+		case '%': Send "{BS}{Text}‰"
+		case '‰', '★', '☆', '✪': Send "{BS}{Text}%"
 
-	case '^': Send "{BS}{Text}……"
-	case '…': Send "{BS 2}{Text}^"
-	case '⌘', '⌥', '⇧', '↩', '⌫', '⇪': Send "{BS}{Text}^"
+		case '^': Send "{BS}{Text}……"
+		case '…': Send "{BS 2}{Text}^"
+		case '⌘', '⌥', '⇧', '↩', '⌫', '⇪': Send "{BS}{Text}^"
 
-	case '~': Send "{BS}{Text}～"
-	case '～', '々', '〃', '≌': Send "{BS}{Text}~"
+		case '~': Send "{BS}{Text}～"
+		case '～', '々', '〃', '≌': Send "{BS}{Text}~"
 
-	case '$': Send "{BS}{Text}￥"
-	case '￥', '＄', '€', '£', '¥', '¢', '¤', '₩': Send "{BS}{Text}$"
+		case '$': Send "{BS}{Text}￥"
+		case '￥', '＄', '€', '£', '¥', '¢', '¤', '₩': Send "{BS}{Text}$"
 	}
-	if FullKBD {
-		switch q1ZiFv
-		{
-		case 'a': Send "{BS}{Text}α"  ; 小写英文字母变换为小写希腊字母。
-		case 'b': Send "{BS}{Text}β"
-		case 'c': Send "{BS}{Text}ψ"
-		case 'd': Send "{BS}{Text}δ"
-		case 'e': Send "{BS}{Text}ε"
-		case 'f': Send "{BS}{Text}φ"
-		case 'g': Send "{BS}{Text}γ"
-		case 'h': Send "{BS}{Text}η"
-		case 'i': Send "{BS}{Text}ι"
-		case 'j': Send "{BS}{Text}ξ"
-		case 'k': Send "{BS}{Text}κ"
-		case 'l': Send "{BS}{Text}λ"
-		case 'm': Send "{BS}{Text}μ"
-		case 'n': Send "{BS}{Text}ν"
-		case 'o': Send "{BS}{Text}ο"
-			; popTip("希腊文", 1)
-		case 'p': Send "{BS}{Text}π"
-		case 'r': Send "{BS}{Text}ρ"
-		case 's': Send "{BS}{Text}σ"
-		case 't': Send "{BS}{Text}τ"
-		case 'u': Send "{BS}{Text}θ"
-		case 'v': Send "{BS}{Text}ω"
-		case 'w': Send "{BS}{Text}ς"
-		case 'x': Send "{BS}{Text}χ"
-		case 'y': Send "{BS}{Text}υ"
-		case 'z': Send "{BS}{Text}ζ"
+	if FullKBD
+		switch q1ZiFv {
+			case 'a': Send "{BS}{Text}α"  ; 小写英文字母变换为小写希腊字母。
+			case 'b': Send "{BS}{Text}β"
+			case 'c': Send "{BS}{Text}ψ"
+			case 'd': Send "{BS}{Text}δ"
+			case 'e': Send "{BS}{Text}ε"
+			case 'f': Send "{BS}{Text}φ"
+			case 'g': Send "{BS}{Text}γ"
+			case 'h': Send "{BS}{Text}η"
+			case 'i': Send "{BS}{Text}ι"
+			case 'j': Send "{BS}{Text}ξ"
+			case 'k': Send "{BS}{Text}κ"
+			case 'l': Send "{BS}{Text}λ"
+			case 'm': Send "{BS}{Text}μ"
+			case 'n': Send "{BS}{Text}ν"
+			case 'o': Send "{BS}{Text}ο"
+				; popTip("希腊文", 1)
+			case 'p': Send "{BS}{Text}π"
+			case 'r': Send "{BS}{Text}ρ"
+			case 's': Send "{BS}{Text}σ"
+			case 't': Send "{BS}{Text}τ"
+			case 'u': Send "{BS}{Text}θ"
+			case 'v': Send "{BS}{Text}ω"
+			case 'w': Send "{BS}{Text}ς"
+			case 'x': Send "{BS}{Text}χ"
+			case 'y': Send "{BS}{Text}υ"
+			case 'z': Send "{BS}{Text}ζ"
 
-		case 'A': Send "{BS}{Text}Α"  ; 大写英文字母变换为大写希腊字母。
-			; popTip("希腊文", 1)
-		case 'B': Send "{BS}{Text}Β"
-		case 'C': Send "{BS}{Text}Ψ"
-		case 'D': Send "{BS}{Text}Δ"
-		case 'E': Send "{BS}{Text}Ε"
-		case 'F': Send "{BS}{Text}Φ"
-		case 'G': Send "{BS}{Text}Γ"
-		case 'H': Send "{BS}{Text}Η"
-		case 'I': Send "{BS}{Text}Ι"
-		case 'J': Send "{BS}{Text}Ξ"
-		case 'K': Send "{BS}{Text}Κ"
-		case 'L': Send "{BS}{Text}Λ"
-		case 'M': Send "{BS}{Text}Μ"
-		case 'N': Send "{BS}{Text}Ν"
-		case 'O': Send "{BS}{Text}Ο"
-		case 'P': Send "{BS}{Text}Π"
-		case 'R': Send "{BS}{Text}Ρ"
-		case 'S': Send "{BS}{Text}Σ"
-		case 'T': Send "{BS}{Text}Τ"
-		case 'U': Send "{BS}{Text}Θ"
-		case 'V': Send "{BS}{Text}Ω"
-		case 'X': Send "{BS}{Text}Χ"
-		case 'Y': Send "{BS}{Text}Υ"
-		case 'Z': Send "{BS}{Text}Ζ"
+			case 'A': Send "{BS}{Text}Α"  ; 大写英文字母变换为大写希腊字母。
+				; popTip("希腊文", 1)
+			case 'B': Send "{BS}{Text}Β"
+			case 'C': Send "{BS}{Text}Ψ"
+			case 'D': Send "{BS}{Text}Δ"
+			case 'E': Send "{BS}{Text}Ε"
+			case 'F': Send "{BS}{Text}Φ"
+			case 'G': Send "{BS}{Text}Γ"
+			case 'H': Send "{BS}{Text}Η"
+			case 'I': Send "{BS}{Text}Ι"
+			case 'J': Send "{BS}{Text}Ξ"
+			case 'K': Send "{BS}{Text}Κ"
+			case 'L': Send "{BS}{Text}Λ"
+			case 'M': Send "{BS}{Text}Μ"
+			case 'N': Send "{BS}{Text}Ν"
+			case 'O': Send "{BS}{Text}Ο"
+			case 'P': Send "{BS}{Text}Π"
+			case 'R': Send "{BS}{Text}Ρ"
+			case 'S': Send "{BS}{Text}Σ"
+			case 'T': Send "{BS}{Text}Τ"
+			case 'U': Send "{BS}{Text}Θ"
+			case 'V': Send "{BS}{Text}Ω"
+			case 'X': Send "{BS}{Text}Χ"
+			case 'Y': Send "{BS}{Text}Υ"
+			case 'Z': Send "{BS}{Text}Ζ"
 
-		case '0', '₀', '⁰', '⓿': Send "{BS}{Text}⓪"  ; 左Shift键数字漂移功能。
-		case '⓪': Send "{BS}{Text}0"
+			case '0', '₀', '⁰', '⓿': Send "{BS}{Text}⓪"  ; 左Shift键数字漂移功能。
+			case '⓪': Send "{BS}{Text}0"
 
-		case '1', '₁', '¹', '➊': Send "{BS}{Text}Ⅰ"
-		case 'Ⅰ': Send "{BS}{Text}ⅰ"
-		case 'ⅰ': Send "{BS}{Text}➀"
-		case '➀': Send "{BS}{Text}1"
+			case '1', '₁', '¹', '➊': Send "{BS}{Text}Ⅰ"
+			case 'Ⅰ': Send "{BS}{Text}ⅰ"
+			case 'ⅰ': Send "{BS}{Text}➀"
+			case '➀': Send "{BS}{Text}1"
 
-		case '2', '₂', '²', '➋': Send "{BS}{Text}Ⅱ"
-		case 'Ⅱ': Send "{BS}{Text}ⅱ"
-		case 'ⅱ': Send "{BS}{Text}➁"
-		case '➁': Send "{BS}{Text}2"
+			case '2', '₂', '²', '➋': Send "{BS}{Text}Ⅱ"
+			case 'Ⅱ': Send "{BS}{Text}ⅱ"
+			case 'ⅱ': Send "{BS}{Text}➁"
+			case '➁': Send "{BS}{Text}2"
 
-		case '3', '₃', '³', '➌': Send "{BS}{Text}Ⅲ"
-		case 'Ⅲ': Send "{BS}{Text}ⅲ"
-		case 'ⅲ': Send "{BS}{Text}➂"
-		case '➂': Send "{BS}{Text}3"
+			case '3', '₃', '³', '➌': Send "{BS}{Text}Ⅲ"
+			case 'Ⅲ': Send "{BS}{Text}ⅲ"
+			case 'ⅲ': Send "{BS}{Text}➂"
+			case '➂': Send "{BS}{Text}3"
 
-		case '4', '₄', '⁴', '➍': Send "{BS}{Text}Ⅳ"
-		case 'Ⅳ': Send "{BS}{Text}ⅳ"
-		case 'ⅳ': Send "{BS}{Text}➃"
-		case '➃': Send "{BS}{Text}4"
+			case '4', '₄', '⁴', '➍': Send "{BS}{Text}Ⅳ"
+			case 'Ⅳ': Send "{BS}{Text}ⅳ"
+			case 'ⅳ': Send "{BS}{Text}➃"
+			case '➃': Send "{BS}{Text}4"
 
-		case '5', '₅', '⁵', '➎': Send "{BS}{Text}Ⅴ"
-		case 'Ⅴ': Send "{BS}{Text}ⅴ"
-		case 'ⅴ': Send "{BS}{Text}➄"
-		case '➄': Send "{BS}{Text}5"
+			case '5', '₅', '⁵', '➎': Send "{BS}{Text}Ⅴ"
+			case 'Ⅴ': Send "{BS}{Text}ⅴ"
+			case 'ⅴ': Send "{BS}{Text}➄"
+			case '➄': Send "{BS}{Text}5"
 
-		case '6', '₆', '⁶', '➏': Send "{BS}{Text}Ⅵ"
-		case 'Ⅵ': Send "{BS}{Text}ⅵ"
-		case 'ⅵ': Send "{BS}{Text}➅"
-		case '➅': Send "{BS}{Text}6"
+			case '6', '₆', '⁶', '➏': Send "{BS}{Text}Ⅵ"
+			case 'Ⅵ': Send "{BS}{Text}ⅵ"
+			case 'ⅵ': Send "{BS}{Text}➅"
+			case '➅': Send "{BS}{Text}6"
 
-		case '7', '₇', '⁷', '➐': Send "{BS}{Text}Ⅶ"
-		case 'Ⅶ': Send "{BS}{Text}ⅶ"
-		case 'ⅶ': Send "{BS}{Text}➆"
-		case '➆': Send "{BS}{Text}7"
+			case '7', '₇', '⁷', '➐': Send "{BS}{Text}Ⅶ"
+			case 'Ⅶ': Send "{BS}{Text}ⅶ"
+			case 'ⅶ': Send "{BS}{Text}➆"
+			case '➆': Send "{BS}{Text}7"
 
-		case '8', '₈', '⁸', '➑': Send "{BS}{Text}Ⅷ"
-		case 'Ⅷ': Send "{BS}{Text}ⅷ"
-		case 'ⅷ': Send "{BS}{Text}⓼"
-		case '⓼': Send "{BS}{Text}8"
+			case '8', '₈', '⁸', '➑': Send "{BS}{Text}Ⅷ"
+			case 'Ⅷ': Send "{BS}{Text}ⅷ"
+			case 'ⅷ': Send "{BS}{Text}⓼"
+			case '⓼': Send "{BS}{Text}8"
 
-		case '9', '₉', '⁹', '➒': Send "{BS}{Text}Ⅸ"
-		case 'Ⅸ': Send "{BS}{Text}ⅸ"
-		case 'ⅸ': Send "{BS}{Text}⓽"
-		case '⓽': Send "{BS}{Text}9"
+			case '9', '₉', '⁹', '➒': Send "{BS}{Text}Ⅸ"
+			case 'Ⅸ': Send "{BS}{Text}ⅸ"
+			case 'ⅸ': Send "{BS}{Text}⓽"
+			case '⓽': Send "{BS}{Text}9"
 		}
-	}
 }
 
 ; 扩展标点变换。处理有配怼木示点符号时提供选项列表，可快速变换单个或者成对飚点。
 RShift:: {
-	switch q1ZiFv := getQ1ZiFv()
-	{
-	case '.', '。', '℉': Send "{BS}{Text}℃"
-	case '℃': Send "{BS}{Text}°"
-	case '°': Send "{BS}{Text}℉"
+	switch q1ZiFv := getQ1ZiFv() {
+		case '.', '。', '℉': Send "{BS}{Text}℃"
+		case '℃': Send "{BS}{Text}°"
+		case '°': Send "{BS}{Text}℉"
 
-	case ',', '，', '⊂': Send "{BS}{Text}∈"
-	case '∈': Send "{BS}{Text}⊆"
-	case '⊆': Send "{BS}{Text}⊂"
+		case ',', '，', '⊂': Send "{BS}{Text}∈"
+		case '∈': Send "{BS}{Text}⊆"
+		case '⊆': Send "{BS}{Text}⊂"
 
-	case '(', '（', '〘': ch8PeiDviBD(q1ZiFv, '〔')
-	case '〔': ch8PeiDviBD('〔', '〘')
+		case '(', '（', '〘': ch8PeiDviBD(q1ZiFv, '〔')
+		case '〔': ch8PeiDviBD('〔', '〘')
 
-	case ')', '）', '〙': Send "{BS}{Text}〕"
-	case '〕': Send "{BS}{Text}〙"
+		case ')', '）', '〙': Send "{BS}{Text}〕"
+		case '〕': Send "{BS}{Text}〙"
 
-	case '_', '∩': Send "{BS}{Text}∪"
-	case '—': Send "{BS 2}{Text}∪"
-	case '∪': Send "{BS}{Text}∩"
+		case '_', '∩': Send "{BS}{Text}∪"
+		case '—': Send "{BS 2}{Text}∪"
+		case '∪': Send "{BS}{Text}∩"
 
-	case ':', '：', '∷': Send "{BS}{Text}∵"
-	case '∵': Send "{BS}{Text}∴"
-	case '∴': Send "{BS}{Text}∷"
+		case ':', '：', '∷': Send "{BS}{Text}∵"
+		case '∵': Send "{BS}{Text}∴"
+		case '∴': Send "{BS}{Text}∷"
 
-	case '"':
-		Send "{Left}{Del}{Text}“"
-	case '“': Send "{BS}{Text}”"
-	case '”':
-		SendText "!"
-		Send '{Left}{BS}{Text}"'
-		Send "{Del}"
+		case '"':
+			Send "{Left}{Del}{Text}“"
+		case '“': Send "{BS}{Text}”"
+		case '”':
+			SendText "!"
+			Send '{Left}{BS}{Text}"'
+			Send "{Del}"
 
-	case '/', '÷', '√': Send "{BS}{Text}／"
-	case '／': Send "{BS}{Text}≠"
-	case '≠': Send "{BS}{Text}√"
+		case '/', '÷', '√': Send "{BS}{Text}／"
+		case '／': Send "{BS}{Text}≠"
+		case '≠': Send "{BS}{Text}√"
 
-	case '=', '≈', '≡': Send "{BS}{Text}⇒"
-	case '⇒': Send "{BS}{Text}⇔"
-	case '⇔': Send "{BS}{Text}≡"
+		case '=', '≈', '≡': Send "{BS}{Text}⇒"
+		case '⇒': Send "{BS}{Text}⇔"
+		case '⇔': Send "{BS}{Text}≡"
 
-	case '<', '《', '〈': ch8PeiDviBD(q1ZiFv)
-	case '≤', '«', '‹', '≦', '⟨': Send "{BS}<"
+		case '<', '《', '〈': ch8PeiDviBD(q1ZiFv)
+		case '≤', '«', '‹', '≦', '⟨': Send "{BS}<"
 
-	case '>', '》', '〉', '≥', '»', '›', '≧', '⟩': Send "{BS}>"
+		case '>', '》', '〉', '≥', '»', '›', '≧', '⟩': Send "{BS}>"
 
-	case ';', '；', '☒': Send "{BS}{Text}☐"
-	case '☐': Send "{BS}{Text}☑"
-	case '☑': Send "{BS}{Text}☒"
+		case ';', '；', '☒': Send "{BS}{Text}☐"
+		case '☐': Send "{BS}{Text}☑"
+		case '☑': Send "{BS}{Text}☒"
 
-	case '-', '¬', '∧': Send "{BS}{Text}∨"
-	case '∨': Send "{BS}{Text}∧"
+		case '-', '¬', '∧': Send "{BS}{Text}∨"
+		case '∨': Send "{BS}{Text}∧"
 
-	case '{', '「', '｛': ch8PeiDviBD(q1ZiFv, '『')
-	case '『': ch8PeiDviBD('『', '｛')
+		case '{', '「', '｛': ch8PeiDviBD(q1ZiFv, '『')
+		case '『': ch8PeiDviBD('『', '｛')
 
-	case '}', '」', '｝': Send "{BS}{Text}』"
-	case '』': Send "{BS}{Text}｝"
+		case '}', '」', '｝': Send "{BS}{Text}』"
+		case '』': Send "{BS}{Text}｝"
 
-	case "'": Send "{Left}{Del}{Text}‘"
-	case "‘": Send "{BS}{Text}’"
-	case "’":
-		SendText "!"
-		Send "{Left}{BS}{Text}'"
-		Send "{Del}"
+		case "'": Send "{Left}{Del}{Text}‘"
+		case "‘": Send "{BS}{Text}’"
+		case "’":
+			SendText "!"
+			Send "{Left}{BS}{Text}'"
+			Send "{Del}"
 
-	case '*', '×', '∏': Send "{BS}{Text}·"
-	case '·': Send "{BS}{Text}＊"
-	case '＊': Send "{BS}{Text}∏"
+		case '*', '×', '∏': Send "{BS}{Text}·"
+		case '·': Send "{BS}{Text}＊"
+		case '＊': Send "{BS}{Text}∏"
 
-	case '#', '■', '□': Send "{BS}{Text}◆"
-	case '◆': Send "{BS}{Text}◇"
-	case '◇': Send "{BS}{Text}□"
+		case '#', '■', '□': Send "{BS}{Text}◆"
+		case '◆': Send "{BS}{Text}◇"
+		case '◇': Send "{BS}{Text}□"
 
-	case '[', '【', '［': ch8PeiDviBD(q1ZiFv, '〖')
-	case '〖': ch8PeiDviBD('〖', '［')
+		case '[', '【', '［': ch8PeiDviBD(q1ZiFv, '〖')
+		case '〖': ch8PeiDviBD('〖', '［')
 
-	case ']', '】', '］': Send "{BS}{Text}〗"
-	case '〗': Send "{BS}{Text}］"
+		case ']', '】', '］': Send "{BS}{Text}〗"
+		case '〗': Send "{BS}{Text}］"
 
-	case '``', '‴': Send "{BS}{Text}′"
-	case '′': Send "{BS}{Text}″"
-	case '″': Send "{BS}{Text}‴"
+		case '``', '‴': Send "{BS}{Text}′"
+		case '′': Send "{BS}{Text}″"
+		case '″': Send "{BS}{Text}‴"
 
-	case '+', '±', '∮': Send "{BS}{Text}∑"
-	case '∑': Send "{BS}{Text}∫"
-	case '∫': Send "{BS}{Text}∮"
+		case '+', '±', '∮': Send "{BS}{Text}∑"
+		case '∑': Send "{BS}{Text}∫"
+		case '∫': Send "{BS}{Text}∮"
 
-	case '&', '※', '∝': Send "{BS}{Text}§"
-	case '§': Send "{BS}{Text}∞"
-	case '∞': Send "{BS}{Text}∝"
+		case '&', '※', '∝': Send "{BS}{Text}§"
+		case '§': Send "{BS}{Text}∞"
+		case '∞': Send "{BS}{Text}∝"
 
-	case '?', '？', '⭕': Send "{BS}{Text}✔"
-	case '✔': Send "{BS}{Text}❌"
-	case '❌': Send "{BS}{Text}✘"
-	case '✘': Send "{BS}{Text}⭕"
+		case '?', '？', '⭕': Send "{BS}{Text}✔"
+		case '✔': Send "{BS}{Text}❌"
+		case '❌': Send "{BS}{Text}✘"
+		case '✘': Send "{BS}{Text}⭕"
 
-	case '!', '！', '△': Send "{BS}{Text}▲"
-	case '▲': Send "{BS}{Text}⚠"
-	case '⚠': Send "{BS}{Text}△"
+		case '!', '！', '△': Send "{BS}{Text}▲"
+		case '▲': Send "{BS}{Text}⚠"
+		case '⚠': Send "{BS}{Text}△"
 
-	case '\', '、', '←': Send "{BS}{Text}→"
-	case '→': Send "{BS}{Text}↔"
-	case '↔': Send "{BS}{Text}←"
+		case '\', '、', '←': Send "{BS}{Text}→"
+		case '→': Send "{BS}{Text}↔"
+		case '↔': Send "{BS}{Text}←"
 
-	case '|', '｜', '↑', '↕', '↓', '‖', '¦': Send "{BS}|"
+		case '|', '｜', '↑', '↕', '↓', '‖', '¦': Send "{BS}|"
 
-	case '@', '●', '©', '®', '™', '○', '№': Send "{BS}@"
+		case '@', '●', '©', '®', '™', '○', '№': Send "{BS}@"
 
-	case '%', '‰', '✪': Send "{BS}{Text}★"
-	case '★': Send "{BS}{Text}☆"
-	case '☆': Send "{BS}{Text}✪"
+		case '%', '‰', '✪': Send "{BS}{Text}★"
+		case '★': Send "{BS}{Text}☆"
+		case '☆': Send "{BS}{Text}✪"
 
-	case '^', '⌘', '⌥', '⇧', '↩', '⌫', '⇪': Send "{BS}{^}"
-	case '…': Send "{BS 2}{^}"
+		case '^', '⌘', '⌥', '⇧', '↩', '⌫', '⇪': Send "{BS}{^}"
+		case '…': Send "{BS 2}{^}"
 
-	case '~', '～', '≌': Send "{BS}{Text}々"
-	case '々': Send "{BS}{Text}〃"
-	case '〃': Send "{BS}{Text}≌"
+		case '~', '～', '≌': Send "{BS}{Text}々"
+		case '々': Send "{BS}{Text}〃"
+		case '〃': Send "{BS}{Text}≌"
 
-	case '$', '￥', '＄', '€', '£', '¥', '¢', '¤', '₩': Send "{BS}$"
+		case '$', '￥', '＄', '€', '£', '¥', '¢', '¤', '₩': Send "{BS}$"
 	}
-	if FullKBD {
-		switch q1ZiFv
-		{
-		case 'α': Send "{BS}{Text}a"  ; 小写希腊字母变换为小写英文字母。
-		case 'β': Send "{BS}{Text}b"
-		case 'ψ': Send "{BS}{Text}c"
-		case 'δ': Send "{BS}{Text}d"
-		case 'φ': Send "{BS}{Text}f"
-		case 'ε': Send "{BS}{Text}e"
-		case 'γ': Send "{BS}{Text}g"
-		case 'η': Send "{BS}{Text}h"
-		case 'ι': Send "{BS}{Text}i"
-		case 'ξ': Send "{BS}{Text}j"
-		case 'κ': Send "{BS}{Text}k"
-		case 'λ': Send "{BS}{Text}l"
-		case 'μ': Send "{BS}{Text}m"
-		case 'ν': Send "{BS}{Text}n"
-		case 'ο': Send "{BS}{Text}o"
-			; popTip("英文", 1)
-		case 'π': Send "{BS}{Text}p"
-		case 'ρ': Send "{BS}{Text}r"
-		case 'σ': Send "{BS}{Text}s"
-		case 'τ': Send "{BS}{Text}t"
-		case 'θ': Send "{BS}{Text}u"
-		case 'ω': Send "{BS}{Text}v"
-		case 'ς': Send "{BS}{Text}w"
-		case 'χ': Send "{BS}{Text}x"
-		case 'υ': Send "{BS}{Text}y"
-		case 'ζ': Send "{BS}{Text}z"
+	if FullKBD
+		switch q1ZiFv {
+			case 'α': Send "{BS}{Text}a"  ; 小写希腊字母变换为小写英文字母。
+			case 'β': Send "{BS}{Text}b"
+			case 'ψ': Send "{BS}{Text}c"
+			case 'δ': Send "{BS}{Text}d"
+			case 'φ': Send "{BS}{Text}f"
+			case 'ε': Send "{BS}{Text}e"
+			case 'γ': Send "{BS}{Text}g"
+			case 'η': Send "{BS}{Text}h"
+			case 'ι': Send "{BS}{Text}i"
+			case 'ξ': Send "{BS}{Text}j"
+			case 'κ': Send "{BS}{Text}k"
+			case 'λ': Send "{BS}{Text}l"
+			case 'μ': Send "{BS}{Text}m"
+			case 'ν': Send "{BS}{Text}n"
+			case 'ο': Send "{BS}{Text}o"
+				; popTip("英文", 1)
+			case 'π': Send "{BS}{Text}p"
+			case 'ρ': Send "{BS}{Text}r"
+			case 'σ': Send "{BS}{Text}s"
+			case 'τ': Send "{BS}{Text}t"
+			case 'θ': Send "{BS}{Text}u"
+			case 'ω': Send "{BS}{Text}v"
+			case 'ς': Send "{BS}{Text}w"
+			case 'χ': Send "{BS}{Text}x"
+			case 'υ': Send "{BS}{Text}y"
+			case 'ζ': Send "{BS}{Text}z"
 
-		case 'Α': Send "{BS}{Text}A"  ; 大写希腊字母变换为大写英文字母。
-			; popTip("英文", 1)
-		case 'Β': Send "{BS}{Text}B"
-		case 'Ψ': Send "{BS}{Text}C"
-		case 'Δ': Send "{BS}{Text}D"
-		case 'Ε': Send "{BS}{Text}E"
-		case 'Φ': Send "{BS}{Text}F"
-		case 'Γ': Send "{BS}{Text}G"
-		case 'Η': Send "{BS}{Text}H"
-		case 'Ι': Send "{BS}{Text}I"
-		case 'Ξ': Send "{BS}{Text}J"
-		case 'Κ': Send "{BS}{Text}K"
-		case 'Λ': Send "{BS}{Text}L"
-		case 'Μ': Send "{BS}{Text}M"
-		case 'Ν': Send "{BS}{Text}N"
-		case 'Ο': Send "{BS}{Text}O"
-		case 'Π': Send "{BS}{Text}P"
-		case 'Ρ': Send "{BS}{Text}R"
-		case 'Σ': Send "{BS}{Text}S"
-		case 'Τ': Send "{BS}{Text}T"
-		case 'Θ': Send "{BS}{Text}U"
-		case 'Ω': Send "{BS}{Text}V"
-		case 'Χ': Send "{BS}{Text}X"
-		case 'Υ': Send "{BS}{Text}Y"
-		case 'Ζ': Send "{BS}{Text}Z"
+			case 'Α': Send "{BS}{Text}A"  ; 大写希腊字母变换为大写英文字母。
+				; popTip("英文", 1)
+			case 'Β': Send "{BS}{Text}B"
+			case 'Ψ': Send "{BS}{Text}C"
+			case 'Δ': Send "{BS}{Text}D"
+			case 'Ε': Send "{BS}{Text}E"
+			case 'Φ': Send "{BS}{Text}F"
+			case 'Γ': Send "{BS}{Text}G"
+			case 'Η': Send "{BS}{Text}H"
+			case 'Ι': Send "{BS}{Text}I"
+			case 'Ξ': Send "{BS}{Text}J"
+			case 'Κ': Send "{BS}{Text}K"
+			case 'Λ': Send "{BS}{Text}L"
+			case 'Μ': Send "{BS}{Text}M"
+			case 'Ν': Send "{BS}{Text}N"
+			case 'Ο': Send "{BS}{Text}O"
+			case 'Π': Send "{BS}{Text}P"
+			case 'Ρ': Send "{BS}{Text}R"
+			case 'Σ': Send "{BS}{Text}S"
+			case 'Τ': Send "{BS}{Text}T"
+			case 'Θ': Send "{BS}{Text}U"
+			case 'Ω': Send "{BS}{Text}V"
+			case 'Χ': Send "{BS}{Text}X"
+			case 'Υ': Send "{BS}{Text}Y"
+			case 'Ζ': Send "{BS}{Text}Z"
 
-		case '0', '⓪': Send "{BS}{Text}₀"  ; 右Shift键数字漂移功能。
-		case '₀': Send "{BS}{Text}⁰"
-		case '⁰': Send "{BS}{Text}⓿"
-		case '⓿': Send "{BS}{Text}0"
+			case '0', '⓪': Send "{BS}{Text}₀"  ; 右Shift键数字漂移功能。
+			case '₀': Send "{BS}{Text}⁰"
+			case '⁰': Send "{BS}{Text}⓿"
+			case '⓿': Send "{BS}{Text}0"
 
-		case '1', 'Ⅰ', 'ⅰ', '➀': Send "{BS}{Text}₁"
-		case '₁': Send "{BS}{Text}¹"
-		case '¹': Send "{BS}{Text}➊"
-		case '➊': Send "{BS}{Text}1"
+			case '1', 'Ⅰ', 'ⅰ', '➀': Send "{BS}{Text}₁"
+			case '₁': Send "{BS}{Text}¹"
+			case '¹': Send "{BS}{Text}➊"
+			case '➊': Send "{BS}{Text}1"
 
-		case '2', 'Ⅱ', 'ⅱ', '➁': Send "{BS}{Text}₂"
-		case '₂': Send "{BS}{Text}²"
-		case '²': Send "{BS}{Text}➋"
-		case '➋': Send "{BS}{Text}2"
+			case '2', 'Ⅱ', 'ⅱ', '➁': Send "{BS}{Text}₂"
+			case '₂': Send "{BS}{Text}²"
+			case '²': Send "{BS}{Text}➋"
+			case '➋': Send "{BS}{Text}2"
 
-		case '3', 'Ⅲ', 'ⅲ', '➂': Send "{BS}{Text}₃"
-		case '₃': Send "{BS}{Text}³"
-		case '³': Send "{BS}{Text}➌"
-		case '➌': Send "{BS}{Text}3"
+			case '3', 'Ⅲ', 'ⅲ', '➂': Send "{BS}{Text}₃"
+			case '₃': Send "{BS}{Text}³"
+			case '³': Send "{BS}{Text}➌"
+			case '➌': Send "{BS}{Text}3"
 
-		case '4', 'Ⅳ', 'ⅳ', '➃': Send "{BS}{Text}₄"
-		case '₄': Send "{BS}{Text}⁴"
-		case '⁴': Send "{BS}{Text}➍"
-		case '➍': Send "{BS}{Text}4"
+			case '4', 'Ⅳ', 'ⅳ', '➃': Send "{BS}{Text}₄"
+			case '₄': Send "{BS}{Text}⁴"
+			case '⁴': Send "{BS}{Text}➍"
+			case '➍': Send "{BS}{Text}4"
 
-		case '5', 'Ⅴ', 'ⅴ', '➄': Send "{BS}{Text}₅"
-		case '₅': Send "{BS}{Text}⁵"
-		case '⁵': Send "{BS}{Text}➎"
-		case '➎': Send "{BS}{Text}5"
+			case '5', 'Ⅴ', 'ⅴ', '➄': Send "{BS}{Text}₅"
+			case '₅': Send "{BS}{Text}⁵"
+			case '⁵': Send "{BS}{Text}➎"
+			case '➎': Send "{BS}{Text}5"
 
-		case '6', 'Ⅵ', 'ⅵ', '➅': Send "{BS}{Text}₆"
-		case '₆': Send "{BS}{Text}⁶"
-		case '⁶': Send "{BS}{Text}➏"
-		case '➏': Send "{BS}{Text}6"
+			case '6', 'Ⅵ', 'ⅵ', '➅': Send "{BS}{Text}₆"
+			case '₆': Send "{BS}{Text}⁶"
+			case '⁶': Send "{BS}{Text}➏"
+			case '➏': Send "{BS}{Text}6"
 
-		case '7': Send "{BS}{Text}₇"
-		case '₇': Send "{BS}{Text}⁷"
-		case '⁷': Send "{BS}{Text}➐"
-		case '➐': Send "{BS}{Text}7"
+			case '7': Send "{BS}{Text}₇"
+			case '₇': Send "{BS}{Text}⁷"
+			case '⁷': Send "{BS}{Text}➐"
+			case '➐': Send "{BS}{Text}7"
 
-		case '8', 'Ⅷ', 'ⅷ', '⓼': Send "{BS}{Text}₈"
-		case '₈': Send "{BS}{Text}⁸"
-		case '⁸': Send "{BS}{Text}➑"
-		case '➑': Send "{BS}{Text}8"
+			case '8', 'Ⅷ', 'ⅷ', '⓼': Send "{BS}{Text}₈"
+			case '₈': Send "{BS}{Text}⁸"
+			case '⁸': Send "{BS}{Text}➑"
+			case '➑': Send "{BS}{Text}8"
 
-		case '9', 'Ⅸ', 'ⅸ', '⓽': Send "{BS}{Text}₉"
-		case '₉': Send "{BS}{Text}⁹"
-		case '⁹': Send "{BS}{Text}➒"
-		case '➒': Send "{BS}{Text}9"
+			case '9', 'Ⅸ', 'ⅸ', '⓽': Send "{BS}{Text}₉"
+			case '₉': Send "{BS}{Text}⁹"
+			case '⁹': Send "{BS}{Text}➒"
+			case '➒': Send "{BS}{Text}9"
 		}
-	}
 }
 
 #HotIf GetKeyState("CapsLock", "T")  ; 如果CapsLock键处于打开状态
