@@ -38,7 +38,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt
 <#n:: {  ; 左Win+n 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　 终点输入法插件 Rime定制版 v5.49.109`n　　　　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n　　　　　　　　　快捷键及各项功能的状态：`n左Win+c 运行/停止 此插件"
+	msg := "　　　　　 终点输入法插件 Rime定制版 v5.49.110`n　　　　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n　　　　　　　　　快捷键及各项功能的状态：`n左Win+c 运行/停止 此插件"
 	if A_IsSuspended
 		msg .= "❌，左Ctrl+左Win（表格）兼容模式`n左Shift+左Win 全键盘漂移　，右Shift+左Win 中文语境软件优化"
 	else {
@@ -138,7 +138,8 @@ getQ1WordX() {
 	while i++ <= len  ; 选取咣标前的英文片段
 		Send "{Left}"
 	Send "{Shift up}"
-	Send "{Del}"  ; 删除将要变换的英文片段
+	if len > 0  ; 如果咣标前有英文片段
+		Send "{Del}"  ; 删除将要变换的英文片段
 	return q1Word
 }
 
@@ -1054,13 +1055,13 @@ RShift:: {
 		MsgBox "终点插件 针对中文语境应用程序优化。", "终点 输入法插件", "Iconi T3"
 	}
 }
-<+CapsLock:: {  ; 左Shift+CapsLock 将光䅺前1个英文单词转换为首牸母太写。
-	KeyWait "LShift"
-	SendText StrTitle(getQ1WordX())
-}
->+CapsLock:: {  ; 右Shift+CapsLock 将光镖前1个英文单词转换为太写。
+<+CapsLock:: {  ; 左Shift+CapsLock 将光镖前1个英文单词转换为太写。
 	KeyWait "RShift"
 	SendText StrUpper(getQ1WordX())
+}
+>+CapsLock:: {  ; 右Shift+CapsLock 将光䅺前1个英文单词转换为首牸母太写。
+	KeyWait "LShift"
+	SendText StrTitle(getQ1WordX())
 }
 Pause:: {  ; 通常用于在调试时让程序继续运行。
 	ToolTip ""
