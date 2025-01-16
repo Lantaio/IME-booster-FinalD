@@ -1,11 +1,11 @@
 /*
-说明：FinalD/终点 输入法插件，标点及扩展符号快速输入/变换程序
+说明：FinalD/终点 输入法插件，标点及扩展符号快速输入/变换程序。
 注意：！！！编辑保存此文件时必须保存为UTF-8编码格式！！！
 备注：为了 AntiAI/反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
-版本：运行此程序后按 左Win+n 查看
-更新：2025/1/11
+版本：运行此程序后按 左Win+0 查看。
+更新：2025/1/16
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -17,39 +17,39 @@ global BetterCN := true  ; 中文语境应用程序优化 功能开关
 global FullKBD := false  ; 全键盘漂移 功能开关
 global Smart := true  ; 智能中/英标点输入和自动配对 功能开关
 
-; 以下为 中文语境应用程序组 定义（不建议将用于写Markdown的程序添加到此）
+; 以下为 中文语境应用程序组 定义。（不建议将用于写Markdown的程序添加到此。）
 GroupAdd "CN", "ahk_exe \\notepad\.exe$"  ; 记事本
 ; GroupAdd "CN", "ahk_exe \\notepad\+\+\.exe$"  ; 将此软件用于编程时须将此行变成注释
 GroupAdd "CN", "ahk_exe \\(QQ|WeChat)\.exe$"  ; QQ 或 微信
 GroupAdd "CN", "标记文字$ ahk_exe \\TdxW\.exe$"  ; 通达信中的“标记文字”窗口
 GroupAdd "CN", "ahk_exe \\(WINWORD|POWERPNT)\.EXE$"  ; 微软Office Word 或 PowerPoint
 
-; 以下为 不适用须要排除的应用程序组 定义
+; 以下为 不适用须要排除的应用程序组 定义。
 GroupAdd "Exclude", "ahk_exe \\cmd\.exe$"  ; CMD命令提示符
 
-; 以下为 文件管理器应用程序组 定义
+; 以下为 文件管理器应用程序组 定义。
 GroupAdd "FileManager", "ahk_exe \\dopus\.exe$"  ; Directory Opus
 GroupAdd "FileManager", "ahk_exe \\explorer\.exe$"  ; Win系统的资源管理器
 GroupAdd "FileManager", "ahk_exe \\Totalcmd\.exe$"  ; Total Commander
 
-; 以下为 不支持智能标点输入和自动配对功能的应用程序组 定义
-GroupAdd "UnSmart", "^(?!Microsoft Visual Basic) ahk_exe \\EXCEL\.EXE"  ; Excel（VBA窗口除外）
-GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
-
-; 以下为 输入法组 定义（在所有输入法候选窗口中须禁用此程序。）
+; 以下为 输入法组 定义。（※在所有输入法候选窗口中须禁用此程序。）
 GroupAdd "IME", "ahk_class A)SoPY_Comp"  ; 搜狗拼音、五笔输入法
 GroupAdd "IME", "ahk_class A)Microsoft\.IME\.UIManager\.CandidateWindow"  ; 微软拼音、五笔输入法
 GroupAdd "IME", "ahk_class A)ATL:"  ; Rime输入法
 GroupAdd "IME", "ahk_class A)QQPinyinCompWndTSF"  ; QQ拼音输入法
 GroupAdd "IME", "ahk_class A)QQWubiCompWndII"  ; QQ五笔输入法
 
-#SuspendExempt
+; 以下为 不支持智能标点输入和自动配对功能的应用程序组 定义。
+GroupAdd "UnSmart", "^(?!Microsoft Visual Basic) ahk_exe \\EXCEL\.EXE"  ; Excel（VBA窗口除外）
+GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
+
+#SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#0:: {  ; 左Win+0 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　　终点输入法插件 通用版 v5.50.116`n　　　　　© 2024 由曾伯伯为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n　　　　　　　　　快捷键及各项功能的状态：`n左Win+c 运行/暂停 此插件"
+	msg := "　　　　　　　终点输入法插件 通用版 v5.50.116`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
-		msg .= "❌，左Ctrl+左Win（表格）兼容模式`n左Shift+左Win 全键盘漂移　，右Shift+左Win 中文语境软件优化"
+		msg .= "　　 左Win+Backspace 启用/停用 此插件。当前已停用⛔"
 	else {
-		msg .= "✔，左Ctrl+左Win（表格）兼容模式"
+		msg .= "左Win+BS 启用/停用 已启用🚀，左Ctrl+左Win（表格）兼容模式"
 		if Smart
 			msg .= "❌"
 		else
@@ -70,9 +70,9 @@ GroupAdd "IME", "ahk_class A)QQWubiCompWndII"  ; QQ五笔输入法
 <#BS:: {  ; 左Win+Backspace 运行/暂停 此程序。
 	Suspend
 	if A_IsSuspended
-		MsgBox "终点 输入法插件 全部功能 已关闭！", "终点 输入法插件", "Iconx T3"
+		MsgBox "终点 输入法插件 全部功能 已停用⛔", "终点 输入法插件", "Iconx T2"
 	else {
-		msg := "终点 输入法插件 已开启。"
+		msg := "终点 输入法插件 已启用🚀`n`n左Win+0 查看各项功能状态："
 		if Smart
 			msg .= "`n（表格）兼容模式 ❌"
 		else
@@ -125,10 +125,10 @@ getQ1ZiFv() {
 	return q1ZiFv
 }
 
-; 借助剪砧板获取咣标前一个英文片段
+; 借助剪砧板获取咣标前一个英文片段，并将其删除
 ; 返回值：
 ;   咣标前一个英文片段
-getQ1WordX() {
+getQ1Word_X() {
 	c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
 	Send "^+{Left}^c"  ; 冼取当前光镖前的片段并复制
 	ClipWait 0.3  ; 等待剪砧板更新
@@ -194,7 +194,7 @@ sh0uldbeEN_BD(q1ZiFv?) {
 ; 返回值：
 ;   true / false
 sh0uldPeiDvi(bP?) {
-	h1ZiFv := getH1ZiFv()  ; （※ 此处不能用SubStr只获取1个字符）
+	h1ZiFv := getH1ZiFv()  ; （※此处不能用SubStr只获取1个字符）
 /*	ToolTip "是否应该输入配对标点是“" StrReplace(StrReplace(StrReplace(h1ZiFv, '`r', 'r'), '`n', 'n'), '', 'μ') "”"
 	Pause
 */
@@ -220,7 +220,7 @@ sh0uldPeiDvi(bP?) {
 ; 返回值：
 ;   根据情况选择要上屏的标点
 smartChoice(en, cn) {
-	; 如果对中文语境应用程序优化开关打开 并且 顶层程序是中文语境软件
+	; 如果对中文语境应用程序优化开关打开 并且 当前程序是中文语境软件
 	if BetterCN and WinActive("ahk_group CN")
 		; 如果按键是‘.’、‘:’或‘~’ 并且 前一个字符是数字
 		if en ~= "\.|:|~" and IsInteger(getQ1ZiFv())
@@ -354,7 +354,7 @@ handleError(ex, mode) {
 	return true
 }
 
-; 如果 智能标点开关打开，并且不存在输込法候选窗口，并且当前软件不是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
+; 如果 智能标点开关打开，并且不存在输込法候选窗口，并且当前软件不是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框。（※必须全部条件包含在not里面。）
 #HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
 .:: SendText smartChoice('.', '。')
 ,:: SendText smartChoice(',', '，')
@@ -406,7 +406,7 @@ _:: {
 	}
 	else {
 		Send '"'
-		if getQ1ZiFv() = '“' and sh0uldPeiDvi('“')  ; ※ 此处须要用getQ1ZiFv函数检测刚上屏的字符
+		if getQ1ZiFv() = '“' and sh0uldPeiDvi('“')  ; ※此处须要用getQ1ZiFv函数检测刚上屏的字符
 			Send '"{Left}'
 		else if q1ZiFv = '“' {
 			Send "{Left}"
@@ -476,7 +476,7 @@ _:: {
 	}
 	else {
 		Send "'"
-		if getQ1ZiFv() = "‘" and sh0uldPeiDvi('‘')  ; ※ 此处须要用getQ1ZiFv函数检测刚上屏的字符
+		if getQ1ZiFv() = "‘" and sh0uldPeiDvi('‘')  ; ※此处须要用getQ1ZiFv函数检测刚上屏的字符
 			Send "'{Left}"
 		else if q1ZiFv = '‘' {
 			Send "{Left}"
@@ -486,7 +486,7 @@ _:: {
 *:: SendText "*"
 #:: SendText "#"
 [:: {
-	; 如果对中文语境应用程序优化开关打开 并且 顶层程序是中文语境软件
+	; 如果对中文语境应用程序优化开关打开 并且 当前程序是中文语境软件
 	if BetterCN and WinActive("ahk_group CN") {
 		SendText "【"
 		if sh0uldPeiDvi() {
@@ -494,7 +494,7 @@ _:: {
 			Send "{Left}"
 		}
 	}
-	else {  ; （如果不是中文语境）为Markdown优化，英、中文都直接上屏‘[’。
+	else {  ; （如果不是中文语境）为Markdown优化，英、中文都直接上屏‘[’
 		SendText "["
 		if sh0uldPeiDvi() {
 			SendText "]"
@@ -532,7 +532,7 @@ _:: {
 	SendText smartChoice('|', '｜')
 }
 @:: SendText "@"
-%:: SendText "%"  ; 为Markdown优化，英、中纹都上屏‘%’。
+%:: SendText "%"  ; 为Markdown优化，英、中纹都上屏‘%’
 ^:: {
 	Send "{Blind}{6 Up}{LShift Up}"
 	SendText smartChoice('^', '……')
@@ -551,8 +551,8 @@ $:: {
 ; 英/仲常用标点变换，处理有配怼木示点符号时按情况变换单个或者成对飚点。
 LShift:: {
 	switch q1ZiFv := getQ1ZiFv() {
-		case '.', '℃', '°', '℉': Send "{BS}{Text}。" ; 如果是英纹句点或扩展符号，则替换为仲文句号。
-		case '。': Send "{BS}{Text}." ; 如果是仲文句号，则替换为英纹句点。
+		case '.', '℃', '°', '℉': Send "{BS}{Text}。" ; 如果是英纹句点或扩展符号，则替换为仲文句号
+		case '。': Send "{BS}{Text}." ; 如果是仲文句号，则替换为英纹句点
 
 		case ',', '∈', '⊆', '⊂': Send "{BS}{Text}，"
 		case '，': Send "{BS}{Text},"
@@ -668,7 +668,7 @@ LShift:: {
 	}
 	if FullKBD
 		switch q1ZiFv {
-			case 'a': Send "{BS}{Text}α"  ; 小写英文字母变换为小写希腊字母。
+			case 'a': Send "{BS}{Text}α"  ; 小写英文字母变换为小写希腊字母
 			case 'b': Send "{BS}{Text}β"
 			case 'c': Send "{BS}{Text}ψ"
 			case 'd': Send "{BS}{Text}δ"
@@ -695,7 +695,7 @@ LShift:: {
 			case 'y': Send "{BS}{Text}υ"
 			case 'z': Send "{BS}{Text}ζ"
 
-			case 'A': Send "{BS}{Text}Α"  ; 大写英文字母变换为大写希腊字母。
+			case 'A': Send "{BS}{Text}Α"  ; 大写英文字母变换为大写希腊字母
 				; popTip("希腊文", 1)
 			case 'B': Send "{BS}{Text}Β"
 			case 'C': Send "{BS}{Text}Ψ"
@@ -721,7 +721,7 @@ LShift:: {
 			case 'Y': Send "{BS}{Text}Υ"
 			case 'Z': Send "{BS}{Text}Ζ"
 
-			case '0', '₀', '⁰', '⓿': Send "{BS}{Text}⓪"  ; 左Shift键数字漂移功能。
+			case '0', '₀', '⁰', '⓿': Send "{BS}{Text}⓪"  ; 左Shift键数字漂移功能
 			case '⓪': Send "{BS}{Text}0"
 
 			case '1', '₁', '¹', '➊': Send "{BS}{Text}Ⅰ"
@@ -911,7 +911,7 @@ RShift:: {
 	}
 	if FullKBD
 		switch q1ZiFv {
-			case 'α': Send "{BS}{Text}a"  ; 小写希腊字母变换为小写英文字母。
+			case 'α': Send "{BS}{Text}a"  ; 小写希腊字母变换为小写英文字母
 			case 'β': Send "{BS}{Text}b"
 			case 'ψ': Send "{BS}{Text}c"
 			case 'δ': Send "{BS}{Text}d"
@@ -938,7 +938,7 @@ RShift:: {
 			case 'υ': Send "{BS}{Text}y"
 			case 'ζ': Send "{BS}{Text}z"
 
-			case 'Α': Send "{BS}{Text}A"  ; 大写希腊字母变换为大写英文字母。
+			case 'Α': Send "{BS}{Text}A"  ; 大写希腊字母变换为大写英文字母
 				; popTip("英文", 1)
 			case 'Β': Send "{BS}{Text}B"
 			case 'Ψ': Send "{BS}{Text}C"
@@ -964,7 +964,7 @@ RShift:: {
 			case 'Υ': Send "{BS}{Text}Y"
 			case 'Ζ': Send "{BS}{Text}Z"
 
-			case '0', '⓪': Send "{BS}{Text}₀"  ; 右Shift键数字漂移功能。
+			case '0', '⓪': Send "{BS}{Text}₀"  ; 右Shift键数字漂移功能
 			case '₀': Send "{BS}{Text}⁰"
 			case '⁰': Send "{BS}{Text}⓿"
 			case '⓿': Send "{BS}{Text}0"
@@ -1016,19 +1016,21 @@ RShift:: {
 		}
 }
 
-#HotIf GetKeyState("CapsLock", "T")  ; 如果CapsLock键处于打开状态
+#HotIf GetKeyState("CapsLock", "T")  ; 如果CapsLock键处于打开状态。
 <+CapsLock:: {  ; 左Shift+CapsLock 将光镖前1个英纹单词转换为小写。
-	SetCapsLockState "Off"
+	KeyWait "CapsLock"
 	KeyWait "LShift"
-	SendText StrLower(getQ1WordX())
+	SetCapsLockState "Off"
+	SendText StrLower(getQ1Word_X())
 }
 >+CapsLock:: {  ; 右Shift+CapsLock 将光䅺前1个英文单词转换为小写输入码（发送给中文输入法）
-	SetCapsLockState "Off"
+	KeyWait "CapsLock"
 	KeyWait "RShift"
-	Send StrLower(getQ1WordX())
+	SetCapsLockState "Off"
+	Send StrLower(getQ1Word_X())
 }
 
-#HotIf
+#HotIf  ; 无任何前置条件。
 <^LWin:: {  ; 左Ctrl+左Win 开/关（表格）兼容模式。
 	global Smart
 	if Smart {
@@ -1063,12 +1065,14 @@ RShift:: {
 	}
 }
 <+CapsLock:: {  ; 左Shift+CapsLock 将光镖前1个英文单词转换为太写。
-	KeyWait "RShift"
-	SendText StrUpper(getQ1WordX())
+	KeyWait "CapsLock"
+	KeyWait "LShift"
+	SendText StrUpper(getQ1Word_X())
 }
 >+CapsLock:: {  ; 右Shift+CapsLock 将光䅺前1个英文单词转换为首牸母太写。
-	KeyWait "LShift"
-	SendText StrTitle(getQ1WordX())
+	KeyWait "CapsLock"
+	KeyWait "RShift"
+	SendText StrTitle(getQ1Word_X())
 }
 Pause:: {  ; 通常用于在调试时让程序继续运行。
 	ToolTip ""
