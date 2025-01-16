@@ -7,7 +7,7 @@
 * 🐣️在不是自动配对的情况下，输入成对的标点时光标会回到成对标点中间（2025/1/12）
 
 ### 优化更改
-* 🔧修改运行/暂停此程序的快捷键为左<kbd>Win</kbd>+<kbd>Backspace</kbd>，修改显示程序版本信息的快捷键为左<kbd>Win</kbd>+<kbd>0</kbd>，以避免和Windows系统的快捷键冲突（2025/1/12）
+* 🔧修改启用/停用此程序的快捷键为左<kbd>Win</kbd>+<kbd>Backspace</kbd>，修改显示程序版本信息的快捷键为左<kbd>Win</kbd>+<kbd>0</kbd>，以避免和Windows系统的快捷键冲突（2025/1/12）
 * 🔧️修改smartType函数为smartChoice，修改hasPeiDviBD函数以提高复用率（2025/1/12）
 * ✨️调整switch语句块的缩进样式（2025/1/12）
 * 🐱‍🏍Rime定制版中按<kbd>^</kbd>键改为智能输入‘^’号或‘……’号，改用<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>^</kbd>触发输入扩展标点符号。另外，用<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>$</kbd>触发输入大写数字和大写金额（2025/1/16）
