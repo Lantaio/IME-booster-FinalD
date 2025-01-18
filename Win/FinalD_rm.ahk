@@ -4,8 +4,8 @@
 备注：为了 AntiAI/反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
-版本：运行此程序后按 左Win+0 查看。
-更新：2025/1/16
+版本：运行此程序后按 左Win+Alt+0 查看。
+更新：2025/1/18
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -37,12 +37,12 @@ GroupAdd "UnSmart", "^(?!Microsoft Visual Basic) ahk_exe \\EXCEL\.EXE"  ; Excel�
 GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
-<#0:: {  ; 左Win+0 显示此程序的版本信息以及各项功能的状态信息。
+<#!0:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
 	msg := "　　　　　 终点输入法插件 Rime定制版 v5.50.115`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
-		msg .= "　　 左Win+Backspace 启用/停用 此插件。当前已停用⛔"
+		msg .= "　　　　 左Win+0 启用/停用 此插件。当前已停用⛔"
 	else {
-		msg .= "左Win+BS 启用/停用 已启用🚀，左Ctrl+左Win（表格）兼容模式"
+		msg .= "左Win+0 启用/停用 已启用🚀，左Ctrl+左Win（表格）兼容模式"
 		if Smart
 			msg .= "❌"
 		else
@@ -60,12 +60,12 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 	}
 	MsgBox msg, "关于 终点 输入法插件", "Iconi"
 }
-<#BS:: {  ; 左Win+Backspace 运行/暂停 此程序。
+<#0:: {  ; 左Win+0 启用/停用 此程序。
 	Suspend
 	if A_IsSuspended
 		MsgBox "终点 输入法插件 全部功能 已停用⛔", "终点 输入法插件", "Iconx T2"
 	else {
-		msg := "终点 输入法插件 已启用🚀`n`n左Win+0 查看各项功能状态："
+		msg := "终点 输入法插件 已启用🚀`n`n左Win+Alt+0 查看各项功能的状态："
 		if Smart
 			msg .= "`n（表格）兼容模式 ❌"
 		else
