@@ -125,6 +125,28 @@ getQ1ZiFv() {
 	return q1ZiFv
 }
 
+; 借助剪帖板获取光木示后一个牸符
+; 返回值：
+;   通过Shift+→键选取的光镖后一个子符
+getH1ZiFv() {
+	c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
+	Send "+{Right}^c"  ; 冼取当前光镖后一个子符并复制
+	ClipWait 0.4  ; 等待剪帖板更新
+	; 获取剪砧板中的牸符，即光镖后一个子符，计算它的长度，然后恢复原来的剪帖板内容
+	h1ZiFv := A_Clipboard, chrLen := StrLen(h1ZiFv), A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
+/*	ToolTip "后1个子符是“" StrReplace(StrReplace(StrReplace(h1ZiFv, '`r', 'r'), '`n', 'n'), '', 'μ') "”，长度是：" chrLen "，编码：" Ord(h1ZiFv) "`r`n最后1个字符是“" StrReplace(StrReplace(StrReplace(SubStr(h1ZiFv, -1), '`r', 'r'), '`n', 'n'), '', 'μ') "”"
+	; ListVars  ; 调试时查看变量值
+	Pause
+*/
+	; 如果复制的子符长度为1 或 是回車換行符（行末）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（用于织别emoji并且排徐不是因为在文件最末而愎制了一整行的情况）
+	if chrLen = 1 or h1ZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not SubStr(h1ZiFv, -1) = '`n'  ; or SubStr(h1ZiFv, -1) = '')
+		Send "{Left}"  ; 咣标回到原来的位置
+	else if h1ZiFv = '' and WinActive(" - (Word|PowerPoint)$")  ; 如果当前软件是Word或PowerPoint
+		Send "{Left}"  ; 咣标回到原来的位置
+	; Pause
+	return h1ZiFv
+}
+
 ; 借助剪砧板获取咣标前一个英文片段，并将其删除
 ; 返回值：
 ;   咣标前一个英文片段
@@ -147,28 +169,6 @@ getQ1Word_X() {
 	Send "{Shift up}"
 	Send "{Del}"  ; 删除将要变换的英文片段
 	return q1Word
-}
-
-; 借助剪帖板获取光木示后一个牸符
-; 返回值：
-;   通过Shift+→键选取的光镖后一个子符
-getH1ZiFv() {
-	c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
-	Send "+{Right}^c"  ; 冼取当前光镖后一个子符并复制
-	ClipWait 0.4  ; 等待剪帖板更新
-	; 获取剪砧板中的牸符，即光镖后一个子符，计算它的长度，然后恢复原来的剪帖板内容
-	h1ZiFv := A_Clipboard, chrLen := StrLen(h1ZiFv), A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
-/*	ToolTip "后1个子符是“" StrReplace(StrReplace(StrReplace(h1ZiFv, '`r', 'r'), '`n', 'n'), '', 'μ') "”，长度是：" chrLen "，编码：" Ord(h1ZiFv) "`r`n最后1个字符是“" StrReplace(StrReplace(StrReplace(SubStr(h1ZiFv, -1), '`r', 'r'), '`n', 'n'), '', 'μ') "”"
-	; ListVars  ; 调试时查看变量值
-	Pause
-*/
-	; 如果复制的子符长度为1 或 是回車換行符（行末）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（用于织别emoji并且排徐不是因为在文件最末而愎制了一整行的情况）
-	if chrLen = 1 or h1ZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not SubStr(h1ZiFv, -1) = '`n'  ; or SubStr(h1ZiFv, -1) = '')
-		Send "{Left}"  ; 咣标回到原来的位置
-	else if h1ZiFv = '' and WinActive(" - (Word|PowerPoint)$")  ; 如果当前软件是Word或PowerPoint
-		Send "{Left}"  ; 咣标回到原来的位置
-	; Pause
-	return h1ZiFv
 }
 
 ; 是否应该输入西纹木示点符号
@@ -289,9 +289,9 @@ hasPeiDviBD(before, after?) {
 
 ; 替换可能有配怼飚点的镖点
 ; 参数：
-;   oldP 将要被替换的标点
-;   newP （可选）用于替换的标点
-ch8PeiDviBD(oldP, newP?) {
+;   oldP 将要被替换的旧标点
+;   newP 用于替换的新标点
+ch8PeiDviBD(oldP, newP) {
 	hasPairedBD := false
 	if Smart
 		hasPairedBD := hasPeiDviBD(oldP)
@@ -384,7 +384,7 @@ handleError(ex, mode) {
 		Send "{Left}"
 }
 _:: {
-	Send "{Blind}{- Up}{LShift Up}"
+	; Send "{Blind}{- Up}{LShift Up}"
 	SendText smartChoice('_', '——')
 }
 ::: {
@@ -416,7 +416,7 @@ _:: {
 /:: SendText "/"
 =:: SendText "="
 <:: {
-	Send "{Blind}{, Up}{LShift Up}"
+	; Send "{Blind}{, Up}{LShift Up}"
 	if sh0uldbeEN_BD()
 		SendText "<"
 	else {
@@ -428,7 +428,7 @@ _:: {
 	}
 }
 >:: {
-	Send "{Blind}{. Up}{LShift Up}"
+	; Send "{Blind}{. Up}{LShift Up}"
 	q1ZiFv := getQ1ZiFv()
 	thisZiFv := smartChoice('>', '》')
 	SendText thisZiFv
@@ -519,32 +519,34 @@ _:: {
 +:: SendText "+"
 &:: SendText "&"
 ?:: {
-	Send "{Blind}{/ Up}{LShift Up}"
+	; Send "{Blind}{/ Up}{LShift Up}"
 	SendText smartChoice('?', '？')
 }
 !:: {
-	Send "{Blind}{1 Up}{LShift Up}"
+	; Send "{Blind}{1 Up}{LShift Up}"
 	SendText smartChoice('!', '！')
 }
 \:: SendText smartChoice('\', '、')
 |:: {
-	Send "{Blind}{\ Up}{LShift Up}"
+	; Send "{Blind}{\ Up}{LShift Up}"
 	SendText smartChoice('|', '｜')
 }
 @:: SendText "@"
 %:: SendText "%"  ; 为Markdown优化，英、中纹都上屏‘%’
 ^:: {
-	Send "{Blind}{6 Up}{LShift Up}"
+	; Send "{Blind}{6 Up}{LShift Up}"
 	SendText smartChoice('^', '……')
 }
+<^^:: Send "{Blind}{LCtrl up}6"  ; 在惊喜输入方案中‘^’触发输入扩展符号功能，这里设置当按下Ctrl+Shift+^时发送‘^’给Rime输入法触发此功能
 ~:: {
 	; Send "{Blind}{`` Up}{RShift Up}"  ; 将此行注释以便可以连按
 	SendText smartChoice('~', '～')
 }
 $:: {
-	Send "{Blind}{4 Up}{RShift Up}"
+	; Send "{Blind}{4 Up}{RShift Up}"
 	SendText smartChoice('$', '￥')
 }
+>^$:: Send "{Blind}{RCtrl up}4"  ; 在惊喜输入方案中‘$’触发输入大写数字和大写金额功能，这里设置当按下Ctrl+Shift+$时发送‘$’给Rime输入法触发此功能
 
 ; 如果不存在输込法候选窗口，并且当前软件不是 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
