@@ -177,7 +177,7 @@ getQ1Word_X() {
 hasMS_IMEWindow() {
 	CoordMode "Pixel"  ; 将下面的坐标解释为相对于屏幕而不是活动窗口的客户端区域
 	try {
-		return ImageSearch(&FoundX, &FoundY, 0, 0, A_ScreenWidth, A_ScreenHeight, "MS_IMEIcon.png")
+		return ImageSearch(&FoundX, &FoundY, 0, 0, A_ScreenWidth, A_ScreenHeight, "MS_IMEIcon.gif")
 	}
 }
 
