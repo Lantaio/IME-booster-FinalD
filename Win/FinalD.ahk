@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按 左Win+Alt+0 查看。
-更新：2025/1/19
+更新：2025/1/20
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -45,7 +45,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!0:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　　FinalD/终点 输入法插件 v5.50.116`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
+	msg := "　　　　　　　FinalD/终点 输入法插件 v5.51.118`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
 		msg .= "　　　　 左Win+0 启用/停用 此插件。当前已停用⛔"
 	else {
@@ -169,6 +169,16 @@ getQ1Word_X() {
 	Send "{Shift up}"
 	Send "{Del}"  ; 删除将要变换的英文片段
 	return q1Word
+}
+
+; 在Windows 11系统中检测是否存在微软输入法候选窗口
+; 返回值：
+;   true / false
+hasMS_IMEWindow() {
+	CoordMode "Pixel"  ; 将下面的坐标解释为相对于屏幕而不是活动窗口的客户端区域
+	try {
+		return ImageSearch(&FoundX, &FoundY, 0, 0, A_ScreenWidth, A_ScreenHeight, "MS_IMEIcon.png")
+	}
 }
 
 ; 是否应该输入西纹木示点符号
@@ -355,7 +365,7 @@ handleError(ex, mode) {
 }
 
 ; 如果 智能标点开关打开，并且不存在输込法候选窗口，并且当前软件不是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框。（※必须全部条件包含在not里面。）
-#HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
+#HotIf Smart and not (WinExist("ahk_group IME") or hasMS_IMEWindow() or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
 .:: SendText smartChoice('.', '。')
 ,:: SendText smartChoice(',', '，')
 (:: {
@@ -549,7 +559,7 @@ $:: {
 >^$:: Send "{Blind}{RCtrl up}4"  ; 在惊喜输入方案中‘$’触发输入大写数字和大写金额功能，这里设置当按下Ctrl+Shift+$时发送‘$’给Rime输入法触发此功能
 
 ; 如果不存在输込法候选窗口，并且当前软件不是 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
-#HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
+#HotIf not (WinExist("ahk_group IME") or hasMS_IMEWindow() or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
 ; 英/仲常用标点变换，处理有配怼木示点符号时按情况变换单个或者成对飚点。
 LShift:: {
 	switch q1ZiFv := getQ1ZiFv() {
