@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按 左Win+Alt+0 查看。
-更新：2025/1/20
+更新：2025/1/27
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -38,6 +38,7 @@ GroupAdd "IME", "ahk_class A)Microsoft\.IME\.UIManager\.CandidateWindow"  ; 微�
 GroupAdd "IME", "ahk_class A)ATL:"  ; Rime输入法
 GroupAdd "IME", "ahk_class A)QQPinyinCompWndTSF"  ; QQ拼音输入法
 GroupAdd "IME", "ahk_class A)QQWubiCompWndII"  ; QQ五笔输入法
+GroupAdd "IME", "ahk_class A)QQWubiCandWndII"  ; QQ五笔；模式
 
 ; 以下为 不支持智能标点输入和自动配对功能的应用程序组 定义。
 GroupAdd "UnSmart", "^(?!Microsoft Visual Basic) ahk_exe \\EXCEL\.EXE"  ; Excel（VBA窗口除外）
@@ -45,7 +46,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!0:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　　FinalD/终点 输入法插件 v5.51.118`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
+	msg := "　　　　　　 FinalD/终点 输入法插件 v5.52.122`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
 		msg .= "　　　　 左Win+0 启用/停用 此插件。当前已停用⛔"
 	else {
@@ -171,16 +172,6 @@ getQ1Word_X() {
 	return q1Word
 }
 
-; 在Windows 11系统中检测是否存在微软输入法候选窗口
-; 返回值：
-;   true / false
-hasMS_IMEWindow() {
-	CoordMode "Pixel"  ; 将下面的坐标解释为相对于屏幕而不是活动窗口的客户端区域
-	try {
-		return ImageSearch(&FoundX, &FoundY, 0, 0, A_ScreenWidth, A_ScreenHeight, "MS_IMEIcon.gif")
-	}
-}
-
 ; 是否应该输入西纹木示点符号
 ; 参数：
 ;   q1ZiFv （可选）提供前一字符
@@ -193,7 +184,7 @@ sh0uldbeEN_BD(q1ZiFv?) {
 	Pause
 */
 	; 如果前一个子符在西纹牸符集中
-	if Ord(q1ZiFv) < 0x2000  ; or q1ZiFv = '‘'
+	if Ord(q1ZiFv) < 0x2000
 		return true
 	return false
 }
@@ -228,11 +219,11 @@ sh0uldPeiDvi(bP?) {
 ;   en 按键对应的英文标点符号
 ;   cn 按键对应的中文标点符号
 ; 返回值：
-;   根据情况选择要上屏的标点
+;   根据情况选择要上屏英文还是中文标点
 smartChoice(en, cn) {
 	; 如果对中文语境应用程序优化开关打开 并且 当前程序是中文语境软件
 	if BetterCN and WinActive("ahk_group CN")
-		; 如果按键是‘.’、‘:’或‘~’ 并且 前一个字符是数字
+		; 如果按键是‘.’、‘:’或‘~’ 并且 前一个字符是数字，则选英文标点
 		if en ~= "\.|:|~" and IsInteger(getQ1ZiFv())
 			Return en
 		else
@@ -243,57 +234,63 @@ smartChoice(en, cn) {
 		Return cn
 }
 
-; 检测是否有成对的木示点
+; 检测是不是成对的木示点
 ; 参数：
 ;   before 检测这个字符（如果是前标点）是否有相配怼的标点
 ;   after 提供后标点以检测是否和参数before是成怼的标点
 ; 返回值：
 ;   true / false
-hasPeiDviBD(before, after?) {
-	if isSet(after)  ; 如果 提供了后标点，则……
-		switch before {
-			case '(': return after = ')'
-			case '（': return after = '）'
-			case '"': return after = '"'
-			case '“': return after = '”'
-			case "'": return after = "'"
-			case '‘': return after = '’'
-			case '{': return after = '}'
-			case '「': return after = '」'
-			case '『': return after = '』'
-			case '〘': return after = '〙'
-			case '｛': return after = '｝'
-			case '[': return after = ']'
-			case '【': return after = '】'
-			case '〖': return after = '〗'
-			case '〔': return after = '〕'
-			case '［': return after = '］'
-			case '<': return after = '>'
-			case '《': return after = '》'
-			case '〈': return after = '〉'
-		}
-	else  ; 否则（即没有提供后标点参数），则……
-		switch before {
-			case '(': return getH1ZiFv() = ')'
-			case '（': return getH1ZiFv() = '）'
-			case '"': return getH1ZiFv() = '"'
-			case '“': return getH1ZiFv() = '”'
-			case "'": return getH1ZiFv() = "'"
-			case '‘': return getH1ZiFv() = '’'
-			case '{': return getH1ZiFv() = '}'
-			case '「': return getH1ZiFv() = '」'
-			case '『': return getH1ZiFv() = '』'
-			case '〘': return getH1ZiFv() = '〙'
-			case '｛': return getH1ZiFv() = '｝'
-			case '[': return getH1ZiFv() = ']'
-			case '【': return getH1ZiFv() = '】'
-			case '〖': return getH1ZiFv() = '〗'
-			case '〔': return getH1ZiFv() = '〕'
-			case '［': return getH1ZiFv() = '］'
-			case '<': return getH1ZiFv() = '>'
-			case '《': return getH1ZiFv() = '》'
-			case '〈': return getH1ZiFv() = '〉'
-		}
+isPeiDviBD(before, after) {
+	switch before {
+		case '(': return after = ')'
+		case '（': return after = '）'
+		case '"': return after = '"'
+		case '“': return after = '”'
+		case "'": return after = "'"
+		case '‘': return after = '’'
+		case '{': return after = '}'
+		case '「': return after = '」'
+		case '『': return after = '』'
+		case '〘': return after = '〙'
+		case '｛': return after = '｝'
+		case '[': return after = ']'
+		case '【': return after = '】'
+		case '〖': return after = '〗'
+		case '〔': return after = '〕'
+		case '［': return after = '］'
+		case '<': return after = '>'
+		case '《': return after = '》'
+		case '〈': return after = '〉'
+	}
+	return false
+}
+; 检测是否有成对的木示点
+; 参数：
+;   before 检测这个字符（如果是前标点）是否有相配怼的标点
+; 返回值：
+;   true / false
+hasPeiDviBD(before) {
+	switch before {
+		case '(': return getH1ZiFv() = ')'
+		case '（': return getH1ZiFv() = '）'
+		case '"': return getH1ZiFv() = '"'
+		case '“': return getH1ZiFv() = '”'
+		case "'": return getH1ZiFv() = "'"
+		case '‘': return getH1ZiFv() = '’'
+		case '{': return getH1ZiFv() = '}'
+		case '「': return getH1ZiFv() = '」'
+		case '『': return getH1ZiFv() = '』'
+		case '〘': return getH1ZiFv() = '〙'
+		case '｛': return getH1ZiFv() = '｝'
+		case '[': return getH1ZiFv() = ']'
+		case '【': return getH1ZiFv() = '】'
+		case '〖': return getH1ZiFv() = '〗'
+		case '〔': return getH1ZiFv() = '〕'
+		case '［': return getH1ZiFv() = '］'
+		case '<': return getH1ZiFv() = '>'
+		case '《': return getH1ZiFv() = '》'
+		case '〈': return getH1ZiFv() = '〉'
+	}
 	return false
 }
 
@@ -308,7 +305,8 @@ ch8PeiDviBD(oldP, newP) {
 	SendText "!"
 	Send "{Left}{BS}"
 	switch oldP {
-		case '(', '"', "'", '{', '[', '<': SendText newP
+		case '(', '"', "'": SendText(newP), showTip("前", 1)
+		case '{', '[', '<': SendText newP
 		case '（', '“', '‘', '「', '『', '〘', '｛', '【', '〖', '〔', '［', '《', '〈': SendText newP
 	}
 	Send "{Del}"
@@ -316,12 +314,12 @@ ch8PeiDviBD(oldP, newP) {
 		Send "{Del}{Text}!"
 		Send "{Left}"
 		switch newP {
-			case '(': SendText ')'
-			case '（': SendText '）'
-			case '"': SendText '"'
-			case '“': SendText '”'
-			case "'": SendText "'"
-			case '‘': SendText '’'
+			case '(': SendText(')')
+			case '（': SendText('）'), showTip("配对", 1)
+			case '"': SendText('"')
+			case '“': SendText('”'), showTip("配对", 1)
+			case "'": SendText("'")
+			case '‘': SendText('’'), showTip("配对", 1)
 			case '{': SendText '}'
 			case '「': SendText '」'
 			case '『': SendText '』'
@@ -346,11 +344,12 @@ ch8PeiDviBD(oldP, newP) {
 ; 参数：
 ;   info 提示信息内容
 ;   sec 提示信息显示时长，以秒为单位
-popTip(info, sec) {
-	msec := sec * 1000  ; 将显示时长转换为以毫秒作为单位
+showTip(info, sec) {
+	mSec := sec * 1000  ; 将显示时长转换为以毫秒作为单位
+	; Sleep 500
 	if CaretGetPos(&x, &y) {
-		ToolTip info, x, y - 20
-		SetTimer () => ToolTip(), - msec
+		ToolTip info, x, y - 25
+		SetTimer ToolTip, -mSec
 	}
 }
 
@@ -365,7 +364,7 @@ handleError(ex, mode) {
 }
 
 ; 如果 智能标点开关打开，并且不存在输込法候选窗口，并且当前软件不是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框。（※必须全部条件包含在not里面。）
-#HotIf Smart and not (WinExist("ahk_group IME") or hasMS_IMEWindow() or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
+#HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))  ; or hasMS_IMEWindow()
 .:: SendText smartChoice('.', '。')
 ,:: SendText smartChoice(',', '，')
 (:: {
@@ -379,9 +378,11 @@ handleError(ex, mode) {
 	}
 	else {
 		SendText "（"
+		showTip "前", 1
 		if sh0uldPeiDvi() {
 			SendText "）"
 			Send "{Left}"
+			showTip "配对", 1
 		}
 	}
 }
@@ -390,7 +391,9 @@ handleError(ex, mode) {
 	q1ZiFv := getQ1ZiFv()
 	thisZiFv := smartChoice(')', '）')
 	SendText thisZiFv
-	if hasPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
+	if thisZiFv = '）'
+		showTip "后", 1
+	if isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
 		Send "{Left}"
 }
 _:: {
@@ -406,20 +409,28 @@ _:: {
 	q1ZiFv := getQ1ZiFv()
 	if sh0uldbeEN_BD(q1ZiFv) {
 		SendText '"'
-		if (q1ZiFv = '' or q1ZiFv = ' ' or SubStr(q1ZiFv, -1) = '`n') and sh0uldPeiDvi(ThisHotkey) {
+		if (q1ZiFv = ' ' or SubStr(q1ZiFv, -1) = '`n' or q1ZiFv = '`v' or q1ZiFv = '') and sh0uldPeiDvi(ThisHotkey) {  ; 如果 应该自动配对，则……
 			SendText '"'
 			Send "{Left}"
 		}
-		else if q1ZiFv = '"' {
+		else if q1ZiFv = '"' {  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则咣标回到成对标点中间
 			Send "{Left}"
 		}
 	}
 	else {
 		Send '"'
-		if getQ1ZiFv() = '“' and sh0uldPeiDvi('“')  ; ※此处须要用getQ1ZiFv函数检测刚上屏的字符
-			Send '"{Left}'
-		else if q1ZiFv = '“' {
-			Send "{Left}"
+		thisZiFv := getQ1ZiFv()
+		if thisZiFv = '“' {
+			showTip "前", 1
+			if sh0uldPeiDvi('“') {  ; 如果 应该自动配对，则……
+				Send '"{Left}'
+				showTip "配对", 1
+			}
+		}
+		else {
+			showTip "后", 1
+			if q1ZiFv = '“'  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则咣标回到成对标点中间
+				Send "{Left}"
 		}
 	}
 }
@@ -442,7 +453,7 @@ _:: {
 	q1ZiFv := getQ1ZiFv()
 	thisZiFv := smartChoice('>', '》')
 	SendText thisZiFv
-	if hasPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
+	if isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
 		Send "{Left}"
 }
 `;:: SendText smartChoice(';', '；')
@@ -469,27 +480,35 @@ _:: {
 	q1ZiFv := getQ1ZiFv()
 	thisZiFv := smartChoice('}', '」')
 	SendText thisZiFv
-	if hasPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
+	if isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
 		Send "{Left}"
 }
 ':: {
 	q1ZiFv := getQ1ZiFv()
 	if sh0uldbeEN_BD(q1ZiFv) {
 		SendText "'"
-		if (q1ZiFv = '' or q1ZiFv = ' ' or SubStr(q1ZiFv, -1) = '`n') and sh0uldPeiDvi(ThisHotkey) {
+		if (q1ZiFv = ' ' or SubStr(q1ZiFv, -1) = '`n' or q1ZiFv = '`v' or q1ZiFv = '') and sh0uldPeiDvi(ThisHotkey) {  ; 如果 应该自动配对，则……
 			SendText "'"
 			Send "{Left}"
 		}
-		else if q1ZiFv = "'" {
+		else if q1ZiFv = "'" {  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则咣标回到成对标点中间
 			Send "{Left}"
 		}
 	}
 	else {
 		Send "'"
-		if getQ1ZiFv() = "‘" and sh0uldPeiDvi('‘')  ; ※此处须要用getQ1ZiFv函数检测刚上屏的字符
-			Send "'{Left}"
-		else if q1ZiFv = '‘' {
-			Send "{Left}"
+		thisZiFv := getQ1ZiFv()
+		if thisZiFv = "‘" {
+			showTip "前", 1
+			if sh0uldPeiDvi('‘') {  ; 如果 应该自动配对，则……
+				Send "'{Left}"
+				showTip "配对", 1
+			}
+		}
+		else {
+			showTip "后", 1
+			if q1ZiFv = '‘'  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则咣标回到成对标点中间
+				Send "{Left}"
 		}
 	}
 }
@@ -559,9 +578,9 @@ $:: {
 >^$:: Send "{Blind}{RCtrl up}4"  ; 在惊喜输入方案中‘$’触发输入大写数字和大写金额功能，这里设置当按下Ctrl+Shift+$时发送‘$’给Rime输入法触发此功能
 
 ; 如果不存在输込法候选窗口，并且当前软件不是 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
-#HotIf not (WinExist("ahk_group IME") or hasMS_IMEWindow() or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))
+#HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))  ; or hasMS_IMEWindow()
 ; 英/仲常用标点变换，处理有配怼木示点符号时按情况变换单个或者成对飚点。
-LShift:: {
+LShift:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
 	switch q1ZiFv := getQ1ZiFv() {
 		case '.', '℃', '°', '℉': Send "{BS}{Text}。" ; 如果是英纹句点或扩展符号，则替换为仲文句号
 		case '。': Send "{BS}{Text}." ; 如果是仲文句号，则替换为英纹句点
@@ -572,7 +591,7 @@ LShift:: {
 		case '(', '〔', '〘': ch8PeiDviBD(q1ZiFv, '（')
 		case '（': ch8PeiDviBD('（', '(')
 
-		case ')', '〕', '〙': Send "{BS}{Text}）"
+		case ')', '〕', '〙': Send("{BS}{Text}）"), showTip("后", 1)
 		case '）':
 			SendText "!"
 			Send "{Left}{BS}{Text})"
@@ -695,7 +714,7 @@ LShift:: {
 			case 'm': Send "{BS}{Text}μ"
 			case 'n': Send "{BS}{Text}ν"
 			case 'o': Send "{BS}{Text}ο"
-				; popTip("希腊文", 1)
+				; showTip("希腊文", 1)
 			case 'p': Send "{BS}{Text}π"
 			case 'r': Send "{BS}{Text}ρ"
 			case 's': Send "{BS}{Text}σ"
@@ -708,7 +727,7 @@ LShift:: {
 			case 'z': Send "{BS}{Text}ζ"
 
 			case 'A': Send "{BS}{Text}Α"  ; 大写英文字母变换为大写希腊字母
-				; popTip("希腊文", 1)
+				; showTip("希腊文", 1)
 			case 'B': Send "{BS}{Text}Β"
 			case 'C': Send "{BS}{Text}Ψ"
 			case 'D': Send "{BS}{Text}Δ"
@@ -784,7 +803,7 @@ LShift:: {
 }
 
 ; 扩展标点变换。处理有配怼木示点符号时可快速变换单个或者成对飚点。
-RShift:: {
+RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 	switch q1ZiFv := getQ1ZiFv() {
 		case '.', '。', '℉': Send "{BS}{Text}℃"
 		case '℃': Send "{BS}{Text}°"
@@ -808,13 +827,13 @@ RShift:: {
 		case '∵': Send "{BS}{Text}∴"
 		case '∴': Send "{BS}{Text}∷"
 
-		case '"':
-			Send "{Left}{Del}{Text}“"
-		case '“': Send "{BS}{Text}”"
+		case '"': Send("{Left}{Del}{Text}“"), showTip("前", 1)
+		case '“': Send("{BS}{Text}”"), showTip("后", 1)
 		case '”':
 			SendText "!"
 			Send '{Left}{BS}{Text}"'
 			Send "{Del}"
+			; showTip "英", 1
 
 		case '/', '÷', '√': Send "{BS}{Text}／"
 		case '／': Send "{BS}{Text}≠"
@@ -846,8 +865,8 @@ RShift:: {
 		case '}', '」', '｝': Send "{BS}{Text}』"
 		case '』': Send "{BS}{Text}｝"
 
-		case "'": Send "{Left}{Del}{Text}‘"
-		case "‘": Send "{BS}{Text}’"
+		case "'": Send("{Left}{Del}{Text}‘"), showTip("前", 1)
+		case "‘": Send("{BS}{Text}’"), showTip("后", 1)
 		case "’":
 			SendText "!"
 			Send "{Left}{BS}{Text}'"
@@ -938,7 +957,7 @@ RShift:: {
 			case 'μ': Send "{BS}{Text}m"
 			case 'ν': Send "{BS}{Text}n"
 			case 'ο': Send "{BS}{Text}o"
-				; popTip("英文", 1)
+				; showTip("英文", 1)
 			case 'π': Send "{BS}{Text}p"
 			case 'ρ': Send "{BS}{Text}r"
 			case 'σ': Send "{BS}{Text}s"
@@ -951,7 +970,7 @@ RShift:: {
 			case 'ζ': Send "{BS}{Text}z"
 
 			case 'Α': Send "{BS}{Text}A"  ; 大写希腊字母变换为大写英文字母
-				; popTip("英文", 1)
+				; showTip("英文", 1)
 			case 'Β': Send "{BS}{Text}B"
 			case 'Ψ': Send "{BS}{Text}C"
 			case 'Δ': Send "{BS}{Text}D"
