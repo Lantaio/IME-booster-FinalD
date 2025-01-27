@@ -34,11 +34,12 @@ GroupAdd "FileManager", "ahk_exe \\Totalcmd\.exe$"  ; Total Commander
 
 ; 以下为 输入法组 定义。（※在所有输入法候选窗口中须禁用此程序。）
 GroupAdd "IME", "ahk_class A)ATL:"  ; Rime输入法
-GroupAdd "IME", "ahk_class A)Microsoft\.IME\.UIManager\.CandidateWindow"  ; 微软拼音、五笔输入法
-GroupAdd "IME", "ahk_class A)SoPY_Comp"  ; 搜狗拼音、五笔输入法
-GroupAdd "IME", "ahk_class A)QQPinyinCompWndTSF"  ; QQ拼音输入法
-GroupAdd "IME", "ahk_class A)QQWubiCompWndII"  ; QQ五笔输入法
+GroupAdd "IME", "ahk_class A)Microsoft\.IME\.UIManager\.CandidateWindow"  ; 微软拼音、五笔
+GroupAdd "IME", "ahk_class A)SoPY_Comp"  ; 搜狗拼音、五笔
+GroupAdd "IME", "ahk_class A)QQPinyinCompWnd"  ; QQ拼音
+GroupAdd "IME", "ahk_class A)QQWubiCompWndII"  ; QQ五笔
 GroupAdd "IME", "ahk_class A)QQWubiCandWndII"  ; QQ五笔；模式
+GroupAdd "IME", "ahk_class A)HandyPinyinCandidateWindow"  ; 手心拼音
 GroupAdd "IME", "ahk_class A)TfFrameClass"  ; 智能ABC
 
 ; 以下为 不支持智能标点输入和自动配对功能的应用程序组 定义。
