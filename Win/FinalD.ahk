@@ -33,12 +33,13 @@ GroupAdd "FileManager", "ahk_exe \\explorer\.exe$"  ; Win系统的资源管理�
 GroupAdd "FileManager", "ahk_exe \\Totalcmd\.exe$"  ; Total Commander
 
 ; 以下为 输入法组 定义。（※在所有输入法候选窗口中须禁用此程序。）
-GroupAdd "IME", "ahk_class A)SoPY_Comp"  ; 搜狗拼音、五笔输入法
-GroupAdd "IME", "ahk_class A)Microsoft\.IME\.UIManager\.CandidateWindow"  ; 微软拼音、五笔输入法
 GroupAdd "IME", "ahk_class A)ATL:"  ; Rime输入法
+GroupAdd "IME", "ahk_class A)Microsoft\.IME\.UIManager\.CandidateWindow"  ; 微软拼音、五笔输入法
+GroupAdd "IME", "ahk_class A)SoPY_Comp"  ; 搜狗拼音、五笔输入法
 GroupAdd "IME", "ahk_class A)QQPinyinCompWndTSF"  ; QQ拼音输入法
 GroupAdd "IME", "ahk_class A)QQWubiCompWndII"  ; QQ五笔输入法
 GroupAdd "IME", "ahk_class A)QQWubiCandWndII"  ; QQ五笔；模式
+GroupAdd "IME", "ahk_class A)TfFrameClass"  ; 智能ABC
 
 ; 以下为 不支持智能标点输入和自动配对功能的应用程序组 定义。
 GroupAdd "UnSmart", "^(?!Microsoft Visual Basic) ahk_exe \\EXCEL\.EXE"  ; Excel（VBA窗口除外）
@@ -46,7 +47,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!0:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　 FinalD/终点 输入法插件 v5.52.122`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
+	msg := "　　　　　　 FinalD/终点 输入法插件 v5.52.124`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
 		msg .= "　　　　 左Win+0 启用/停用 此插件。当前已停用⛔"
 	else {
@@ -346,7 +347,6 @@ ch8PeiDviBD(oldP, newP) {
 ;   sec 提示信息显示时长，以秒为单位
 showTip(info, sec) {
 	mSec := sec * 1000  ; 将显示时长转换为以毫秒作为单位
-	; Sleep 500
 	if CaretGetPos(&x, &y) {
 		ToolTip info, x, y - 25
 		SetTimer ToolTip, -mSec
@@ -699,58 +699,56 @@ LShift:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
 	}
 	if FullKBD
 		switch q1ZiFv {
-			case 'a': Send "{BS}{Text}α"  ; 小写英文字母变换为小写希腊字母
-			case 'b': Send "{BS}{Text}β"
-			case 'c': Send "{BS}{Text}ψ"
-			case 'd': Send "{BS}{Text}δ"
-			case 'e': Send "{BS}{Text}ε"
-			case 'f': Send "{BS}{Text}φ"
-			case 'g': Send "{BS}{Text}γ"
-			case 'h': Send "{BS}{Text}η"
-			case 'i': Send "{BS}{Text}ι"
-			case 'j': Send "{BS}{Text}ξ"
-			case 'k': Send "{BS}{Text}κ"
-			case 'l': Send "{BS}{Text}λ"
-			case 'm': Send "{BS}{Text}μ"
-			case 'n': Send "{BS}{Text}ν"
-			case 'o': Send "{BS}{Text}ο"
-				; showTip("希腊文", 1)
-			case 'p': Send "{BS}{Text}π"
-			case 'r': Send "{BS}{Text}ρ"
-			case 's': Send "{BS}{Text}σ"
-			case 't': Send "{BS}{Text}τ"
-			case 'u': Send "{BS}{Text}θ"
-			case 'v': Send "{BS}{Text}ω"
-			case 'w': Send "{BS}{Text}ς"
-			case 'x': Send "{BS}{Text}χ"
-			case 'y': Send "{BS}{Text}υ"
-			case 'z': Send "{BS}{Text}ζ"
+			case 'α': Send "{BS}{Text}a"  ; 小写希腊字母变换为小写英文字母
+			case 'β': Send "{BS}{Text}b"
+			case 'ψ': Send "{BS}{Text}c"
+			case 'δ': Send "{BS}{Text}d"
+			case 'φ': Send "{BS}{Text}f"
+			case 'ε': Send "{BS}{Text}e"
+			case 'γ': Send "{BS}{Text}g"
+			case 'η': Send "{BS}{Text}h"
+			case 'ι': Send "{BS}{Text}i"
+			case 'ξ': Send "{BS}{Text}j"
+			case 'κ': Send "{BS}{Text}k"
+			case 'λ': Send "{BS}{Text}l"
+			case 'μ': Send "{BS}{Text}m"
+			case 'ν': Send "{BS}{Text}n"
+			case 'ο': Send "{BS}{Text}o"
+			case 'π': Send "{BS}{Text}p"
+			case 'ρ': Send "{BS}{Text}r"
+			case 'σ': Send "{BS}{Text}s"
+			case 'τ': Send "{BS}{Text}t"
+			case 'θ': Send "{BS}{Text}u"
+			case 'ω': Send "{BS}{Text}v"
+			case 'ς': Send "{BS}{Text}w"
+			case 'χ': Send "{BS}{Text}x"
+			case 'υ': Send "{BS}{Text}y"
+			case 'ζ': Send "{BS}{Text}z"
 
-			case 'A': Send "{BS}{Text}Α"  ; 大写英文字母变换为大写希腊字母
-				; showTip("希腊文", 1)
-			case 'B': Send "{BS}{Text}Β"
-			case 'C': Send "{BS}{Text}Ψ"
-			case 'D': Send "{BS}{Text}Δ"
-			case 'E': Send "{BS}{Text}Ε"
-			case 'F': Send "{BS}{Text}Φ"
-			case 'G': Send "{BS}{Text}Γ"
-			case 'H': Send "{BS}{Text}Η"
-			case 'I': Send "{BS}{Text}Ι"
-			case 'J': Send "{BS}{Text}Ξ"
-			case 'K': Send "{BS}{Text}Κ"
-			case 'L': Send "{BS}{Text}Λ"
-			case 'M': Send "{BS}{Text}Μ"
-			case 'N': Send "{BS}{Text}Ν"
-			case 'O': Send "{BS}{Text}Ο"
-			case 'P': Send "{BS}{Text}Π"
-			case 'R': Send "{BS}{Text}Ρ"
-			case 'S': Send "{BS}{Text}Σ"
-			case 'T': Send "{BS}{Text}Τ"
-			case 'U': Send "{BS}{Text}Θ"
-			case 'V': Send "{BS}{Text}Ω"
-			case 'X': Send "{BS}{Text}Χ"
-			case 'Y': Send "{BS}{Text}Υ"
-			case 'Z': Send "{BS}{Text}Ζ"
+			case 'Α': Send "{BS}{Text}A"  ; 大写希腊字母变换为大写英文字母
+			case 'Β': Send "{BS}{Text}B"
+			case 'Ψ': Send "{BS}{Text}C"
+			case 'Δ': Send "{BS}{Text}D"
+			case 'Ε': Send "{BS}{Text}E"
+			case 'Φ': Send "{BS}{Text}F"
+			case 'Γ': Send "{BS}{Text}G"
+			case 'Η': Send "{BS}{Text}H"
+			case 'Ι': Send "{BS}{Text}I"
+			case 'Ξ': Send "{BS}{Text}J"
+			case 'Κ': Send "{BS}{Text}K"
+			case 'Λ': Send "{BS}{Text}L"
+			case 'Μ': Send "{BS}{Text}M"
+			case 'Ν': Send "{BS}{Text}N"
+			case 'Ο': Send "{BS}{Text}O"
+			case 'Π': Send "{BS}{Text}P"
+			case 'Ρ': Send "{BS}{Text}R"
+			case 'Σ': Send "{BS}{Text}S"
+			case 'Τ': Send "{BS}{Text}T"
+			case 'Θ': Send "{BS}{Text}U"
+			case 'Ω': Send "{BS}{Text}V"
+			case 'Χ': Send "{BS}{Text}X"
+			case 'Υ': Send "{BS}{Text}Y"
+			case 'Ζ': Send "{BS}{Text}Z"
 
 			case '0', '₀', '⁰', '⓿': Send "{BS}{Text}⓪"  ; 左Shift键数字漂移功能
 			case '⓪': Send "{BS}{Text}0"
@@ -942,58 +940,56 @@ RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 	}
 	if FullKBD
 		switch q1ZiFv {
-			case 'α': Send "{BS}{Text}a"  ; 小写希腊字母变换为小写英文字母
-			case 'β': Send "{BS}{Text}b"
-			case 'ψ': Send "{BS}{Text}c"
-			case 'δ': Send "{BS}{Text}d"
-			case 'φ': Send "{BS}{Text}f"
-			case 'ε': Send "{BS}{Text}e"
-			case 'γ': Send "{BS}{Text}g"
-			case 'η': Send "{BS}{Text}h"
-			case 'ι': Send "{BS}{Text}i"
-			case 'ξ': Send "{BS}{Text}j"
-			case 'κ': Send "{BS}{Text}k"
-			case 'λ': Send "{BS}{Text}l"
-			case 'μ': Send "{BS}{Text}m"
-			case 'ν': Send "{BS}{Text}n"
-			case 'ο': Send "{BS}{Text}o"
-				; showTip("英文", 1)
-			case 'π': Send "{BS}{Text}p"
-			case 'ρ': Send "{BS}{Text}r"
-			case 'σ': Send "{BS}{Text}s"
-			case 'τ': Send "{BS}{Text}t"
-			case 'θ': Send "{BS}{Text}u"
-			case 'ω': Send "{BS}{Text}v"
-			case 'ς': Send "{BS}{Text}w"
-			case 'χ': Send "{BS}{Text}x"
-			case 'υ': Send "{BS}{Text}y"
-			case 'ζ': Send "{BS}{Text}z"
+			case 'a': Send "{BS}{Text}α"  ; 小写英文字母变换为小写希腊字母
+			case 'b': Send "{BS}{Text}β"
+			case 'c': Send "{BS}{Text}ψ"
+			case 'd': Send "{BS}{Text}δ"
+			case 'e': Send "{BS}{Text}ε"
+			case 'f': Send "{BS}{Text}φ"
+			case 'g': Send "{BS}{Text}γ"
+			case 'h': Send "{BS}{Text}η"
+			case 'i': Send "{BS}{Text}ι"
+			case 'j': Send "{BS}{Text}ξ"
+			case 'k': Send "{BS}{Text}κ"
+			case 'l': Send "{BS}{Text}λ"
+			case 'm': Send "{BS}{Text}μ"
+			case 'n': Send "{BS}{Text}ν"
+			case 'o': Send "{BS}{Text}ο"
+			case 'p': Send "{BS}{Text}π"
+			case 'r': Send "{BS}{Text}ρ"
+			case 's': Send "{BS}{Text}σ"
+			case 't': Send "{BS}{Text}τ"
+			case 'u': Send "{BS}{Text}θ"
+			case 'v': Send "{BS}{Text}ω"
+			case 'w': Send "{BS}{Text}ς"
+			case 'x': Send "{BS}{Text}χ"
+			case 'y': Send "{BS}{Text}υ"
+			case 'z': Send "{BS}{Text}ζ"
 
-			case 'Α': Send "{BS}{Text}A"  ; 大写希腊字母变换为大写英文字母
-				; showTip("英文", 1)
-			case 'Β': Send "{BS}{Text}B"
-			case 'Ψ': Send "{BS}{Text}C"
-			case 'Δ': Send "{BS}{Text}D"
-			case 'Ε': Send "{BS}{Text}E"
-			case 'Φ': Send "{BS}{Text}F"
-			case 'Γ': Send "{BS}{Text}G"
-			case 'Η': Send "{BS}{Text}H"
-			case 'Ι': Send "{BS}{Text}I"
-			case 'Ξ': Send "{BS}{Text}J"
-			case 'Κ': Send "{BS}{Text}K"
-			case 'Λ': Send "{BS}{Text}L"
-			case 'Μ': Send "{BS}{Text}M"
-			case 'Ν': Send "{BS}{Text}N"
-			case 'Ο': Send "{BS}{Text}O"
-			case 'Π': Send "{BS}{Text}P"
-			case 'Ρ': Send "{BS}{Text}R"
-			case 'Σ': Send "{BS}{Text}S"
-			case 'Τ': Send "{BS}{Text}T"
-			case 'Θ': Send "{BS}{Text}U"
-			case 'Ω': Send "{BS}{Text}V"
-			case 'Χ': Send "{BS}{Text}X"
-			case 'Υ': Send "{BS}{Text}Y"
-			case 'Ζ': Send "{BS}{Text}Z"
+			case 'A': Send "{BS}{Text}Α"  ; 大写英文字母变换为大写希腊字母
+			case 'B': Send "{BS}{Text}Β"
+			case 'C': Send "{BS}{Text}Ψ"
+			case 'D': Send "{BS}{Text}Δ"
+			case 'E': Send "{BS}{Text}Ε"
+			case 'F': Send "{BS}{Text}Φ"
+			case 'G': Send "{BS}{Text}Γ"
+			case 'H': Send "{BS}{Text}Η"
+			case 'I': Send "{BS}{Text}Ι"
+			case 'J': Send "{BS}{Text}Ξ"
+			case 'K': Send "{BS}{Text}Κ"
+			case 'L': Send "{BS}{Text}Λ"
+			case 'M': Send "{BS}{Text}Μ"
+			case 'N': Send "{BS}{Text}Ν"
+			case 'O': Send "{BS}{Text}Ο"
+			case 'P': Send "{BS}{Text}Π"
+			case 'R': Send "{BS}{Text}Ρ"
+			case 'S': Send "{BS}{Text}Σ"
+			case 'T': Send "{BS}{Text}Τ"
+			case 'U': Send "{BS}{Text}Θ"
+			case 'V': Send "{BS}{Text}Ω"
+			case 'X': Send "{BS}{Text}Χ"
+			case 'Y': Send "{BS}{Text}Υ"
+			case 'Z': Send "{BS}{Text}Ζ"
 
 			case '0', '⓪': Send "{BS}{Text}₀"  ; 右Shift键数字漂移功能
 			case '₀': Send "{BS}{Text}⁰"
