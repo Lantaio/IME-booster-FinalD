@@ -174,6 +174,27 @@ getQ1Word_X() {
 	return q1Word
 }
 
+; 检测触发动作的热键是单击、双击还是长按
+; 参数：
+;   hot_key 触发动作的热键
+; 返回值：
+;   返回击键方式的英文
+pressMode(hot_key) {
+	if KeyWait(hot_key, "T 0.3")  ; 短按
+		if (A_PriorHotkey != hot_key OR A_TimeSincePriorHotkey > 300) {  ;单击 ※ 这样判断单击、双击有问题，双击前的单击也会执行！
+			; KeyWait key
+			return "single"
+		}
+		else {  ; 双击
+			; KeyWait key
+			return "double"
+		}
+	else {  ; 长按
+		; KeyWait key
+		return "long"
+	}
+}
+
 ; 是否应该输入西纹木示点符号
 ; 参数：
 ;   q1ZiFv （可选）提供前一字符
@@ -365,7 +386,7 @@ handleError(ex, mode) {
 }
 
 ; 如果 智能标点开关打开，并且不存在输込法候选窗口，并且当前软件不是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框。（※必须全部条件包含在not里面。）
-#HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))  ; or hasMS_IMEWindow()
+#HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) ; or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))  ; or hasMS_IMEWindow()
 .:: SendText smartChoice('.', '。')
 ,:: SendText smartChoice(',', '，')
 (:: {
@@ -439,25 +460,44 @@ _:: {
 =:: SendText "="
 <:: {
 	; Send "{Blind}{, Up}{LShift Up}"
-	if sh0uldbeEN_BD()
-		SendText "<"
-	else {
-		SendText "《"
-		if sh0uldPeiDvi() {
-			SendText "》"
-			Send "{Left}"
+	if pressMode(ThisHotkey) = "long"
+		Send "<"
+	else
+		if sh0uldbeEN_BD()
+			SendText "<"
+		else {
+			SendText "《"
+			if sh0uldPeiDvi() {
+				SendText "》"
+				Send "{Left}"
+			}
 		}
-	}
 }
 >:: {
 	; Send "{Blind}{. Up}{LShift Up}"
-	q1ZiFv := getQ1ZiFv()
-	thisZiFv := smartChoice('>', '》')
-	SendText thisZiFv
-	if isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
-		Send "{Left}"
+	if pressMode(ThisHotkey) = "long"
+		Send ">"
+	else {
+		q1ZiFv := getQ1ZiFv()
+		thisZiFv := smartChoice('>', '》')
+		SendText thisZiFv
+		if isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
+			Send "{Left}"
+	}
 }
-`;:: SendText smartChoice(';', '；')
+`;:: {
+/*	switch pressMode(ThisHotkey) {
+		case "single": SendText smartChoice(';', '；')
+		case "double": Send "{BS}{Del}"  ; ※ 双击前的单击也会执行
+		case "long": Send("{Right}"), KeyWait(";")
+	}
+*/
+	if pressMode(ThisHotkey) = "long" {
+		Send("{Right}"), KeyWait(";")
+	}
+	else
+		SendText smartChoice(';', '；')
+}
 -:: SendText "-"
 {:: {
 	Send "{Blind}{[ Up}{LShift Up}"
@@ -545,7 +585,12 @@ _:: {
 			Send "{Left}"
 	}
 }
-`:: SendText "``"
+`:: {
+	if pressMode(ThisHotkey) = "long"
+		Send "``"
+	else
+		SendText "``"
+}
 +:: SendText "+"
 &:: SendText "&"
 ?:: {
@@ -553,30 +598,38 @@ _:: {
 	SendText smartChoice('?', '？')
 }
 !:: {
-	; Send "{Blind}{1 Up}{LShift Up}"
+	; Send "{Blind}{1 Up}{RShift Up}"
 	SendText smartChoice('!', '！')
 }
 \:: SendText smartChoice('\', '、')
 |:: {
 	; Send "{Blind}{\ Up}{LShift Up}"
-	SendText smartChoice('|', '｜')
+	if pressMode(ThisHotkey) = "long"
+		Send "|"
+	else
+		SendText smartChoice('|', '｜')
 }
 @:: SendText "@"
 %:: SendText "%"  ; 为Markdown优化，英、中纹都上屏‘%’
 ^:: {
 	; Send "{Blind}{6 Up}{LShift Up}"
-	SendText smartChoice('^', '……')
+	if pressMode(ThisHotkey) = "long"
+		Send "{^}"
+	else
+		SendText smartChoice('^', '……')
 }
-<^^:: Send "{Blind}{LCtrl up}6"  ; 在惊喜输入方案中‘^’触发输入扩展符号功能，这里设置当按下Ctrl+Shift+^时发送‘^’给Rime输入法触发此功能
 ~:: {
 	; Send "{Blind}{`` Up}{RShift Up}"  ; 将此行注释以便可以连按
 	SendText smartChoice('~', '～')
 }
 $:: {
 	; Send "{Blind}{4 Up}{RShift Up}"
-	SendText smartChoice('$', '￥')
+	if pressMode(ThisHotkey) = "long"
+		Send "$"
+	else
+		SendText smartChoice('$', '￥')
 }
->^$:: Send "{Blind}{RCtrl up}4"  ; 在惊喜输入方案中‘$’触发输入大写数字和大写金额功能，这里设置当按下Ctrl+Shift+$时发送‘$’给Rime输入法触发此功能
++BS:: Send "+{Right}^x"  ; 将咣标后一个字符剪切到剪帖板
 
 ; 如果不存在输込法候选窗口，并且当前软件不是 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))  ; or hasMS_IMEWindow()
