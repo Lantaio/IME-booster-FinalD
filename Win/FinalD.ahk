@@ -5,12 +5,13 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按 左Win+Alt+0 查看。
-更新：2025/1/27
+更新：2025/2/3
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
 #UseHook
-SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（※此模式默认区分大小写）
+; KeyHistory 100
+SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（※ 此模式默认区分大小写）
 OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
 global BetterCN := true  ; 中文语境应用程序优化 功能开关
@@ -48,7 +49,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!0:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　 FinalD/终点 输入法插件 v5.52.124`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
+	msg := "　　　　　　 FinalD/终点 输入法插件 v5.54.127`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
 		msg .= "　　　　 左Win+0 启用/停用 此插件。当前已停用⛔"
 	else {
@@ -107,7 +108,7 @@ getQ1ZiFv() {
 	Pause
 */
 	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（用于织别emoji并且排徐不是因为在文件最开头而愎制了一整行的情况）
-	if chrLen = 1 or q1ZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not SubStr(q1ZiFv, -1) = '`n'  ; or SubStr(q1ZiFv, -1) = '')
+	if chrLen = 1 or q1ZiFv = '`n' or q1ZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not SubStr(q1ZiFv, -1) = '`n'  ; or SubStr(q1ZiFv, -1) = '')
 		Send "{Right}"  ; 咣标回到原来的位置
 	; 否则，如果当前软件是Word或PowerPoint
 	else if q1ZiFv = '' and WinActive(" - (Word|PowerPoint)$") {
@@ -142,7 +143,7 @@ getH1ZiFv() {
 	Pause
 */
 	; 如果复制的子符长度为1 或 是回車換行符（行末）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（用于织别emoji并且排徐不是因为在文件最末而愎制了一整行的情况）
-	if chrLen = 1 or h1ZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not SubStr(h1ZiFv, -1) = '`n'  ; or SubStr(h1ZiFv, -1) = '')
+	if chrLen = 1 or h1ZiFv = '`n' or h1ZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not SubStr(h1ZiFv, -1) = '`n'  ; or SubStr(h1ZiFv, -1) = '')
 		Send "{Left}"  ; 咣标回到原来的位置
 	else if h1ZiFv = '' and WinActive(" - (Word|PowerPoint)$")  ; 如果当前软件是Word或PowerPoint
 		Send "{Left}"  ; 咣标回到原来的位置
@@ -178,20 +179,24 @@ getQ1Word_X() {
 ; 参数：
 ;   hot_key 触发动作的热键
 ; 返回值：
-;   返回击键方式的英文
+;   返回代表击键方式的数字
 pressMode(hot_key) {
 	if KeyWait(hot_key, "T 0.3")  ; 短按
 		if (A_PriorHotkey != hot_key OR A_TimeSincePriorHotkey > 300) {  ;单击 ※ 这样判断单击、双击有问题，双击前的单击也会执行！
-			; KeyWait key
-			return "single"
+			return 1
 		}
 		else {  ; 双击
-			; KeyWait key
-			return "double"
+			return 2
 		}
 	else {  ; 长按
-		; KeyWait key
-		return "long"
+		return 0
+	}
+}
+
+reKeyState(key) {
+	if GetKeyState(key, "P") {
+		Send "{" . key . " down}"
+		; Sleep 50
 	}
 }
 
@@ -214,10 +219,10 @@ sh0uldbeEN_BD(q1ZiFv?) {
 
 ; 是否应该输入配怼的木示点符号
 ; 参数：
-;   bP （可选）起始标点
+;   frontP （可选）起始标点
 ; 返回值：
 ;   true / false
-sh0uldPeiDvi(bP?) {
+sh0uldPeiDvi(frontP?) {
 	h1ZiFv := getH1ZiFv()  ; （※此处不能用SubStr只获取1个字符）
 /*	ToolTip "是否应该输入配对标点是“" StrReplace(StrReplace(StrReplace(h1ZiFv, '`r', 'r'), '`n', 'n'), '', 'μ') "”"
 	Pause
@@ -226,7 +231,7 @@ sh0uldPeiDvi(bP?) {
 	if SubStr(h1ZiFv, -1) = '`n' or h1ZiFv = '' or h1ZiFv = ' ' or h1ZiFv = '`v'
 		return true
 	; 如果给定起始标点 并且 起始标点是‘'’、‘"’、‘‘’或‘“’
-	if isSet(bP) and bP ~= "'|`"|‘|“"
+	if isSet(frontP) and frontP ~= "'|`"|‘|“"
 		return false
 	; 如果后一个牸符是下列子符之一
 	switch h1ZiFv {
@@ -251,7 +256,7 @@ smartChoice(en, cn) {
 			Return en
 		else
 			Return cn
-	else if sh0uldbeEN_BD()  ; 否则（即所有程序使用一致的输入体验时），如果根据情况应该输入英文标点
+	else if sh0uldbeEN_BD(getQ1ZiFv())  ; 否则（即所有程序使用一致的输入体验时），如果根据情况应该输入英文标点
 		Return en
 	else
 		Return cn
@@ -259,41 +264,41 @@ smartChoice(en, cn) {
 
 ; 检测是不是成对的木示点
 ; 参数：
-;   before 检测这个字符（如果是前标点）是否有相配怼的标点
-;   after 提供后标点以检测是否和参数before是成怼的标点
+;   frontP 检测这个字符（如果是前标点）是否有相配怼的标点
+;   backP 提供后标点以检测是否和参数frontP是成怼的标点
 ; 返回值：
 ;   true / false
-isPeiDviBD(before, after) {
-	switch before {
-		case '(': return after = ')'
-		case '（': return after = '）'
-		case '"': return after = '"'
-		case '“': return after = '”'
-		case "'": return after = "'"
-		case '‘': return after = '’'
-		case '{': return after = '}'
-		case '「': return after = '」'
-		case '『': return after = '』'
-		case '〘': return after = '〙'
-		case '｛': return after = '｝'
-		case '[': return after = ']'
-		case '【': return after = '】'
-		case '〖': return after = '〗'
-		case '〔': return after = '〕'
-		case '［': return after = '］'
-		case '<': return after = '>'
-		case '《': return after = '》'
-		case '〈': return after = '〉'
+isPeiDviBD(frontP, backP) {
+	switch frontP {
+		case '(': return backP = ')'
+		case '（': return backP = '）'
+		case '"': return backP = '"'
+		case '“': return backP = '”'
+		case "'": return backP = "'"
+		case '‘': return backP = '’'
+		case '{': return backP = '}'
+		case '「': return backP = '」'
+		case '『': return backP = '』'
+		case '〘': return backP = '〙'
+		case '｛': return backP = '｝'
+		case '[': return backP = ']'
+		case '【': return backP = '】'
+		case '〖': return backP = '〗'
+		case '〔': return backP = '〕'
+		case '［': return backP = '］'
+		case '<': return backP = '>'
+		case '《': return backP = '》'
+		case '〈': return backP = '〉'
 	}
 	return false
 }
 ; 检测是否有成对的木示点
 ; 参数：
-;   before 检测这个字符（如果是前标点）是否有相配怼的标点
+;   frontP 检测这个字符（如果是前标点）是否有相配怼的标点
 ; 返回值：
 ;   true / false
-hasPeiDviBD(before) {
-	switch before {
+hasPeiDviBD(frontP) {
+	switch frontP {
 		case '(': return getH1ZiFv() = ')'
 		case '（': return getH1ZiFv() = '）'
 		case '"': return getH1ZiFv() = '"'
@@ -390,7 +395,7 @@ handleError(ex, mode) {
 .:: SendText smartChoice('.', '。')
 ,:: SendText smartChoice(',', '，')
 (:: {
-	Send "{Blind}{9 Up}{LShift Up}"
+	; Send "{Blind}{9 up}{LShift up}"  ; 优化虚拟按键，避免Shift键不释放问题
 	if sh0uldbeEN_BD() {
 		SendText "("
 		if sh0uldPeiDvi() {
@@ -407,9 +412,10 @@ handleError(ex, mode) {
 			showTip "配对", 1
 		}
 	}
+	; reKeyState "LShift"  ; 可自动重复
 }
 ):: {
-	Send "{Blind}{0 Up}{LShift Up}"
+	; Send "{Blind}{0 up}{LShift up}"
 	q1ZiFv := getQ1ZiFv()
 	thisZiFv := smartChoice(')', '）')
 	SendText thisZiFv
@@ -417,17 +423,20 @@ handleError(ex, mode) {
 		showTip "后", 1
 	if isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
 		Send "{Left}"
+	; reKeyState "LShift"
 }
 _:: {
-	; Send "{Blind}{- Up}{LShift Up}"
+	; Send "{Blind}{- up}{LShift up}"
 	SendText smartChoice('_', '——')
+	; reKeyState "LShift"  ; 可自动重复
 }
 ::: {
-	; Send "{Blind}{; Up}{LShift Up}"
+	; Send "{Blind}{; up}{LShift up}"
 	SendText smartChoice(':', '：')
+	; reKeyState "LShift"  ; 可自动重复
 }
 ":: {
-	Send "{Blind}{' Up}{LShift Up}"
+	; Send "{Blind}{' up}{LShift up}"
 	q1ZiFv := getQ1ZiFv()
 	if sh0uldbeEN_BD(q1ZiFv) {
 		SendText '"'
@@ -455,13 +464,15 @@ _:: {
 				Send "{Left}"
 		}
 	}
+	; reKeyState "LShift"  ; 可自动重复
 }
 /:: SendText "/"
 =:: SendText "="
 <:: {
-	; Send "{Blind}{, Up}{LShift Up}"
-	if pressMode(ThisHotkey) = "long"
-		Send "<"
+	; Send "{Blind}{, up}{LShift up}"
+	if pressMode(ThisHotkey) = 0 {  ; 长按
+		Send "<"  ; 交给输入法处理， ; "{LShift down}{, down}"
+	}
 	else
 		if sh0uldbeEN_BD()
 			SendText "<"
@@ -472,11 +483,12 @@ _:: {
 				Send "{Left}"
 			}
 		}
+	; reKeyState "LShift"  ; 可自动重复
 }
 >:: {
-	; Send "{Blind}{. Up}{LShift Up}"
-	if pressMode(ThisHotkey) = "long"
-		Send ">"
+	; Send "{Blind}{. up}{LShift up}"
+	if pressMode(ThisHotkey) = 0
+		Send ">"  ; "{LShift down}{. down}"
 	else {
 		q1ZiFv := getQ1ZiFv()
 		thisZiFv := smartChoice('>', '》')
@@ -484,23 +496,18 @@ _:: {
 		if isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
 			Send "{Left}"
 	}
+	; reKeyState "LShift"  ; 可自动重复
 }
 `;:: {
-/*	switch pressMode(ThisHotkey) {
-		case "single": SendText smartChoice(';', '；')
-		case "double": Send "{BS}{Del}"  ; ※ 双击前的单击也会执行
-		case "long": Send("{Right}"), KeyWait(";")
-	}
-*/
-	if pressMode(ThisHotkey) = "long" {
-		Send("{Right}"), KeyWait(";")
+	if pressMode(ThisHotkey) = 0 {  ; 长按发送‘→’
+		Send("{Right}"), KeyWait(ThisHotkey)
 	}
 	else
 		SendText smartChoice(';', '；')
 }
 -:: SendText "-"
 {:: {
-	Send "{Blind}{[ Up}{LShift Up}"
+	; Send "{Blind}{[ up}{LShift up}"
 	if sh0uldbeEN_BD() {
 		SendText "{"
 		if sh0uldPeiDvi() {
@@ -515,14 +522,16 @@ _:: {
 			Send "{Left}"
 		}
 	}
+	; reKeyState "LShift"
 }
 }:: {
-	Send "{Blind}{] Up}{LShift Up}"
+	; Send "{Blind}{] up}{LShift up}"
 	q1ZiFv := getQ1ZiFv()
 	thisZiFv := smartChoice('}', '」')
 	SendText thisZiFv
 	if isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
 		Send "{Left}"
+	; reKeyState "LShift"
 }
 ':: {
 	q1ZiFv := getQ1ZiFv()
@@ -586,7 +595,7 @@ _:: {
 	}
 }
 `:: {
-	if pressMode(ThisHotkey) = "long"
+	if pressMode(ThisHotkey) = 0
 		Send "``"
 	else
 		SendText "``"
@@ -594,17 +603,17 @@ _:: {
 +:: SendText "+"
 &:: SendText "&"
 ?:: {
-	; Send "{Blind}{/ Up}{LShift Up}"
+	; Send "{Blind}{/ up}{LShift up}"
 	SendText smartChoice('?', '？')
 }
 !:: {
-	; Send "{Blind}{1 Up}{RShift Up}"
+	; Send "{Blind}{1 up}{RShift up}"
 	SendText smartChoice('!', '！')
 }
 \:: SendText smartChoice('\', '、')
 |:: {
-	; Send "{Blind}{\ Up}{LShift Up}"
-	if pressMode(ThisHotkey) = "long"
+	; Send "{Blind}{\ up}{LShift up}"
+	if pressMode(ThisHotkey) = 0
 		Send "|"
 	else
 		SendText smartChoice('|', '｜')
@@ -612,24 +621,25 @@ _:: {
 @:: SendText "@"
 %:: SendText "%"  ; 为Markdown优化，英、中纹都上屏‘%’
 ^:: {
-	; Send "{Blind}{6 Up}{LShift Up}"
-	if pressMode(ThisHotkey) = "long"
+	; Send "{Blind}{6 up}{LShift up}"
+	if pressMode(ThisHotkey) = 0
 		Send "{^}"
 	else
 		SendText smartChoice('^', '……')
 }
 ~:: {
-	; Send "{Blind}{`` Up}{RShift Up}"  ; 将此行注释以便可以连按
+	; Send "{Blind}{`` up}{RShift up}"  ; 将此行注释以便可以连按
 	SendText smartChoice('~', '～')
 }
 $:: {
-	; Send "{Blind}{4 Up}{RShift Up}"
-	if pressMode(ThisHotkey) = "long"
+	; Send "{Blind}{4 up}{RShift up}"
+	if pressMode(ThisHotkey) = 0
 		Send "$"
 	else
 		SendText smartChoice('$', '￥')
 }
-+BS:: Send "+{Right}^x"  ; 将咣标后一个字符剪切到剪帖板
+!BS:: Send "+{left}^x"  ; 将咣标前一个字符剪切到剪帖板
+!Del:: Send "+{Right}^x"  ; 将咣标后一个字符剪切到剪帖板
 
 ; 如果不存在输込法候选窗口，并且当前软件不是 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))  ; or hasMS_IMEWindow()
