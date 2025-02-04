@@ -49,7 +49,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!0:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　 FinalD/终点 输入法插件 v5.54.129`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
+	msg := "　　　　　　 FinalD/终点 输入法插件 v5.55.130`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
 		msg .= "　　　　 左Win+0 启用/停用 此插件。当前已停用⛔"
 	else {
@@ -421,7 +421,7 @@ handleError(ex, mode) {
 	SendText thisZiFv
 	if thisZiFv = '）'
 		showTip "后", 1
-	if isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
+	if KeyWait(ThisHotkey, "T 0.2") and isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 是短按，并且（在不是自动配对的情况下）前一个标点和本次输入的标点是配对标点，则光标回到配对标点中间
 		Send "{Left}"
 	; reKeyState "LShift"
 }
@@ -444,9 +444,9 @@ _:: {
 			SendText '"'
 			Send "{Left}"
 		}
-		; else if q1ZiFv = '"' {  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则咣标回到成对标点中间
-		; 	Send "{Left}"
-		; }
+		else if q1ZiFv = '"' and KeyWait(ThisHotkey, "T 0.2") {  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是短按，则咣标回到配对标点中间
+			Send "{Left}"
+		}
 	}
 	else {
 		Send '"'
@@ -460,7 +460,7 @@ _:: {
 		}
 		else {
 			showTip "后", 1
-			if q1ZiFv = '“'  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则咣标回到成对标点中间
+			if q1ZiFv = '“'  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，则咣标回到配对标点中间
 				Send "{Left}"
 		}
 	}
@@ -493,7 +493,7 @@ _:: {
 		q1ZiFv := getQ1ZiFv()
 		thisZiFv := smartChoice('>', '》')
 		SendText thisZiFv
-		if isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
+		if isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，则咣标回到配对标点中间
 			Send "{Left}"
 	}
 	; reKeyState "LShift"  ; 可自动重复
@@ -529,7 +529,7 @@ _:: {
 	q1ZiFv := getQ1ZiFv()
 	thisZiFv := smartChoice('}', '」')
 	SendText thisZiFv
-	if isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
+	if KeyWait(ThisHotkey, "T 0.2") and isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 是短按，并且（在不是自动配对的情况下）前一个标点和本次输入的标点是配对标点，则光标回到配对标点中间
 		Send "{Left}"
 	; reKeyState "LShift"
 }
@@ -541,9 +541,9 @@ _:: {
 			SendText "'"
 			Send "{Left}"
 		}
-		; else if q1ZiFv = "'" {  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则咣标回到成对标点中间
-		; 	Send "{Left}"
-		; }
+		else if q1ZiFv = "'" and KeyWait(ThisHotkey, "T 0.2") {  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是短按，则咣标回到成对标点中间
+			Send "{Left}"
+		}
 	}
 	else {
 		Send "'"
@@ -557,7 +557,7 @@ _:: {
 		}
 		else {
 			showTip "后", 1
-			if q1ZiFv = '‘'  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则咣标回到成对标点中间
+			if q1ZiFv = '‘'  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，则咣标回到配对标点中间
 				Send "{Left}"
 		}
 	}
@@ -583,14 +583,14 @@ _:: {
 }
 ]:: {
 	q1ZiFv := getQ1ZiFv()
-	if BetterCN and WinActive("ahk_group CN") {
+	if q1ZiFv = '【' or BetterCN and WinActive("ahk_group CN") {
 		SendText "】"
-		if q1ZiFv = '【'  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
+		if q1ZiFv = '【' and KeyWait(ThisHotkey, "T 0.2")  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是长按，则光标回到配对标点中间
 			Send "{Left}"
 	}
 	else {
 		SendText "]"
-		if q1ZiFv = '['  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是成对的标点，则……
+		if q1ZiFv = '[' and KeyWait(ThisHotkey, "T 0.2")  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是长按，则光标回到配对标点中间
 			Send "{Left}"
 	}
 }
