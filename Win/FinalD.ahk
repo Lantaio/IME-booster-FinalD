@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按 左Win+Alt+0 查看。
-更新：2025/2/3
+更新：2025/2/4
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -49,7 +49,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!0:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　 FinalD/终点 输入法插件 v5.54.128`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
+	msg := "　　　　　　 FinalD/终点 输入法插件 v5.54.129`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
 		msg .= "　　　　 左Win+0 启用/停用 此插件。当前已停用⛔"
 	else {
@@ -181,8 +181,8 @@ getQ1Word_X() {
 ; 返回值：
 ;   返回代表击键方式的数字
 pressMode(hot_key) {
-	if KeyWait(hot_key, "T 0.3")  ; 短按
-		if (A_PriorHotkey != hot_key OR A_TimeSincePriorHotkey > 300) {  ;单击 ※ 这样判断单击、双击有问题，双击前的单击也会执行！
+	if KeyWait(hot_key, "T 0.2")  ; 短按
+		if (A_PriorHotkey != hot_key OR A_TimeSincePriorHotkey > 200) {  ;单击 ※ 这样判断单击、双击有问题，双击前的单击也会执行！
 			return 1
 		}
 		else {  ; 双击
@@ -679,7 +679,7 @@ LShift:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
 		case '÷', '／', '≠', '√': Send "{BS}{Text}/"
 
 		case '=': Send "{BS}{Text}≈"
-		case '≈', '⇒', '⇔', '≡': Send "{BS}{Text}="
+		case '≈', '⇒', '⇔', '≡', '≌': Send "{BS}{Text}="
 
 		case '<', '〈': ch8PeiDviBD(q1ZiFv, '《')
 		case '《': ch8PeiDviBD('《', '<')
@@ -725,7 +725,9 @@ LShift:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
 			Send "{Left}{BS}{Text}]"
 			Send "{Del}"
 
-		case '′', '″', '‴': Send "{BS}{Text}``"
+		case '``': Send "{BS}{Text}々"
+		case '々': Send "{BS}{Text}〃"
+		case '〃', 'α', 'β', 'γ', 'λ', 'π': Send "{BS}{Text}``"
 
 		case '+': Send "{BS}{Text}±"
 		case '±', '∑', '∫', '∮': Send "{BS}{Text}+"
@@ -756,7 +758,7 @@ LShift:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
 		case '⌘', '⌥', '⇧', '↩': Send "{BS}{Text}^"
 
 		case '~': Send "{BS}{Text}～"
-		case '～', '々', '〃', '≌': Send "{BS}{Text}~"
+		case '～', 'Δ', 'Θ', 'Λ', 'Φ', 'Ω': Send "{BS}{Text}~"
 
 		case '$': Send "{BS}{Text}￥"
 		case '￥', '＄', '€', '£', '¥', '¢': Send "{BS}{Text}$"
@@ -901,9 +903,10 @@ RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 		case '／': Send "{BS}{Text}≠"
 		case '≠': Send "{BS}{Text}√"
 
-		case '=', '≈', '≡': Send "{BS}{Text}⇒"
+		case '=', '≈', '≌': Send "{BS}{Text}⇒"
 		case '⇒': Send "{BS}{Text}⇔"
 		case '⇔': Send "{BS}{Text}≡"
+		case '≡': Send "{BS}{Text}≌"
 
 		case '<', '《': ch8PeiDviBD(q1ZiFv, '〈')
 		case '〈': ch8PeiDviBD('〈', '≤')
@@ -948,9 +951,11 @@ RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 		case ']', '】', '］': Send "{BS}{Text}〗"
 		case '〗': Send "{BS}{Text}］"
 
-		case '``', '‴': Send "{BS}{Text}′"
-		case '′': Send "{BS}{Text}″"
-		case '″': Send "{BS}{Text}‴"
+		case '``', '々', '〃', 'π': Send "{BS}{Text}α"
+		case 'α': Send "{BS}{Text}β"
+		case 'β': Send "{BS}{Text}γ"
+		case 'γ': Send "{BS}{Text}λ"
+		case 'λ': Send "{BS}{Text}π"
 
 		case '+', '±', '∮': Send "{BS}{Text}∑"
 		case '∑': Send "{BS}{Text}∫"
@@ -993,9 +998,11 @@ RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 		case '⌥': Send "{BS}{Text}⇧"
 		case '⇧': Send "{BS}{Text}↩"
 
-		case '~', '～', '≌': Send "{BS}{Text}々"
-		case '々': Send "{BS}{Text}〃"
-		case '〃': Send "{BS}{Text}≌"
+		case '~', '～', 'Ω': Send "{BS}{Text}Δ"
+		case 'Δ': Send "{BS}{Text}Θ"
+		case 'Θ': Send "{BS}{Text}Λ"
+		case 'Λ': Send "{BS}{Text}Φ"
+		case 'Φ': Send "{BS}{Text}Ω"
 
 		case '$', '￥', '¢': Send "{BS}{Text}＄"
 		case '＄': Send "{BS}{Text}€"
