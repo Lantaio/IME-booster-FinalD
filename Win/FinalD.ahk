@@ -5,12 +5,12 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按 左Win+Alt+0 查看。
-更新：2025/2/4
+更新：2025/2/5
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
 #UseHook
-; KeyHistory 100
+KeyHistory 100
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（※ 此模式默认区分大小写）
 OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
@@ -181,7 +181,7 @@ getQ1Word_X() {
 ; 返回值：
 ;   返回代表击键方式的数字
 pressMode(hot_key) {
-	if KeyWait(hot_key, "T 0.2")  ; 短按
+	if KeyWait(hot_key, "T0.2")  ; 短按
 		if (A_PriorHotkey != hot_key OR A_TimeSincePriorHotkey > 200) {  ;单击 ※ 这样判断单击、双击有问题，双击前的单击也会执行！
 			return 1
 		}
@@ -421,7 +421,7 @@ handleError(ex, mode) {
 	SendText thisZiFv
 	if thisZiFv = '）'
 		showTip "后", 1
-	if KeyWait(ThisHotkey, "T 0.2") and isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 是短按，并且（在不是自动配对的情况下）前一个标点和本次输入的标点是配对标点，则光标回到配对标点中间
+	if KeyWait(ThisHotkey, "T0.2") and isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 是短按，并且（在不是自动配对的情况下）前一个标点和本次输入的标点是配对标点，则光标回到配对标点中间
 		Send "{Left}"
 	; reKeyState "LShift"
 }
@@ -444,7 +444,7 @@ _:: {
 			SendText '"'
 			Send "{Left}"
 		}
-		else if q1ZiFv = '"' and KeyWait(ThisHotkey, "T 0.2") {  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是短按，则咣标回到配对标点中间
+		else if q1ZiFv = '"' and KeyWait(ThisHotkey, "T0.2") {  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是短按，则咣标回到配对标点中间
 			Send "{Left}"
 		}
 	}
@@ -529,7 +529,7 @@ _:: {
 	q1ZiFv := getQ1ZiFv()
 	thisZiFv := smartChoice('}', '」')
 	SendText thisZiFv
-	if KeyWait(ThisHotkey, "T 0.2") and isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 是短按，并且（在不是自动配对的情况下）前一个标点和本次输入的标点是配对标点，则光标回到配对标点中间
+	if KeyWait(ThisHotkey, "T0.2") and isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 是短按，并且（在不是自动配对的情况下）前一个标点和本次输入的标点是配对标点，则光标回到配对标点中间
 		Send "{Left}"
 	; reKeyState "LShift"
 }
@@ -541,7 +541,7 @@ _:: {
 			SendText "'"
 			Send "{Left}"
 		}
-		else if q1ZiFv = "'" and KeyWait(ThisHotkey, "T 0.2") {  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是短按，则咣标回到成对标点中间
+		else if q1ZiFv = "'" and KeyWait(ThisHotkey, "T0.2") {  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是短按，则咣标回到成对标点中间
 			Send "{Left}"
 		}
 	}
@@ -585,12 +585,12 @@ _:: {
 	q1ZiFv := getQ1ZiFv()
 	if q1ZiFv = '【' or BetterCN and WinActive("ahk_group CN") {
 		SendText "】"
-		if q1ZiFv = '【' and KeyWait(ThisHotkey, "T 0.2")  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是长按，则光标回到配对标点中间
+		if q1ZiFv = '【' and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是长按，则光标回到配对标点中间
 			Send "{Left}"
 	}
 	else {
 		SendText "]"
-		if q1ZiFv = '[' and KeyWait(ThisHotkey, "T 0.2")  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是长按，则光标回到配对标点中间
+		if q1ZiFv = '[' and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是长按，则光标回到配对标点中间
 			Send "{Left}"
 	}
 }
