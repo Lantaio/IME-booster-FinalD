@@ -270,7 +270,7 @@ sh0uldPeiDvi(frontP?) {
 smartChoice(en, cn) {
 	; 如果对中文语境应用程序优化开关打开 并且 当前程序是中文语境软件
 	if BetterCN and WinActive("ahk_group CN")
-		; 如果按键是‘.’、‘:’或‘~’ 并且 前一个字符是数字，则选英文标点
+		; 如果按键是‘.’、‘:’或‘~’ 并且 前一个字符是数字，则应是英文标点
 		if en ~= "\.|:|~" and IsInteger(getQ1ZiFv())
 			Return en
 		else
@@ -451,7 +451,7 @@ handleError(ex, mode) {
 	SendText thisZiFv
 	if thisZiFv = '）'
 		showTip "后", 1
-	if KeyWait(ThisHotkey, "T0.2") and isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 是短按，并且（在不是自动配对的情况下）前一个标点和本次输入的标点是配对标点，则光标回到配对标点中间
+	if isPeiDviBD(q1ZiFv, thisZiFv) and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个标点和本次输入的标点是配对标点，并且是短按，则光标回到配对标点中间
 		Send "{Left}"
 	; reKeyState "LShift"
 }
@@ -468,7 +468,7 @@ _:: {
 ":: {
 	; Send "{Blind}{' up}{LShift up}"
 	q1ZiFv := getQ1ZiFv()
-	if sh0uldbeEN_BD(q1ZiFv) {
+	if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD(q1ZiFv) {
 		SendText '"'
 		if (q1ZiFv = ' ' or SubStr(q1ZiFv, -1) = '`n' or q1ZiFv = '`v' or q1ZiFv = '') and sh0uldPeiDvi(ThisHotkey) {  ; 如果 应该自动配对，则……
 			SendText '"'
@@ -504,7 +504,7 @@ _:: {
 		Send "<"  ; 交给输入法处理， ; "{LShift down}{, down}"
 	}
 	else
-		if sh0uldbeEN_BD()
+		if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD()
 			SendText "<"
 		else {
 			SendText "《"
@@ -517,20 +517,20 @@ _:: {
 }
 >:: {
 	; Send "{Blind}{. up}{LShift up}"
-	if not KeyWait(ThisHotkey, "T0.2")
+	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
 		Send ">"  ; "{LShift down}{. down}"
 	else {
 		q1ZiFv := getQ1ZiFv()
 		thisZiFv := smartChoice('>', '》')
 		SendText thisZiFv
-		if isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，则咣标回到配对标点中间
+		if thisZiFv = '》' and isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，则咣标回到配对标点中间
 			Send "{Left}"
 	}
 	; reKeyState "LShift"  ; 可自动重复
 }
 `;:: {
-	if not KeyWait(ThisHotkey, "T0.2") {  ; 长按发送‘→’
-		Send("{Right}"), KeyWait(ThisHotkey)
+	if not KeyWait(ThisHotkey, "T0.2") {  ; 长按
+		Send("{Right}"), KeyWait(ThisHotkey)  ; 发送‘→’
 	}
 	else
 		SendText smartChoice(';', '；')
@@ -538,7 +538,7 @@ _:: {
 -:: SendText "-"
 {:: {
 	; Send "{Blind}{[ up}{LShift up}"
-	if sh0uldbeEN_BD() {
+	if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD() {
 		SendText "{"
 		if sh0uldPeiDvi() {
 			SendText "}"
@@ -559,13 +559,13 @@ _:: {
 	q1ZiFv := getQ1ZiFv()
 	thisZiFv := smartChoice('}', '」')
 	SendText thisZiFv
-	if KeyWait(ThisHotkey, "T0.2") and isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 是短按，并且（在不是自动配对的情况下）前一个标点和本次输入的标点是配对标点，则光标回到配对标点中间
+	if isPeiDviBD(q1ZiFv, thisZiFv) and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个标点和本次输入的标点是配对标点，并且是短按，则光标回到配对标点中间
 		Send "{Left}"
 	; reKeyState "LShift"
 }
 ':: {
 	q1ZiFv := getQ1ZiFv()
-	if sh0uldbeEN_BD(q1ZiFv) {
+	if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD(q1ZiFv) {
 		SendText "'"
 		if (q1ZiFv = ' ' or SubStr(q1ZiFv, -1) = '`n' or q1ZiFv = '`v' or q1ZiFv = '') and sh0uldPeiDvi(ThisHotkey) {  ; 如果 应该自动配对，则……
 			SendText "'"
@@ -615,12 +615,12 @@ _:: {
 	q1ZiFv := getQ1ZiFv()
 	if q1ZiFv = '【' or BetterCN and WinActive("ahk_group CN") {
 		SendText "】"
-		if q1ZiFv = '【' and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是长按，则光标回到配对标点中间
+		if q1ZiFv = '【' and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是短按，则光标回到配对标点中间
 			Send "{Left}"
 	}
 	else {
 		SendText "]"
-		if q1ZiFv = '[' and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是长按，则光标回到配对标点中间
+		if q1ZiFv = '[' and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是短按，则光标回到配对标点中间
 			Send "{Left}"
 	}
 }
