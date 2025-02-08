@@ -182,26 +182,6 @@ getQ1Word_X() {
 }
 
 /*
-检测按键是单击、双击还是长按
-参数：
-	key (string) 按键名称
-返回值：
-	(integer) 返回代表击键方式的数字
-*/
-pressMode(key) {
-	if KeyWait(key, "T0.2")  ; 短按
-		if (A_PriorHotkey != key OR A_TimeSincePriorHotkey > 200) {  ;单击 ※ 这样判断单击、双击有问题，双击前的单击也会执行！
-			return 1
-		}
-		else {  ; 双击
-			return 2
-		}
-	else {  ; 长按
-		return 0
-	}
-}
-
-/*
 让按键的逻辑状态和物理状态一致
 参数：
 	key (string) 按键名称
@@ -401,10 +381,9 @@ ch8PeiDviBD(oldP, newP) {
 	sec (float) 提示信息显示时长，以秒为单位
 */
 showTip(info, sec) {
-	mSec := sec * 1000  ; 将显示时长转换为以毫秒作为单位
 	if CaretGetPos(&x, &y) {
 		ToolTip info, x, y - 25
-		SetTimer ToolTip, -mSec
+		SetTimer ToolTip, -sec*1000  ; 转换为以毫秒为单位
 	}
 }
 
