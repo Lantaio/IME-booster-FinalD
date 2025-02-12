@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按 左Win+Alt+0 查看。
-更新：2025/2/8
+更新：2025/2/12
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -49,7 +49,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!0:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　 FinalD/终点 输入法插件 v5.55.133`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
+	msg := "　　　　　　 FinalD/终点 输入法插件 v5.56.138`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
 		msg .= "　　　　 左Win+0 启用/停用 此插件。当前已停用⛔"
 	else {
@@ -76,19 +76,21 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 	if A_IsSuspended
 		MsgBox "终点 输入法插件 全部功能 已停用⛔", "终点 输入法插件", "Iconx T2"
 	else {
-		msg := "终点 输入法插件 已启用🚀`n`n左Win+Alt+0 查看各项功能的状态："
+		msg := "终点 输入法插件 已启用🚀`n`n左Win+Alt+0 查看各项功能的状态：`n（表格）兼容模式 "
 		if Smart
-			msg .= "`n（表格）兼容模式 ❌"
+			msg .= "❌"
 		else
-			msg .= "`n（表格）兼容模式 ✔"
+			msg .= "✔"
+		msg .= "`n全键盘漂移 "
 		if FullKBD
-			msg .= "`n全键盘漂移 ✔⚠"
+			msg .= "✔⚠"
 		else
-			msg .= "`n全键盘漂移 ❌"
+			msg .= "❌"
+		msg .= "`n中文语境软件优化 "
 		if BetterCN
-			msg .= "`n中文语境软件优化 ✔"
+			msg .= "✔"
 		else
-			msg .= "`n中文语境软件优化 ❌"
+			msg .= "❌"
 		MsgBox msg, "终点 输入法插件", "Iconi T5"
 	}
 }
@@ -375,6 +377,25 @@ ch8PeiDviBD(oldP, newP) {
 }
 
 /*
+标点循环漂移函数
+参数：
+	q1p (string) 前一个字符
+	p* (string array) 标点循环漂移列表（数组）
+*/
+drift(q1p, p*) {
+	i := 0
+	loop p.length
+		if q1p = p[A_Index] {  ; 如果前1个字符在漂移列表中
+			i := A_Index
+			break
+		}
+	if i = 0 or i = p.length  ; 如果在漂移列表中不存在这个字符 或者 是列表中最后1个字符
+		Send "{BS}{Text}" p[1]  ; 上屏列表中第1个字符
+	else
+		Send "{BS}{Text}" p[++i]  ; 上屏列表中所找到的字符的下1个字符
+}
+
+/*
 显示提示信息
 参数：
 	info (string) 提示信息内容
@@ -418,7 +439,7 @@ handleError(ex, mode) {
 		if sh0uldPeiDvi() {
 			SendText "）"
 			Send "{Left}"
-			showTip "配对", 1
+			showTip("配对", 1)
 		}
 	}
 	; reKeyState "LShift"  ; 可自动重复
@@ -429,7 +450,7 @@ handleError(ex, mode) {
 	thisZiFv := smartChoice(')', '）')
 	SendText thisZiFv
 	if thisZiFv = '）'
-		showTip "后", 1
+		showTip("后", 1)
 	if isPeiDviBD(q1ZiFv, thisZiFv) and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个标点和本次输入的标点是配对标点，并且是短按，则光标回到配对标点中间
 		Send "{Left}"
 	; reKeyState "LShift"
@@ -461,14 +482,14 @@ _:: {
 		Send '"'
 		thisZiFv := getQ1ZiFv()
 		if thisZiFv = '“' {
-			showTip "前", 1
+			showTip("前", 1)
 			if sh0uldPeiDvi('“') {  ; 如果 应该自动配对，则……
 				Send '"{Left}'
-				showTip "配对", 1
+				showTip("配对", 1)
 			}
 		}
 		else {
-			showTip "后", 1
+			showTip("后", 1)
 			if q1ZiFv = '“' and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是短按，则咣标回到配对标点中间
 				Send "{Left}"
 		}
@@ -558,14 +579,14 @@ _:: {
 		Send "'"
 		thisZiFv := getQ1ZiFv()
 		if thisZiFv = "‘" {
-			showTip "前", 1
+			showTip("前", 1)
 			if sh0uldPeiDvi('‘') {  ; 如果 应该自动配对，则……
 				Send "'{Left}"
-				showTip "配对", 1
+				showTip("配对", 1)
 			}
 		}
 		else {
-			showTip "后", 1
+			showTip("后", 1)
 			if q1ZiFv = '‘' and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是短按，则咣标回到配对标点中间
 				Send "{Left}"
 		}
@@ -655,485 +676,331 @@ $:: {
 ; 英/仲常用标点变换，处理有配怼木示点符号时按情况变换单个或者成对飚点。
 LShift:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
 	switch q1ZiFv := getQ1ZiFv() {
-		case '.', '℃', '°', '℉': Send "{BS}{Text}。" ; 如果是英纹句点或扩展符号，则替换为仲文句号
-		case '。': Send "{BS}{Text}." ; 如果是仲文句号，则替换为英纹句点
+		case '。', '.', '℃', '°', '℉': drift(q1ZiFv, '。', '.')
 
-		case ',', '∈', '⊆', '⊂': Send "{BS}{Text}，"
-		case '，': Send "{BS}{Text},"
+		case '，', ',', '∈', '⊆', '⊂': drift(q1ZiFv, '，', ',')
 
 		case '(', '〔', '〘': ch8PeiDviBD(q1ZiFv, '（')
 		case '（': ch8PeiDviBD('（', '(')
 
 		case ')', '〕', '〙': Send("{BS}{Text}）"), showTip("后", 1)
-		case '）':
-			SendText "!"
-			Send "{Left}{BS}{Text})"
-			Send "{Del}"
+		case '）': SendText("!"), Send("{Left}{BS}{Text})"), Send("{Del}")
 
 		case '_': Send "{BS}{Text}——"
 		case '—': Send "{BS 2}{Text}_"
 		case '∪', '∩': Send "{BS}{Text}_"
 
-		case ':', '∵', '∴', '∷': Send "{BS}{Text}："
-		case '：': Send "{BS}{Text}:"
+		case '：', ':', '∵', '∴', '∷': drift(q1ZiFv, '：', ':')
 
 		case '"': ch8PeiDviBD('"', '“')
 		case '“': ch8PeiDviBD('“', '"')
-		case '”':
-			SendText "!"
-			Send '{Left}{BS}{Text}"'
-			Send "{Del}"
+		case '”': SendText("!"), Send("{Left}{BS}{Text}`""), Send("{Del}")
 
-		case '/': Send "{BS}{Text}÷"
-		case '÷', '／', '≠', '√': Send "{BS}{Text}/"
+		case '/', '÷', '／', '≠', '√': drift(q1ZiFv, '/', '÷')
 
-		case '=': Send "{BS}{Text}≈"
-		case '≈', '⇒', '⇔', '≡', '≌': Send "{BS}{Text}="
+		case '=', '≈', '⇒', '⇔', '≡', '≌': drift(q1ZiFv, '=', '≈')
 
 		case '<', '〈': ch8PeiDviBD(q1ZiFv, '《')
 		case '《': ch8PeiDviBD('《', '<')
 		case '≤', '«': Send "{BS}{Text}《"
 
-		case '>', '〉', '≥', '»': Send "{BS}{Text}》"
-		case '》': Send "{BS}{Text}>"
+		case '》', '>', '〉', '≥', '»': drift(q1ZiFv, '》', '>')
 
-		case ';', '☐', '☑', '☒': Send "{BS}{Text}；"
-		case '；': Send "{BS}{Text};"
+		case '；', ';', '☐', '☑', '☒': drift(q1ZiFv, '；', ';')
 
-		case '-': Send "{BS}{Text}¬"
-		case '¬', '∨', '∧': Send "{BS}{Text}-"
+		case '-', '¬', '∨', '∧': drift(q1ZiFv, '-', '¬')
 
 		case '{', '『', '｛': ch8PeiDviBD(q1ZiFv, '「')
 		case '「': ch8PeiDviBD('「', '{')
 
 		case '}', '』', '｝': Send "{BS}{Text}」"
-		case '」':
-			SendText "!"
-			Send "{Left}{BS}{Text}}"
-			Send "{Del}"
+		case '」': SendText("!"), Send("{Left}{BS}{Text}}"), Send("{Del}")
 
 		case "'": ch8PeiDviBD("'", '‘')
 		case "‘": ch8PeiDviBD('‘', "'")
-		case "’":
-			SendText "!"
-			Send "{Left}{BS}{Text}'"
-			Send "{Del}"
+		case "’": SendText("!"), Send("{Left}{BS}{Text}'"), Send("{Del}")
 
-		case '*': Send "{BS}{Text}×"
-		case '×', '·', '＊', '∏': Send "{BS}{Text}*"
+		case '*', '×', '·', '＊', '∏': drift(q1ZiFv, '*', '×')
 
-		case '#': Send "{BS}{Text}■"
-		case '■', '◆', '◇', '□': Send "{BS}{Text}#"
+		case '#', '■', '◆', '◇', '□': drift(q1ZiFv, '#', '■')
 
 		case '[': ch8PeiDviBD('[', '【')
 		case '【', '〖', '［': ch8PeiDviBD(q1ZiFv, '[')
 
 		case ']': Send "{BS}{Text}】"
-		case '】', '〗', '］':
-			SendText "!"
-			Send "{Left}{BS}{Text}]"
-			Send "{Del}"
+		case '】', '〗', '］': SendText("!"), Send("{Left}{BS}{Text}]"), Send("{Del}")
 
-		case '``': Send "{BS}{Text}π"
-		case 'π', 'α', 'β', 'γ', 'λ', 'μ': Send "{BS}{Text}``"
+		case '``', 'π', 'α', 'β', 'γ', 'λ', 'μ': drift(q1ZiFv, '``', 'π')
 
-		case '+': Send "{BS}{Text}±"
-		case '±', '∑', '∫', '∮': Send "{BS}{Text}+"
+		case '+', '±', '∑', '∫', '∮': drift(q1ZiFv, '+', '±')
 
-		case '&': Send "{BS}{Text}※"
-		case '※', '§', '∞', '∝': Send "{BS}{Text}&"
+		case '&', '※', '§', '∞', '∝': drift(q1ZiFv, '&', '※')
 
-		case '?', '✔', '❌', '✘', '⭕': Send "{BS}{Text}？"
-		case '？': Send "{BS}{Text}?"
+		case '？', '?', '✔', '❌', '✘', '⭕': drift(q1ZiFv, '？', '?')
 
-		case '!', '▲', '⚠', '△': Send "{BS}{Text}！"
-		case '！': Send "{BS}{Text}!"
+		case '！', '!', '▲', '⚠', '△': drift(q1ZiFv, '！', '!')
 
-		case '\': Send "{BS}{Text}、"
-		case '、', '→', '↔', '←': Send "{BS}{Text}\"
+		case '\', '、', '→', '↔', '←': drift(q1ZiFv, '\', '、')
 
-		case '|', '↑', '↕', '↓', '‖': Send "{BS}{Text}｜"
-		case '｜': Send "{BS}{Text}|"
+		case '｜', '|', '↑', '↕', '↓', '‖': drift(q1ZiFv, '｜', '|')
 
-		case '@': Send "{BS}{Text}©"
-		case '●', '©', '®', '™', '○': Send "{BS}{Text}@"
+		case '@', '©', '●', '®', '™', '○': drift(q1ZiFv, '@', '©')
 
-		case '%': Send "{BS}{Text}‰"
-		case '‰', '★', '☆', '✪': Send "{BS}{Text}%"
+		case '%', '‰', '★', '☆', '✪': drift(q1ZiFv, '%', '‰')
 
 		case '^': Send "{BS}{Text}……"
 		case '…': Send "{BS 2}{Text}^"
 		case '⌘', '⌥', '⇧', '↩': Send "{BS}{Text}^"
 
-		case '~': Send "{BS}{Text}～"
-		case '～', 'Δ', 'Ω', 'Θ', 'Λ', 'Φ': Send "{BS}{Text}~"
+		case '~', '～', 'Δ', 'Ω', 'Θ', 'Λ', 'Φ': drift(q1ZiFv, '~', '～')
 
-		case '$': Send "{BS}{Text}￥"
-		case '￥', '＄', '€', '£', '¥', '¢': Send "{BS}{Text}$"
+		case '$', '￥', '＄', '€', '£', '¥', '¢': drift(q1ZiFv, '$', '￥')
+
+		default:
+			if FullKBD
+				switch q1ZiFv {
+					case 'α': Send "{BS}{Text}a"  ; 小写希腊字母变换为小写英文字母
+					case 'β': Send "{BS}{Text}b"
+					case 'ψ': Send "{BS}{Text}c"
+					case 'δ': Send "{BS}{Text}d"
+					case 'φ': Send "{BS}{Text}f"
+					case 'ε': Send "{BS}{Text}e"
+					case 'γ': Send "{BS}{Text}g"
+					case 'η': Send "{BS}{Text}h"
+					case 'ι': Send "{BS}{Text}i"
+					case 'ξ': Send "{BS}{Text}j"
+					case 'κ': Send "{BS}{Text}k"
+					case 'λ': Send "{BS}{Text}l"
+					case 'μ': Send "{BS}{Text}m"
+					case 'ν': Send "{BS}{Text}n"
+					case 'ο': Send "{BS}{Text}o"
+					case 'π': Send "{BS}{Text}p"
+					case 'ρ': Send "{BS}{Text}r"
+					case 'σ': Send "{BS}{Text}s"
+					case 'τ': Send "{BS}{Text}t"
+					case 'θ': Send "{BS}{Text}u"
+					case 'ω': Send "{BS}{Text}v"
+					case 'ς': Send "{BS}{Text}w"
+					case 'χ': Send "{BS}{Text}x"
+					case 'υ': Send "{BS}{Text}y"
+					case 'ζ': Send "{BS}{Text}z"
+
+					case 'Α': Send "{BS}{Text}A"  ; 大写希腊字母变换为大写英文字母
+					case 'Β': Send "{BS}{Text}B"
+					case 'Ψ': Send "{BS}{Text}C"
+					case 'Δ': Send "{BS}{Text}D"
+					case 'Ε': Send "{BS}{Text}E"
+					case 'Φ': Send "{BS}{Text}F"
+					case 'Γ': Send "{BS}{Text}G"
+					case 'Η': Send "{BS}{Text}H"
+					case 'Ι': Send "{BS}{Text}I"
+					case 'Ξ': Send "{BS}{Text}J"
+					case 'Κ': Send "{BS}{Text}K"
+					case 'Λ': Send "{BS}{Text}L"
+					case 'Μ': Send "{BS}{Text}M"
+					case 'Ν': Send "{BS}{Text}N"
+					case 'Ο': Send "{BS}{Text}O"
+					case 'Π': Send "{BS}{Text}P"
+					case 'Ρ': Send "{BS}{Text}R"
+					case 'Σ': Send "{BS}{Text}S"
+					case 'Τ': Send "{BS}{Text}T"
+					case 'Θ': Send "{BS}{Text}U"
+					case 'Ω': Send "{BS}{Text}V"
+					case 'Χ': Send "{BS}{Text}X"
+					case 'Υ': Send "{BS}{Text}Y"
+					case 'Ζ': Send "{BS}{Text}Z"
+
+					case '0', '⓪', '₀', '⁰', '⓿': drift(q1ZiFv, '0', '⓪')  ; 左Shift键数字漂移功能
+
+					case '1', 'Ⅰ', 'ⅰ', '➀', '₁', '¹', '➊': drift(q1ZiFv, '1', 'Ⅰ', 'ⅰ', '➀')
+
+					case '2', 'Ⅱ', 'ⅱ', '➁', '₂', '²', '➋': drift(q1ZiFv, '2', 'Ⅱ', 'ⅱ', '➁')
+
+					case '3', 'Ⅲ', 'ⅲ', '➂', '₃', '³', '➌': drift(q1ZiFv, '3', 'Ⅲ', 'ⅲ', '➂')
+
+					case '4', 'Ⅳ', 'ⅳ', '➃', '₄', '⁴', '➍': drift(q1ZiFv, '4', 'Ⅳ', 'ⅳ', '➃')
+
+					case '5', 'Ⅴ', 'ⅴ', '➄', '₅', '⁵', '➎': drift(q1ZiFv, '5', 'Ⅴ', 'ⅴ', '➄')
+
+					case '6', 'Ⅵ', 'ⅵ', '➅', '₆', '⁶', '➏': drift(q1ZiFv, '6', 'Ⅵ', 'ⅵ', '➅')
+
+					case '7', 'Ⅶ', 'ⅶ', '➆', '₇', '⁷', '➐': drift(q1ZiFv, '7', 'Ⅶ', 'ⅶ', '➆')
+
+					case '8', 'Ⅷ', 'ⅷ', '⓼', '₈', '⁸', '➑': drift(q1ZiFv, '8', 'Ⅷ', 'ⅷ', '⓼')
+
+					case '9', 'Ⅸ', 'ⅸ', '⓽', '₉', '⁹', '➒': drift(q1ZiFv, '9', 'Ⅸ', 'ⅸ', '⓽')
+				}
 	}
-	if FullKBD
-		switch q1ZiFv {
-			case 'α': Send "{BS}{Text}a"  ; 小写希腊字母变换为小写英文字母
-			case 'β': Send "{BS}{Text}b"
-			case 'ψ': Send "{BS}{Text}c"
-			case 'δ': Send "{BS}{Text}d"
-			case 'φ': Send "{BS}{Text}f"
-			case 'ε': Send "{BS}{Text}e"
-			case 'γ': Send "{BS}{Text}g"
-			case 'η': Send "{BS}{Text}h"
-			case 'ι': Send "{BS}{Text}i"
-			case 'ξ': Send "{BS}{Text}j"
-			case 'κ': Send "{BS}{Text}k"
-			case 'λ': Send "{BS}{Text}l"
-			case 'μ': Send "{BS}{Text}m"
-			case 'ν': Send "{BS}{Text}n"
-			case 'ο': Send "{BS}{Text}o"
-			case 'π': Send "{BS}{Text}p"
-			case 'ρ': Send "{BS}{Text}r"
-			case 'σ': Send "{BS}{Text}s"
-			case 'τ': Send "{BS}{Text}t"
-			case 'θ': Send "{BS}{Text}u"
-			case 'ω': Send "{BS}{Text}v"
-			case 'ς': Send "{BS}{Text}w"
-			case 'χ': Send "{BS}{Text}x"
-			case 'υ': Send "{BS}{Text}y"
-			case 'ζ': Send "{BS}{Text}z"
-
-			case 'Α': Send "{BS}{Text}A"  ; 大写希腊字母变换为大写英文字母
-			case 'Β': Send "{BS}{Text}B"
-			case 'Ψ': Send "{BS}{Text}C"
-			case 'Δ': Send "{BS}{Text}D"
-			case 'Ε': Send "{BS}{Text}E"
-			case 'Φ': Send "{BS}{Text}F"
-			case 'Γ': Send "{BS}{Text}G"
-			case 'Η': Send "{BS}{Text}H"
-			case 'Ι': Send "{BS}{Text}I"
-			case 'Ξ': Send "{BS}{Text}J"
-			case 'Κ': Send "{BS}{Text}K"
-			case 'Λ': Send "{BS}{Text}L"
-			case 'Μ': Send "{BS}{Text}M"
-			case 'Ν': Send "{BS}{Text}N"
-			case 'Ο': Send "{BS}{Text}O"
-			case 'Π': Send "{BS}{Text}P"
-			case 'Ρ': Send "{BS}{Text}R"
-			case 'Σ': Send "{BS}{Text}S"
-			case 'Τ': Send "{BS}{Text}T"
-			case 'Θ': Send "{BS}{Text}U"
-			case 'Ω': Send "{BS}{Text}V"
-			case 'Χ': Send "{BS}{Text}X"
-			case 'Υ': Send "{BS}{Text}Y"
-			case 'Ζ': Send "{BS}{Text}Z"
-
-			case '0', '₀', '⁰', '⓿': Send "{BS}{Text}⓪"  ; 左Shift键数字漂移功能
-			case '⓪': Send "{BS}{Text}0"
-
-			case '1', '₁', '¹', '➊': Send "{BS}{Text}Ⅰ"
-			case 'Ⅰ': Send "{BS}{Text}ⅰ"
-			case 'ⅰ': Send "{BS}{Text}➀"
-			case '➀': Send "{BS}{Text}1"
-
-			case '2', '₂', '²', '➋': Send "{BS}{Text}Ⅱ"
-			case 'Ⅱ': Send "{BS}{Text}ⅱ"
-			case 'ⅱ': Send "{BS}{Text}➁"
-			case '➁': Send "{BS}{Text}2"
-
-			case '3', '₃', '³', '➌': Send "{BS}{Text}Ⅲ"
-			case 'Ⅲ': Send "{BS}{Text}ⅲ"
-			case 'ⅲ': Send "{BS}{Text}➂"
-			case '➂': Send "{BS}{Text}3"
-
-			case '4', '₄', '⁴', '➍': Send "{BS}{Text}Ⅳ"
-			case 'Ⅳ': Send "{BS}{Text}ⅳ"
-			case 'ⅳ': Send "{BS}{Text}➃"
-			case '➃': Send "{BS}{Text}4"
-
-			case '5', '₅', '⁵', '➎': Send "{BS}{Text}Ⅴ"
-			case 'Ⅴ': Send "{BS}{Text}ⅴ"
-			case 'ⅴ': Send "{BS}{Text}➄"
-			case '➄': Send "{BS}{Text}5"
-
-			case '6', '₆', '⁶', '➏': Send "{BS}{Text}Ⅵ"
-			case 'Ⅵ': Send "{BS}{Text}ⅵ"
-			case 'ⅵ': Send "{BS}{Text}➅"
-			case '➅': Send "{BS}{Text}6"
-
-			case '7', '₇', '⁷', '➐': Send "{BS}{Text}Ⅶ"
-			case 'Ⅶ': Send "{BS}{Text}ⅶ"
-			case 'ⅶ': Send "{BS}{Text}➆"
-			case '➆': Send "{BS}{Text}7"
-
-			case '8', '₈', '⁸', '➑': Send "{BS}{Text}Ⅷ"
-			case 'Ⅷ': Send "{BS}{Text}ⅷ"
-			case 'ⅷ': Send "{BS}{Text}⓼"
-			case '⓼': Send "{BS}{Text}8"
-
-			case '9', '₉', '⁹', '➒': Send "{BS}{Text}Ⅸ"
-			case 'Ⅸ': Send "{BS}{Text}ⅸ"
-			case 'ⅸ': Send "{BS}{Text}⓽"
-			case '⓽': Send "{BS}{Text}9"
-		}
 }
 
 ; 扩展标点变换。处理有配怼木示点符号时可快速变换单个或者成对飚点。
 RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 	switch q1ZiFv := getQ1ZiFv() {
-		case '.', '。', '℉': Send "{BS}{Text}℃"
-		case '℃': Send "{BS}{Text}°"
-		case '°': Send "{BS}{Text}℉"
+		case '。', '.', '℃', '°', '℉': drift(q1ZiFv, '℃', '°', '℉')
 
-		case ',', '，', '⊂': Send "{BS}{Text}∈"
-		case '∈': Send "{BS}{Text}⊆"
-		case '⊆': Send "{BS}{Text}⊂"
+		case '，', ',', '∈', '⊆', '⊂': drift(q1ZiFv, '∈', '⊆', '⊂')
 
 		case '(', '（', '〘': ch8PeiDviBD(q1ZiFv, '〔')
 		case '〔': ch8PeiDviBD('〔', '〘')
 
-		case ')', '）', '〙': Send "{BS}{Text}〕"
-		case '〕': Send "{BS}{Text}〙"
+		case ')', '）', '〕', '〙': drift(q1ZiFv, '〕', '〙')
 
-		case '_', '∩': Send "{BS}{Text}∪"
+		case '_', '∪', '∩': drift(q1ZiFv, '∪', '∩')
 		case '—': Send "{BS 2}{Text}∪"
-		case '∪': Send "{BS}{Text}∩"
 
-		case ':', '：', '∷': Send "{BS}{Text}∵"
-		case '∵': Send "{BS}{Text}∴"
-		case '∴': Send "{BS}{Text}∷"
+		case '：', ':', '∵', '∴', '∷': drift(q1ZiFv, '∵', '∴', '∷')
 
 		case '"': Send("{Left}{Del}{Text}“"), showTip("前", 1)
 		case '“': Send("{BS}{Text}”"), showTip("后", 1)
-		case '”':
-			SendText "!"
-			Send '{Left}{BS}{Text}"'
-			Send "{Del}"
-			; showTip "英", 1
+		case '”': SendText("!"), Send('{Left}{BS}{Text}"'), Send("{Del}")
 
-		case '/', '÷', '√': Send "{BS}{Text}／"
-		case '／': Send "{BS}{Text}≠"
-		case '≠': Send "{BS}{Text}√"
+		case '/', '÷', '／', '≠', '√': drift(q1ZiFv, '／', '≠', '√')
 
-		case '=', '≈', '≌': Send "{BS}{Text}⇒"
-		case '⇒': Send "{BS}{Text}⇔"
-		case '⇔': Send "{BS}{Text}≡"
-		case '≡': Send "{BS}{Text}≌"
+		case '=', '≈', '⇒', '⇔', '≡', '≌': drift(q1ZiFv, '⇒', '⇔', '≡', '≌')
 
 		case '<', '《': ch8PeiDviBD(q1ZiFv, '〈')
 		case '〈': ch8PeiDviBD('〈', '≤')
 		case '≤': Send "{BS}{Text}«"
 		case '«': Send "{BS}{Text}〈"
 
-		case '>', '》', '»': Send "{BS}{Text}〉"
-		case '〉': Send "{BS}{Text}≥"
-		case '≥': Send "{BS}{Text}»"
+		case '》', '>', '〉', '≥', '»': drift(q1ZiFv, '〉', '≥', '»')
 
-		case ';', '；', '☒': Send "{BS}{Text}☐"
-		case '☐': Send "{BS}{Text}☑"
-		case '☑': Send "{BS}{Text}☒"
+		case '；', ';', '☐', '☑', '☒': drift(q1ZiFv, '☐', '☑', '☒')
 
-		case '-', '¬', '∧': Send "{BS}{Text}∨"
-		case '∨': Send "{BS}{Text}∧"
+		case '-', '¬', '∨', '∧': drift(q1ZiFv, '∨', '∧')
 
 		case '{', '「', '｛': ch8PeiDviBD(q1ZiFv, '『')
 		case '『': ch8PeiDviBD('『', '｛')
 
-		case '}', '」', '｝': Send "{BS}{Text}』"
-		case '』': Send "{BS}{Text}｝"
+		case '}', '」', '』', '｝': drift(q1ZiFv, '』', '｝')
 
 		case "'": Send("{Left}{Del}{Text}‘"), showTip("前", 1)
 		case "‘": Send("{BS}{Text}’"), showTip("后", 1)
-		case "’":
-			SendText "!"
-			Send "{Left}{BS}{Text}'"
-			Send "{Del}"
+		case "’": SendText("!"), Send("{Left}{BS}{Text}'"), Send("{Del}")
 
-		case '*', '×', '∏': Send "{BS}{Text}·"
-		case '·': Send "{BS}{Text}＊"
-		case '＊': Send "{BS}{Text}∏"
+		case '*', '×', '·', '＊', '∏': drift(q1ZiFv, '·', '＊', '∏')
 
-		case '#', '■', '□': Send "{BS}{Text}◆"
-		case '◆': Send "{BS}{Text}◇"
-		case '◇': Send "{BS}{Text}□"
+		case '#', '■', '◆', '◇', '□': drift(q1ZiFv, '◆', '◇', '□')
 
 		case '[', '【', '［': ch8PeiDviBD(q1ZiFv, '〖')
 		case '〖': ch8PeiDviBD('〖', '［')
 
-		case ']', '】', '］': Send "{BS}{Text}〗"
-		case '〗': Send "{BS}{Text}］"
+		case ']', '】', '〗', '］': drift(q1ZiFv, '〗', '］')
 
-		case '``', 'π', 'μ': Send "{BS}{Text}α"
-		case 'α': Send "{BS}{Text}β"
-		case 'β': Send "{BS}{Text}γ"
-		case 'γ': Send "{BS}{Text}λ"
-		case 'λ': Send "{BS}{Text}μ"
+		case '``', 'π', 'α', 'β', 'γ', 'λ', 'μ': drift(q1ZiFv, 'α', 'β', 'γ', 'λ', 'μ')
 
-		case '+', '±', '∮': Send "{BS}{Text}∑"
-		case '∑': Send "{BS}{Text}∫"
-		case '∫': Send "{BS}{Text}∮"
+		case '+', '±', '∑', '∫', '∮': drift(q1ZiFv, '∑', '∫', '∮')
 
-		case '&', '※', '∝': Send "{BS}{Text}§"
-		case '§': Send "{BS}{Text}∞"
-		case '∞': Send "{BS}{Text}∝"
+		case '&', '※', '§', '∞', '∝': drift(q1ZiFv, '§', '∞', '∝')
 
-		case '?', '？', '⭕': Send "{BS}{Text}✔"
-		case '✔': Send "{BS}{Text}❌"
-		case '❌': Send "{BS}{Text}✘"
-		case '✘': Send "{BS}{Text}⭕"
+		case '？', '?', '✔', '❌', '✘', '⭕': drift(q1ZiFv, '✔', '❌', '✘', '⭕')
 
-		case '!', '！', '△': Send "{BS}{Text}▲"
-		case '▲': Send "{BS}{Text}⚠"
-		case '⚠': Send "{BS}{Text}△"
+		case '！', '!', '▲', '⚠', '△': drift(q1ZiFv, '∑', '∫', '∮')
 
-		case '\', '、', '←': Send "{BS}{Text}→"
-		case '→': Send "{BS}{Text}↔"
-		case '↔': Send "{BS}{Text}←"
+		case '\', '、', '→', '↔', '←': drift(q1ZiFv, '→', '↔', '←')
 
-		case '|', '｜', '‖': Send "{BS}{Text}↑"
-		case '↑': Send "{BS}{Text}↕"
-		case '↕': Send "{BS}{Text}↓"
-		case '↓': Send "{BS}{Text}‖"
+		case '｜', '|', '↑', '↕', '↓', '‖': drift(q1ZiFv, '↑', '↕', '↓', '‖')
 
-		case '@', '©', '○': Send "{BS}{Text}●"
-		case '●': Send "{BS}{Text}®"
-		case '®': Send "{BS}{Text}™"
-		case '™': Send "{BS}{Text}○"
+		case '@', '©', '●', '®', '™', '○': drift(q1ZiFv, '●', '®', '™', '○')
 
-		case '%', '‰', '✪': Send "{BS}{Text}★"
-		case '★': Send "{BS}{Text}☆"
-		case '☆': Send "{BS}{Text}✪"
+		case '%', '‰', '★', '☆', '✪': drift(q1ZiFv, '★', '☆', '✪')
 
-		case '^', '↩': Send "{BS}{Text}⌘"
+		case '^', '⌘', '⌥', '⇧', '↩': drift(q1ZiFv, '⌘', '⌥', '⇧', '↩')
 		case '…': Send "{BS 2}{Text}⌘"
-		case '⌘': Send "{BS}{Text}⌥"
-		case '⌥': Send "{BS}{Text}⇧"
-		case '⇧': Send "{BS}{Text}↩"
 
-		case '~', '～', 'Φ': Send "{BS}{Text}Δ"
-		case 'Δ': Send "{BS}{Text}Ω"
-		case 'Ω': Send "{BS}{Text}Θ"
-		case 'Θ': Send "{BS}{Text}Λ"
-		case 'Λ': Send "{BS}{Text}Φ"
+		case '~', '～', 'Δ', 'Ω', 'Θ', 'Λ', 'Φ': drift(q1ZiFv, 'Δ', 'Ω', 'Θ', 'Λ', 'Φ')
 
-		case '$', '￥', '¢': Send "{BS}{Text}＄"
-		case '＄': Send "{BS}{Text}€"
-		case '€': Send "{BS}{Text}£"
-		case '£': Send "{BS}{Text}¢"
+		case '$', '￥', '＄', '€', '£', '¢': drift(q1ZiFv, '＄', '€', '£', '¢')
+
+		default:
+			if FullKBD
+				switch q1ZiFv {
+					case 'a': Send "{BS}{Text}α"  ; 小写英文字母变换为小写希腊字母
+					case 'b': Send "{BS}{Text}β"
+					case 'c': Send "{BS}{Text}ψ"
+					case 'd': Send "{BS}{Text}δ"
+					case 'e': Send "{BS}{Text}ε"
+					case 'f': Send "{BS}{Text}φ"
+					case 'g': Send "{BS}{Text}γ"
+					case 'h': Send "{BS}{Text}η"
+					case 'i': Send "{BS}{Text}ι"
+					case 'j': Send "{BS}{Text}ξ"
+					case 'k': Send "{BS}{Text}κ"
+					case 'l': Send "{BS}{Text}λ"
+					case 'm': Send "{BS}{Text}μ"
+					case 'n': Send "{BS}{Text}ν"
+					case 'o': Send "{BS}{Text}ο"
+					case 'p': Send "{BS}{Text}π"
+					case 'r': Send "{BS}{Text}ρ"
+					case 's': Send "{BS}{Text}σ"
+					case 't': Send "{BS}{Text}τ"
+					case 'u': Send "{BS}{Text}θ"
+					case 'v': Send "{BS}{Text}ω"
+					case 'w': Send "{BS}{Text}ς"
+					case 'x': Send "{BS}{Text}χ"
+					case 'y': Send "{BS}{Text}υ"
+					case 'z': Send "{BS}{Text}ζ"
+
+					case 'A': Send "{BS}{Text}Α"  ; 大写英文字母变换为大写希腊字母
+					case 'B': Send "{BS}{Text}Β"
+					case 'C': Send "{BS}{Text}Ψ"
+					case 'D': Send "{BS}{Text}Δ"
+					case 'E': Send "{BS}{Text}Ε"
+					case 'F': Send "{BS}{Text}Φ"
+					case 'G': Send "{BS}{Text}Γ"
+					case 'H': Send "{BS}{Text}Η"
+					case 'I': Send "{BS}{Text}Ι"
+					case 'J': Send "{BS}{Text}Ξ"
+					case 'K': Send "{BS}{Text}Κ"
+					case 'L': Send "{BS}{Text}Λ"
+					case 'M': Send "{BS}{Text}Μ"
+					case 'N': Send "{BS}{Text}Ν"
+					case 'O': Send "{BS}{Text}Ο"
+					case 'P': Send "{BS}{Text}Π"
+					case 'R': Send "{BS}{Text}Ρ"
+					case 'S': Send "{BS}{Text}Σ"
+					case 'T': Send "{BS}{Text}Τ"
+					case 'U': Send "{BS}{Text}Θ"
+					case 'V': Send "{BS}{Text}Ω"
+					case 'X': Send "{BS}{Text}Χ"
+					case 'Y': Send "{BS}{Text}Υ"
+					case 'Z': Send "{BS}{Text}Ζ"
+
+					case '0', '⓪', '₀', '⁰', '⓿': drift(q1ZiFv, '₀', '⁰', '⓿')  ; 右Shift键数字漂移功能
+
+					case '1', 'Ⅰ', 'ⅰ', '➀', '₁', '¹', '➊': drift(q1ZiFv, '₁', '¹', '➊')
+
+					case '2', 'Ⅱ', 'ⅱ', '➁', '₂', '²', '➋': drift(q1ZiFv, '₂', '²', '➋')
+
+					case '3', 'Ⅲ', 'ⅲ', '➂', '₃', '³', '➌': drift(q1ZiFv, '₃', '³', '➌')
+
+					case '4', 'Ⅳ', 'ⅳ', '➃', '₄', '⁴', '➍': drift(q1ZiFv, '₄', '⁴', '➍')
+
+					case '5', 'Ⅴ', 'ⅴ', '➄', '₅', '⁵', '➎': drift(q1ZiFv, '₅', '⁵', '➎')
+
+					case '6', 'Ⅵ', 'ⅵ', '➅', '₆', '⁶', '➏': drift(q1ZiFv, '₆', '⁶', '➏')
+
+					case '7', 'Ⅶ', 'ⅶ', '➆', '₇', '⁷', '➐': drift(q1ZiFv, '₇', '⁷', '➐')
+
+					case '8', 'Ⅷ', 'ⅷ', '⓼', '₈', '⁸', '➑': drift(q1ZiFv, '₈', '⁸', '➑')
+
+					case '9', 'Ⅸ', 'ⅸ', '⓽', '₉', '⁹', '➒': drift(q1ZiFv, '₉', '⁹', '➒')
+				}
 	}
-	if FullKBD
-		switch q1ZiFv {
-			case 'a': Send "{BS}{Text}α"  ; 小写英文字母变换为小写希腊字母
-			case 'b': Send "{BS}{Text}β"
-			case 'c': Send "{BS}{Text}ψ"
-			case 'd': Send "{BS}{Text}δ"
-			case 'e': Send "{BS}{Text}ε"
-			case 'f': Send "{BS}{Text}φ"
-			case 'g': Send "{BS}{Text}γ"
-			case 'h': Send "{BS}{Text}η"
-			case 'i': Send "{BS}{Text}ι"
-			case 'j': Send "{BS}{Text}ξ"
-			case 'k': Send "{BS}{Text}κ"
-			case 'l': Send "{BS}{Text}λ"
-			case 'm': Send "{BS}{Text}μ"
-			case 'n': Send "{BS}{Text}ν"
-			case 'o': Send "{BS}{Text}ο"
-			case 'p': Send "{BS}{Text}π"
-			case 'r': Send "{BS}{Text}ρ"
-			case 's': Send "{BS}{Text}σ"
-			case 't': Send "{BS}{Text}τ"
-			case 'u': Send "{BS}{Text}θ"
-			case 'v': Send "{BS}{Text}ω"
-			case 'w': Send "{BS}{Text}ς"
-			case 'x': Send "{BS}{Text}χ"
-			case 'y': Send "{BS}{Text}υ"
-			case 'z': Send "{BS}{Text}ζ"
-
-			case 'A': Send "{BS}{Text}Α"  ; 大写英文字母变换为大写希腊字母
-			case 'B': Send "{BS}{Text}Β"
-			case 'C': Send "{BS}{Text}Ψ"
-			case 'D': Send "{BS}{Text}Δ"
-			case 'E': Send "{BS}{Text}Ε"
-			case 'F': Send "{BS}{Text}Φ"
-			case 'G': Send "{BS}{Text}Γ"
-			case 'H': Send "{BS}{Text}Η"
-			case 'I': Send "{BS}{Text}Ι"
-			case 'J': Send "{BS}{Text}Ξ"
-			case 'K': Send "{BS}{Text}Κ"
-			case 'L': Send "{BS}{Text}Λ"
-			case 'M': Send "{BS}{Text}Μ"
-			case 'N': Send "{BS}{Text}Ν"
-			case 'O': Send "{BS}{Text}Ο"
-			case 'P': Send "{BS}{Text}Π"
-			case 'R': Send "{BS}{Text}Ρ"
-			case 'S': Send "{BS}{Text}Σ"
-			case 'T': Send "{BS}{Text}Τ"
-			case 'U': Send "{BS}{Text}Θ"
-			case 'V': Send "{BS}{Text}Ω"
-			case 'X': Send "{BS}{Text}Χ"
-			case 'Y': Send "{BS}{Text}Υ"
-			case 'Z': Send "{BS}{Text}Ζ"
-
-			case '0', '⓪': Send "{BS}{Text}₀"  ; 右Shift键数字漂移功能
-			case '₀': Send "{BS}{Text}⁰"
-			case '⁰': Send "{BS}{Text}⓿"
-			case '⓿': Send "{BS}{Text}0"
-
-			case '1', 'Ⅰ', 'ⅰ', '➀': Send "{BS}{Text}₁"
-			case '₁': Send "{BS}{Text}¹"
-			case '¹': Send "{BS}{Text}➊"
-			case '➊': Send "{BS}{Text}1"
-
-			case '2', 'Ⅱ', 'ⅱ', '➁': Send "{BS}{Text}₂"
-			case '₂': Send "{BS}{Text}²"
-			case '²': Send "{BS}{Text}➋"
-			case '➋': Send "{BS}{Text}2"
-
-			case '3', 'Ⅲ', 'ⅲ', '➂': Send "{BS}{Text}₃"
-			case '₃': Send "{BS}{Text}³"
-			case '³': Send "{BS}{Text}➌"
-			case '➌': Send "{BS}{Text}3"
-
-			case '4', 'Ⅳ', 'ⅳ', '➃': Send "{BS}{Text}₄"
-			case '₄': Send "{BS}{Text}⁴"
-			case '⁴': Send "{BS}{Text}➍"
-			case '➍': Send "{BS}{Text}4"
-
-			case '5', 'Ⅴ', 'ⅴ', '➄': Send "{BS}{Text}₅"
-			case '₅': Send "{BS}{Text}⁵"
-			case '⁵': Send "{BS}{Text}➎"
-			case '➎': Send "{BS}{Text}5"
-
-			case '6', 'Ⅵ', 'ⅵ', '➅': Send "{BS}{Text}₆"
-			case '₆': Send "{BS}{Text}⁶"
-			case '⁶': Send "{BS}{Text}➏"
-			case '➏': Send "{BS}{Text}6"
-
-			case '7': Send "{BS}{Text}₇"
-			case '₇': Send "{BS}{Text}⁷"
-			case '⁷': Send "{BS}{Text}➐"
-			case '➐': Send "{BS}{Text}7"
-
-			case '8', 'Ⅷ', 'ⅷ', '⓼': Send "{BS}{Text}₈"
-			case '₈': Send "{BS}{Text}⁸"
-			case '⁸': Send "{BS}{Text}➑"
-			case '➑': Send "{BS}{Text}8"
-
-			case '9', 'Ⅸ', 'ⅸ', '⓽': Send "{BS}{Text}₉"
-			case '₉': Send "{BS}{Text}⁹"
-			case '⁹': Send "{BS}{Text}➒"
-			case '➒': Send "{BS}{Text}9"
-		}
 }
 
 #HotIf GetKeyState("CapsLock", "T")  ; 如果CapsLock键处于打开状态。
 <+CapsLock:: {  ; 左Shift+CapsLock 将光镖前1个英纹单词转换为小写。
-	KeyWait "CapsLock"
-	KeyWait "LShift"
 	SetCapsLockState "Off"
 	SendText StrLower(getQ1Word_X())
+	KeyWait "CapsLock"
+	KeyWait "LShift"
 }
 >+CapsLock:: {  ; 右Shift+CapsLock 将光䅺前1个英文单词转换为小写输入码（发送给中文输入法）
-	KeyWait "CapsLock"
-	KeyWait "RShift"
 	SetCapsLockState "Off"
 	Send StrLower(getQ1Word_X())
+	KeyWait "CapsLock"
+	KeyWait "RShift"
 }
 
 #HotIf  ; 无任何前置条件。
@@ -1171,14 +1038,14 @@ RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 	}
 }
 <+CapsLock:: {  ; 左Shift+CapsLock 将光镖前1个英文单词转换为太写。
+	SendText StrUpper(getQ1Word_X())
 	KeyWait "CapsLock"
 	KeyWait "LShift"
-	SendText StrUpper(getQ1Word_X())
 }
 >+CapsLock:: {  ; 右Shift+CapsLock 将光䅺前1个英文单词转换为首牸母太写。
+	SendText StrTitle(getQ1Word_X())
 	KeyWait "CapsLock"
 	KeyWait "RShift"
-	SendText StrTitle(getQ1Word_X())
 }
 Pause:: {  ; 通常用于在调试时让程序继续运行。
 	ToolTip ""
