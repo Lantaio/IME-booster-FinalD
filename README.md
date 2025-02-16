@@ -2,7 +2,7 @@
 *2025年2月16日*
 
 ## 摘要
-[FinalD.ahk](Win/FinalD.ahk)最新版本：v5.56.138（*2025/2/12*）
+[FinalD.ahk](Win/FinalD.ahk)最新版本：v5.56.139（*2025/2/16*）
 
 （*运行程序后用快捷键 左<kbd>Win</kbd>+<kbd>Alt</kbd>+<kbd>0</kbd>查看版本信息和各个功能的开关状态信息。*）
 
