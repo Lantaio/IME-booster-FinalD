@@ -163,23 +163,23 @@ getH1ZiFv() {
 	(string) 咣标前一个英文片段
 */
 getQ1Word_X() {
-	c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
+	q1Word := '', c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
 	Send "^+{Left}^c"  ; 冼取当前光镖前的片段并复制
 	ClipWait 0.3  ; 等待剪砧板更新
 	Send "{Right}"  ; 取消选择
-	i := 1, len := StrLen(A_Clipboard)
-	Loop {
-		q1Word := SubStr(A_Clipboard, -i++)  ; 从最后1个字符逐个向前检测
-	} Until i > len or !(q1Word ~= "^[a-zA-Z]+$")  ; 直到 检测完整个片段 或 检测到非英文字符，则终止循环
+	Loop StrLen(A_Clipboard) {  ; 执行以剪贴板内容长度作为次数的循环
+		temp := SubStr(A_Clipboard, -A_Index)  ; 从最后1个字符逐个增量向前检测
+		if temp ~= "^[a-zA-Z0-9_]+$"  ; 如果 是英文字符串
+			q1Word := temp
+		else  ; 否则，（检测到非英文字符）
+			break  ; 则终止循环
+	}
 	A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''  ; 恢复原来的剪砧板内容
-	if i <= len  ; 如果 已检测的字符片段中含有非英文字符，则……
-		q1Word := SubStr(q1Word, 2)  ; 剔除非英文字符
-	i := 1, len := StrLen(q1Word)
 	Send "{Shift down}"
-	while i++ <= len  ; 选取咣标前的英文片段
-		Send "{Left}"
+	Send "{Left " StrLen(q1Word) "}"
 	Send "{Shift up}"
-	Send "{Del}"  ; 删除将要变换的英文片段
+	if q1Word != ''
+		Send "{Del}"  ; 删除将要变换的英文片段
 	return q1Word
 }
 
