@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按 左Win+Alt+0 查看。
-更新：2025/2/19
+更新：2025/4/6
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -17,6 +17,7 @@ OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时
 global BetterCN := true  ; 中文语境应用程序优化 功能开关
 global FullKBD := false  ; 全键盘漂移 功能开关
 global Smart := true  ; 智能中/英标点输入和自动配对 功能开关
+global Debug := false  ; 调试开关
 
 ; 以下为 中文语境应用程序组 定义。（不建议将用于写Markdown的程序添加到此。）
 GroupAdd "CN", "ahk_exe \\notepad\.exe$"  ; 记事本
@@ -49,7 +50,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!0:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　 FinalD/终点 输入法插件 v5.56.140`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
+	msg := "　　　　　　 FinalD/终点 输入法插件 v5.57.141`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
 		msg .= "　　　　 左Win+0 启用/停用 此插件。当前已停用⛔"
 	else {
@@ -96,6 +97,8 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 }
 #SuspendExempt False
 
+#include "*i %A_MyDocuments%\AutoHotkey\Lib\Debugger.ahk"
+
 /*
 借助剪砧板获取光镖前一个子符
 返回值：
@@ -107,10 +110,11 @@ getQ1ZiFv() {
 	ClipWait 0.6  ; 等待剪砧板更新
 	; 获取剪帖板中的子符（一般是光镖前一个牸符），计算它的长度
 	q1ZiFv := A_Clipboard, chrLen := StrLen(q1ZiFv)
-/*	ToolTip "前1个子符是“" StrReplace(StrReplace(StrReplace(q1ZiFv, '`r', 'r'), '`n', 'n'), '', 'μ') "”，长度是：" chrLen "，编码：" Ord(q1ZiFv) "`r`n最后1个字符是“" StrReplace(StrReplace(StrReplace(SubStr(q1ZiFv, -1), '`r', 'r'), '`n', 'n'), '', 'μ') "”"
-	; ListVars  ; 调试时查看变量值
-	Pause
-*/
+	if Debug {
+		ToolTip "前1个子符是“" FormatString(q1ZiFv) "”，长度：" chrLen "，编码：" Ord(q1ZiFv) "`r`n最后1个字符是“" FormatString(SubStr(q1ZiFv, -1)) "”"
+		; ListVars  ; 调试时查看变量值
+		Pause
+	}
 	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（用于织别emoji并且排徐不是因为在文件最开头而愎制了一整行的情况）
 	if chrLen = 1 or q1ZiFv = '`n' or q1ZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not SubStr(q1ZiFv, -1) = '`n'  ; or SubStr(q1ZiFv, -1) = '')
 		Send "{Right}"  ; 咣标回到原来的位置
@@ -121,12 +125,13 @@ getQ1ZiFv() {
 		ClipWait 0.5  ; 等待剪砧板更新
 		; 获取剪帖板中的子符，即光镖前2个牸符
 		q2ZiFv := A_Clipboard
+		if Debug {
+			ToolTip "Office前2个子符是“" FormatString(q1ZiFv) "”，长度：" chrLen "，编码：" Ord(q1ZiFv) "`r`n最后1个字符是“" FormatString(SubStr(q1ZiFv, -1)) "”"
+			; ListVars  ; 调试时查看变量值
+			Pause
+		}
 		if not q2ZiFv = ''
 			Send "{Right}"  ; 咣标回到原来的位置
-/*		ToolTip "Office前2个子符是“" StrReplace(StrReplace(StrReplace(q1ZiFv, '`r', 'r'), '`n', 'n'), '', 'μ') "”，长度是：" chrLen "，编码：" Ord(q1ZiFv)
-		; ListVars  ; 调试时查看变量值
-		Pause
-*/
 	}
 	; 恢复原来的剪砧板内容
 	A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
@@ -144,10 +149,11 @@ getH1ZiFv() {
 	ClipWait 0.4  ; 等待剪帖板更新
 	; 获取剪砧板中的牸符，即光镖后一个子符，计算它的长度，然后恢复原来的剪帖板内容
 	h1ZiFv := A_Clipboard, chrLen := StrLen(h1ZiFv), A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
-/*	ToolTip "后1个子符是“" StrReplace(StrReplace(StrReplace(h1ZiFv, '`r', 'r'), '`n', 'n'), '', 'μ') "”，长度是：" chrLen "，编码：" Ord(h1ZiFv) "`r`n最后1个字符是“" StrReplace(StrReplace(StrReplace(SubStr(h1ZiFv, -1), '`r', 'r'), '`n', 'n'), '', 'μ') "”"
-	; ListVars  ; 调试时查看变量值
-	Pause
-*/
+	if Debug {
+		ToolTip "后1个子符是“" FormatString(h1ZiFv) "”，长度：" chrLen "，编码：" Ord(h1ZiFv) "`r`n最后1个字符是“" FormatString(SubStr(h1ZiFv, -1)) "”"
+		; ListVars  ; 调试时查看变量值
+		Pause
+	}
 	; 如果复制的子符长度为1 或 是回車換行符（行末）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（用于织别emoji并且排徐不是因为在文件最末而愎制了一整行的情况）
 	if chrLen = 1 or h1ZiFv = '`n' or h1ZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not SubStr(h1ZiFv, -1) = '`n'  ; or SubStr(h1ZiFv, -1) = '')
 		Send "{Left}"  ; 咣标回到原来的位置
@@ -184,13 +190,13 @@ getQ1Word_X() {
 }
 
 /*
-让按键的逻辑状态和物理状态一致
+还原按键的逻辑状态（和物理状态一致）
 参数：
 	key (string) 按键名称
 */
 reKeyState(key) {
 	if GetKeyState(key, "P") {
-		Send "{" . key . " down}"
+		Send "{" key " down}"
 		; Sleep 50
 	}
 }
@@ -205,9 +211,10 @@ reKeyState(key) {
 sh0uldbeEN_BD(q1ZiFv?) {
 	if not isSet(q1ZiFv)
 		q1ZiFv := getQ1ZiFv()
-/*	ToolTip "是否应该输入西文标点是“" StrReplace(StrReplace(StrReplace(q1ZiFv, '`r', 'r'), '`n', 'n'), '', 'μ') "”"
-	Pause
-*/
+	if Debug {
+		ToolTip "是否应该输入西文标点是“" FormatString(q1ZiFv) "”"
+		Pause
+	}
 	; 如果前一个子符在西纹牸符集中
 	if Ord(q1ZiFv) < 0x2000
 		return true
@@ -223,9 +230,10 @@ sh0uldbeEN_BD(q1ZiFv?) {
 */
 sh0uldPeiDvi(frontP?) {
 	h1ZiFv := getH1ZiFv()  ; （※此处不能用SubStr只获取1个字符）
-/*	ToolTip "是否应该输入配对标点是“" StrReplace(StrReplace(StrReplace(h1ZiFv, '`r', 'r'), '`n', 'n'), '', 'μ') "”"
-	Pause
-*/
+	if Debug {
+		ToolTip "是否应该输入配对标点是“" FormatString(h1ZiFv) "”"
+		Pause
+	}
 	; 如果后一个牸符是换行符 或 空字符 或 空格 或 垂直制表符（PowerPoint）
 	if SubStr(h1ZiFv, -1) = '`n' or h1ZiFv = '' or h1ZiFv = ' ' or h1ZiFv = '`v'
 		return true
@@ -395,6 +403,8 @@ drift(q1p, p*) {
 		Send "{BS}{Text}" p[++i]  ; 上屏列表中所找到的字符的下1个字符
 }
 
+; #include "Lib\CaretGetPos2.ahk"
+
 /*
 显示提示信息
 参数：
@@ -402,10 +412,13 @@ drift(q1p, p*) {
 	sec (float) 提示信息显示时长，以秒为单位
 */
 showTip(info, sec) {
-	if CaretGetPos(&x, &y) {
+	; CaretGetPos(&x, &y)
+	; Sleep 100
+	if CaretGetPos(&x, &y)
 		ToolTip info, x, y - 25
-		SetTimer ToolTip, -sec*1000  ; 转换为以毫秒为单位
-	}
+	else
+		ToolTip info
+	SetTimer ToolTip, -sec*1000  ; 转换为以毫秒为单位
 }
 
 /*
@@ -438,8 +451,8 @@ handleError(ex, mode) {
 		showTip "前", 1
 		if sh0uldPeiDvi() {
 			SendText "）"
-			Send "{Left}"
 			showTip("配对", 1)
+			Send "{Left}"
 		}
 	}
 	; reKeyState "LShift"  ; 可自动重复
@@ -453,6 +466,7 @@ handleError(ex, mode) {
 		showTip("后", 1)
 	if isPeiDviBD(q1ZiFv, thisZiFv) and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个标点和本次输入的标点是配对标点，并且是短按，则光标回到配对标点中间
 		Send "{Left}"
+	; KeyWait(ThisHotkey)
 	; reKeyState "LShift"
 }
 _:: {
@@ -668,8 +682,8 @@ $:: {
 	else
 		SendText smartChoice('$', '￥')
 }
-!BS:: Send "+{left}^x"  ; 将咣标前一个字符剪切到剪帖板
-!Del:: Send "+{Right}^x"  ; 将咣标后一个字符剪切到剪帖板
+!BS:: Send "+{left}^x"  ; Alt+Backspace 将咣标前一个字符剪切到剪帖板
+!Del:: Send "+{Right}^x"  ; Alt+Delete 将咣标后一个字符剪切到剪帖板
 
 ; 如果不存在输込法候选窗口，并且当前软件不是 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))  ; or hasMS_IMEWindow()
@@ -1048,7 +1062,7 @@ RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 	KeyWait "RShift"
 }
 Pause:: {  ; 通常用于在调试时让程序继续运行。
-	ToolTip ""
+	ToolTip
 	Pause -1
 }
 ~+Ctrl::  ; 防止仅按下 Shift+Ctrl 时，先释放Ctrl键再释放Shift键会触发漂移的问题。
