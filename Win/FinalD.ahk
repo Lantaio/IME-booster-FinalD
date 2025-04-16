@@ -10,14 +10,15 @@
 #Requires AutoHotkey v2.0
 #SingleInstance
 #UseHook
+; CoordMode "ToolTip", "Screen"  ; 设置ToolTip函数的坐标模式为相对于屏幕
 KeyHistory 100
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（※ 此模式默认区分大小写）
-OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
+; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
 global BetterCN := true  ; 中文语境应用程序优化 功能开关
 global FullKBD := false  ; 全键盘漂移 功能开关
 global Smart := true  ; 智能中/英标点输入和自动配对 功能开关
-global Debug := false  ; 调试开关
+global Debug := false  ; 调试程序的总开关
 
 ; 以下为 中文语境应用程序组 定义。（不建议将用于写Markdown的程序添加到此。）
 GroupAdd "CN", "ahk_exe \\notepad\.exe$"  ; 记事本
@@ -412,13 +413,21 @@ drift(q1p, p*) {
 	sec (float) 提示信息显示时长，以秒为单位
 */
 showTip(info, sec) {
-	; CaretGetPos(&x, &y)
-	; Sleep 100
 	if CaretGetPos(&x, &y)
 		ToolTip info, x, y - 25
 	else
 		ToolTip info
 	SetTimer ToolTip, -sec*1000  ; 转换为以毫秒为单位
+/*	else {
+		loop 30 {
+			if CaretGetPos2(&x, &y) {
+				ToolTip info, x, y - 25
+				break
+			}
+			Sleep 100
+		}
+	}
+*/
 }
 
 /*
@@ -448,7 +457,7 @@ handleError(ex, mode) {
 	}
 	else {
 		SendText "（"
-		showTip "前", 1
+		showTip("前", 1)
 		if sh0uldPeiDvi() {
 			SendText "）"
 			showTip("配对", 1)
@@ -498,8 +507,8 @@ _:: {
 		if thisZiFv = '“' {
 			showTip("前", 1)
 			if sh0uldPeiDvi('“') {  ; 如果 应该自动配对，则……
-				Send '"{Left}'
 				showTip("配对", 1)
+				Send '"{Left}'
 			}
 		}
 		else {
@@ -595,8 +604,8 @@ _:: {
 		if thisZiFv = "‘" {
 			showTip("前", 1)
 			if sh0uldPeiDvi('‘') {  ; 如果 应该自动配对，则……
-				Send "'{Left}"
 				showTip("配对", 1)
+				Send "'{Left}"
 			}
 		}
 		else {
