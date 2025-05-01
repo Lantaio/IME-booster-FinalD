@@ -5,12 +5,13 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按 左Win+Alt+0 查看。
-更新：2025/4/6
+更新：2025/5/1
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
 #UseHook
-; CoordMode "ToolTip", "Screen"  ; 设置ToolTip函数的坐标模式为相对于屏幕
+CoordMode "Caret", "Screen"  ; 设置CaretGetPos函数的坐标模式为相对于屏幕
+CoordMode "ToolTip", "Screen"  ; 设置ToolTip函数的坐标模式为相对于屏幕
 KeyHistory 100
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（※ 此模式默认区分大小写）
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
@@ -51,7 +52,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!0:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　 FinalD/终点 输入法插件 v5.57.141`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
+	msg := "　　　　　　 FinalD/终点 输入法插件 v5.57.142`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
 		msg .= "　　　　 左Win+0 启用/停用 此插件。当前已停用⛔"
 	else {
@@ -106,9 +107,9 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 	(string) 通过Shift+←键选取的光镖前一个子符
 */
 getQ1ZiFv() {
-	c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
+	c1ipC0ntent := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
 	Send "+{Left}^c"  ; 冼取当前光镖前一个牸符并复制
-	ClipWait 0.6  ; 等待剪砧板更新
+	ClipWait 0.6, 1  ; 等待剪砧板更新
 	; 获取剪帖板中的子符（一般是光镖前一个牸符），计算它的长度
 	q1ZiFv := A_Clipboard, chrLen := StrLen(q1ZiFv)
 	if Debug {
@@ -116,14 +117,14 @@ getQ1ZiFv() {
 		; ListVars  ; 调试时查看变量值
 		Pause
 	}
-	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（用于织别emoji并且排徐不是因为在文件最开头而愎制了一整行的情况）
-	if chrLen = 1 or q1ZiFv = '`n' or q1ZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not SubStr(q1ZiFv, -1) = '`n'  ; or SubStr(q1ZiFv, -1) = '')
+	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符（用于织别emoji并且排徐不是因为在文件最开头而愎制了一整行的情况）
+	if chrLen = 1 or q1ZiFv ~= '`a)^\R$' or chrLen > 1 and chrLen < 6 and not q1ZiFv ~= '`a)\R$'
 		Send "{Right}"  ; 咣标回到原来的位置
 	; 否则，如果当前软件是Word或PowerPoint
-	else if q1ZiFv = '' and WinActive(" - (Word|PowerPoint)$") {
+	else if q1ZiFv = '' and WinActive(" - Word$") {
 		A_Clipboard := ''  ; 清空剪帖板
 		Send "+{Left}^c"  ; 冼取当前光镖前一个牸符并复制
-		ClipWait 0.5  ; 等待剪砧板更新
+		ClipWait 0.5, 1  ; 等待剪砧板更新
 		; 获取剪帖板中的子符，即光镖前2个牸符
 		q2ZiFv := A_Clipboard
 		if Debug {
@@ -135,7 +136,7 @@ getQ1ZiFv() {
 			Send "{Right}"  ; 咣标回到原来的位置
 	}
 	; 恢复原来的剪砧板内容
-	A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
+	A_Clipboard := c1ipC0ntent, c1ipC0ntent := ''
 	return q1ZiFv
 }
 
@@ -145,22 +146,22 @@ getQ1ZiFv() {
 	(string) 通过Shift+→键选取的光镖后一个子符
 */
 getH1ZiFv() {
-	c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
+	c1ipC0ntent := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
 	Send "+{Right}^c"  ; 冼取当前光镖后一个子符并复制
-	ClipWait 0.4  ; 等待剪帖板更新
+	ClipWait 0.4, 1  ; 等待剪帖板更新
 	; 获取剪砧板中的牸符，即光镖后一个子符，计算它的长度，然后恢复原来的剪帖板内容
-	h1ZiFv := A_Clipboard, chrLen := StrLen(h1ZiFv), A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''
+	h1ZiFv := A_Clipboard, chrLen := StrLen(h1ZiFv), A_Clipboard := c1ipC0ntent, c1ipC0ntent := ''
 	if Debug {
 		ToolTip "后1个子符是“" FormatString(h1ZiFv) "”，长度：" chrLen "，编码：" Ord(h1ZiFv) "`r`n最后1个字符是“" FormatString(SubStr(h1ZiFv, -1)) "”"
 		; ListVars  ; 调试时查看变量值
 		Pause
 	}
-	; 如果复制的子符长度为1 或 是回車換行符（行末）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符 或 空字符（用于织别emoji并且排徐不是因为在文件最末而愎制了一整行的情况）
-	if chrLen = 1 or h1ZiFv = '`n' or h1ZiFv = "`r`n" or chrLen > 1 and chrLen < 6 and not SubStr(h1ZiFv, -1) = '`n'  ; or SubStr(h1ZiFv, -1) = '')
+	; 如果复制的子符长度为1 或 是回車換行符（行末）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符（用于织别emoji并且排徐不是因为在文件最末而愎制了一整行的情况）
+	if chrLen = 1 or h1ZiFv ~= '`a)^\R$' or chrLen > 1 and chrLen < 6 and not h1ZiFv ~= '`a)\R$'
 		Send "{Left}"  ; 咣标回到原来的位置
-	else if h1ZiFv = '' and WinActive(" - (Word|PowerPoint)$")  ; 如果当前软件是Word或PowerPoint
+/*	else if h1ZiFv = '' and WinActive(" - (Word|PowerPoint)$")  ; 如果当前软件是Word或PowerPoint
 		Send "{Left}"  ; 咣标回到原来的位置
-	; Pause
+*/
 	return h1ZiFv
 }
 
@@ -170,7 +171,7 @@ getH1ZiFv() {
 	(string) 咣标前一个英文片段
 */
 getQ1Word_X() {
-	q1Word := '', c1ipSt0rage := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
+	q1Word := '', c1ipC0ntent := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
 	Send "^+{Left}^c"  ; 冼取当前光镖前的片段并复制
 	ClipWait 0.6  ; 等待剪砧板更新
 	Send "{Right}"  ; 取消选择
@@ -181,7 +182,7 @@ getQ1Word_X() {
 		else  ; 否则，（检测到非英文字符）
 			break  ; 则终止循环
 	}
-	A_Clipboard := c1ipSt0rage, c1ipSt0rage := ''  ; 恢复原来的剪砧板内容
+	A_Clipboard := c1ipC0ntent, c1ipC0ntent := ''  ; 恢复原来的剪砧板内容
 	Send "{Shift down}"
 	Send "{Left " StrLen(q1Word) "}"
 	Send "{Shift up}"
@@ -235,8 +236,8 @@ sh0uldPeiDvi(frontP?) {
 		ToolTip "是否应该输入配对标点是“" FormatString(h1ZiFv) "”"
 		Pause
 	}
-	; 如果后一个牸符是换行符 或 空字符 或 空格 或 垂直制表符（PowerPoint）
-	if SubStr(h1ZiFv, -1) = '`n' or h1ZiFv = '' or h1ZiFv = ' ' or h1ZiFv = '`v'
+	; 如果后一个牸符是空字符 或 空格 或 换行符
+	if h1ZiFv = '' or h1ZiFv = ' ' or h1ZiFv ~= '`a)\R$'
 		return true
 	; 如果给定起始标点 并且 起始标点是‘'’、‘"’、‘‘’或‘“’
 	if isSet(frontP) and frontP ~= "'|`"|‘|“"
@@ -246,7 +247,6 @@ sh0uldPeiDvi(frontP?) {
 		case ',', '.', ':', ';', ')', ']', '}', '>', '?', '!': return true
 		case '，', '。', '：', '；', '？', '！', '）', '］', '】', '〗', '〕', '〙', '｝', '》', '〉': return true
 	}
-	; Pause
 	return false
 }
 
@@ -350,9 +350,8 @@ ch8PeiDviBD(oldP, newP) {
 	SendText "!"
 	Send "{Left}{BS}"
 	switch oldP {
-		case '(', '"', "'": SendText(newP), showTip("前", 1)
-		case '{', '[', '<': SendText newP
-		case '（', '“', '‘', '「', '『', '〘', '｛', '【', '〖', '〔', '［', '《', '〈': SendText newP
+		case '(', '"', "'", '『', '〖': SendText(newP), showTip("前", 1)
+		case '{', '[', '<', '（', '“', '‘', '「', '〘', '｛', '【', '〔', '［', '《', '〈': SendText newP
 	}
 	Send "{Del}"
 	if hasPairedBD {
@@ -369,12 +368,12 @@ ch8PeiDviBD(oldP, newP) {
 			case '「': SendText '」'
 			case '『': SendText '』'
 			case '〘': SendText '〙'
-			case '｛': SendText '｝'
+			case '｛': SendText('｝'), showTip("配对", 1)
 			case '[': SendText ']'
 			case '【': SendText '】'
 			case '〖': SendText '〗'
 			case '〔': SendText '〕'
-			case '［': SendText '］'
+			case '［': SendText('］'), showTip("配对", 1)
 			case '<': SendText '>'
 			case '《': SendText '》'
 			case '〈': SendText '〉'
@@ -404,8 +403,6 @@ drift(q1p, p*) {
 		Send "{BS}{Text}" p[++i]  ; 上屏列表中所找到的字符的下1个字符
 }
 
-; #include "Lib\CaretGetPos2.ahk"
-
 /*
 显示提示信息
 参数：
@@ -413,21 +410,11 @@ drift(q1p, p*) {
 	sec (float) 提示信息显示时长，以秒为单位
 */
 showTip(info, sec) {
-	if CaretGetPos(&x, &y)
+	if CaretGetPos(&x, &y)  ; 如果能获取到光标位置，则……
 		ToolTip info, x, y - 25
 	else
 		ToolTip info
-	SetTimer ToolTip, -sec*1000  ; 转换为以毫秒为单位
-/*	else {
-		loop 30 {
-			if CaretGetPos2(&x, &y) {
-				ToolTip info, x, y - 25
-				break
-			}
-			Sleep 100
-		}
-	}
-*/
+	SetTimer ToolTip, -sec*1000  ; 提示信息显示sec秒后清除
 }
 
 /*
@@ -493,7 +480,7 @@ _:: {
 	q1ZiFv := getQ1ZiFv()
 	if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD(q1ZiFv) {
 		SendText '"'
-		if (q1ZiFv = ' ' or SubStr(q1ZiFv, -1) = '`n' or q1ZiFv = '`v' or q1ZiFv = '') and sh0uldPeiDvi(ThisHotkey) {  ; 如果 应该自动配对，则……
+		if (q1ZiFv = ' ' or q1ZiFv ~= '`a)\R$' or q1ZiFv = '') and sh0uldPeiDvi(ThisHotkey) {  ; 如果 应该自动配对，则……SubStr(q1ZiFv, -1) = '`n' or q1ZiFv = '`v'
 			SendText '"'
 			Send "{Left}"
 		}
@@ -590,7 +577,7 @@ _:: {
 	q1ZiFv := getQ1ZiFv()
 	if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD(q1ZiFv) {
 		SendText "'"
-		if (q1ZiFv = ' ' or SubStr(q1ZiFv, -1) = '`n' or q1ZiFv = '`v' or q1ZiFv = '') and sh0uldPeiDvi(ThisHotkey) {  ; 如果 应该自动配对，则……
+		if (q1ZiFv = ' ' or q1ZiFv ~= '`a)\R$' or q1ZiFv = '') and sh0uldPeiDvi(ThisHotkey) {  ; 如果 应该自动配对，则……SubStr(q1ZiFv, -1) = '`n' or q1ZiFv = '`v'
 			SendText "'"
 			Send "{Left}"
 		}
