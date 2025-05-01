@@ -22,11 +22,12 @@ global Smart := true  ; 智能中/英标点输入和自动配对 功能开关
 global Debug := false  ; 调试程序的总开关
 
 ; 以下为 中文语境应用程序组 定义。（不建议将用于写Markdown的程序添加到此。）
+GroupAdd "CN", "ahk_exe \\AliIM\.exe$"  ; 阿里旺旺
 GroupAdd "CN", "ahk_exe \\notepad\.exe$"  ; 记事本
 ; GroupAdd "CN", "ahk_exe \\notepad\+\+\.exe$"  ; 将此软件用于编程时须将此行变成注释
 GroupAdd "CN", "ahk_exe \\(QQ|WeChat)\.exe$"  ; QQ 或 微信
 GroupAdd "CN", "标记文字$ ahk_exe \\TdxW\.exe$"  ; 通达信中的“标记文字”窗口
-GroupAdd "CN", "ahk_exe \\(WINWORD|POWERPNT)\.EXE$"  ; 微软Office Word 或 PowerPoint
+GroupAdd "CN", "^(?!Microsoft Visual Basic) ahk_exe \\(WINWORD|POWERPNT)\.EXE$"  ; 微软Office Word 或 PowerPoint（VBA窗口除外）
 
 ; 以下为 不适用须要排除的应用程序组 定义。
 GroupAdd "Exclude", "ahk_exe \\cmd\.exe$"  ; CMD命令提示符
@@ -47,12 +48,12 @@ GroupAdd "IME", "ahk_class A)HandyPinyinCandidateWindow"  ; 手心拼音
 GroupAdd "IME", "ahk_class A)TfFrameClass"  ; 智能ABC
 
 ; 以下为 不支持智能标点输入和自动配对功能的应用程序组 定义。
-GroupAdd "UnSmart", "^(?!Microsoft Visual Basic) ahk_exe \\EXCEL\.EXE"  ; Excel（VBA窗口除外）
+GroupAdd "UnSmart", "^(?!Microsoft Visual Basic) ahk_exe \\EXCEL\.EXE"  ; 微软Excel（VBA窗口除外）
 GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!0:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　 FinalD/终点 输入法插件 v5.57.143`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
+	msg := "　　　　　　 FinalD/终点 输入法插件 v5.57.145`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
 		msg .= "　　　　 左Win+0 启用/停用 此插件。当前已停用⛔"
 	else {
@@ -135,6 +136,8 @@ getQ1ZiFv() {
 		if not q2ZiFv = ''
 			Send "{Right}"  ; 咣标回到原来的位置
 	}
+	if WinActive("ahk_exe \\AliIM\.exe$")  ; 如果是阿里旺旺，暂停50毫秒以等待光标完成向右移动
+		Sleep 50
 	; 恢复原来的剪砧板内容
 	A_Clipboard := c1ipC0ntent, c1ipC0ntent := ''
 	return q1ZiFv
