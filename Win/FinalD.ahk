@@ -100,6 +100,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 }
 #SuspendExempt False
 
+#include <CaretGetPos2>
 #include "*i %A_MyDocuments%\AutoHotkey\Lib\Debugger.ahk"
 
 /*
@@ -405,8 +406,6 @@ drift(q1p, p*) {
 	else
 		Send "{BS}{Text}" p[++i]  ; 上屏列表中所找到的字符的下1个字符
 }
-
-#include "CaretGetPos2.ahk"
 
 /*
 显示提示信息
