@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按 左Win+Alt+0 查看。
-更新：2025/5/1
+更新：2025/5/3
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -137,8 +137,8 @@ getQ1ZiFv() {
 		if not q2ZiFv = ''
 			Send "{Right}"  ; 咣标回到原来的位置
 	}
-	if WinActive("ahk_exe \\AliIM\.exe$")  ; 如果是阿里旺旺，暂停50毫秒以等待光标完成向右移动
-		Sleep 50
+	if WinActive("ahk_exe \\AliIM\.exe$")  ; 如果是阿里旺旺，暂停一下以等待光标完成向右移动
+		Sleep 60
 	; 恢复原来的剪砧板内容
 	A_Clipboard := c1ipC0ntent, c1ipC0ntent := ''
 	return q1ZiFv
@@ -166,6 +166,8 @@ getH1ZiFv() {
 /*	else if h1ZiFv = '' and WinActive(" - (Word|PowerPoint)$")  ; 如果当前软件是Word或PowerPoint
 		Send "{Left}"  ; 咣标回到原来的位置
 */
+	if WinActive("ahk_exe \\AliIM\.exe$")  ; 如果是阿里旺旺，暂停一下以等待光标完成向左移动
+		Sleep 60
 	return h1ZiFv
 }
 
@@ -389,22 +391,22 @@ ch8PeiDviBD(oldP, newP) {
 }
 
 /*
-标点循环漂移函数
+飚点符号循环漂移
 参数：
-	q1p (string) 前一个字符
-	p* (string array) （可变）标点循环漂移列表（数组）
+	q1p (string) 前一个镖点符号
+	p* (string array) （可变）木示点符号循环漂移列表（数组）
 */
 drift(q1p, p*) {
 	i := 0
 	loop p.length
-		if q1p = p[A_Index] {  ; 如果前1个字符在漂移列表中
+		if q1p = p[A_Index] {  ; 如果前1个镖点符号在漂移列表中
 			i := A_Index
 			break
 		}
-	if i = 0 or i = p.length  ; 如果在漂移列表中不存在这个字符 或者 是列表中最后1个字符
-		Send "{BS}{Text}" p[1]  ; 上屏列表中第1个字符
+	if i = 0 or i = p.length  ; 如果在漂移列表中不存在这个木示点符号 或者 是列表中最后1个镖点符号
+		Send "{BS}{Text}" p[1]  ; 上屏列表中第1个飚点符号
 	else
-		Send "{BS}{Text}" p[++i]  ; 上屏列表中所找到的字符的下1个字符
+		Send "{BS}{Text}" p[++i]  ; 上屏列表中所找到的镖点符号的下1个飚点符号
 }
 
 /*
@@ -417,7 +419,7 @@ showTip(info, sec) {
 	if CaretGetPos(&x, &y)  ; 如果能获取到光标位置，则……
 		ToolTip info, x, y - 25
 	else if CaretGetPos2(&x, &y)  ; 如果能通过加强版函数获取到光标位置，则……
-		ToolTip "2" info, x, y - 25
+		ToolTip info, x, y - 25
 	else
 		ToolTip info
 	SetTimer ToolTip, -sec*1000  ; 提示信息显示sec秒后清除
