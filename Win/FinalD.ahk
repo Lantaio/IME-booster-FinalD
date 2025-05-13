@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按 左Win+Alt+0 查看。
-更新：2025/5/3
+更新：2025/5/13
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -17,9 +17,10 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
 global BetterCN := true  ; 中文语境应用程序优化 功能开关
+global Debug := false  ; 调试程序的总开关
 global FullKBD := false  ; 全键盘漂移 功能开关
 global Smart := true  ; 智能中/英标点输入和自动配对 功能开关
-global Debug := false  ; 调试程序的总开关
+global Tip := true  ; 中文标点提示信息 功能开关
 
 ; 以下为 中文语境应用程序组 定义。（不建议将用于写Markdown的程序添加到此。）
 GroupAdd "CN", "ahk_exe \\AliIM\.exe$"  ; 阿里旺旺
@@ -53,7 +54,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!0:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　 FinalD/终点 输入法插件 v5.57.145`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
+	msg := "　　　　　　 FinalD/终点 输入法插件 v5.58.148`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
 		msg .= "　　　　 左Win+0 启用/停用 此插件。当前已停用⛔"
 	else {
@@ -100,8 +101,8 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 }
 #SuspendExempt False
 
-#include <CaretGetPos2>
-#include "*i %A_MyDocuments%\AutoHotkey\Lib\Debugger.ahk"
+#Include <CaretGetPos2>
+#Include "*i %A_MyDocuments%\AutoHotkey\Lib\Debugger.ahk"
 
 /*
 借助剪砧板获取光镖前一个子符
@@ -274,8 +275,11 @@ smartChoice(en, cn) {
 			Return cn
 	else if sh0uldbeEN_BD()  ; 否则（即所有程序使用一致的输入体验时），如果根据情况应该输入英文标点
 		Return en
-	else
+	else {
+		if Tip and cn ~= "，|：|；|？|！|｜|～"
+			showTip("中", 1)
 		Return cn
+	}
 }
 
 /*
@@ -355,35 +359,39 @@ ch8PeiDviBD(oldP, newP) {
 		hasPairedBD := hasPeiDviBD(oldP)
 	SendText "!"
 	Send "{Left}{BS}"
-	switch oldP {
-		case '(', '"', "'", '『', '〖': SendText(newP), showTip("前", 1)
-		case '{', '[', '<', '（', '“', '‘', '「', '〘', '｛', '【', '〔', '［', '《', '〈': SendText newP
+	switch newP {
+		case '(', '"', "'", '{', '[', '<', '「', '『', '【', '〖', '〔', '〘', '《', '〈': SendText newP
+		case '（', '“', "‘", '｛', '［': SendText newP
+			if Tip
+				showTip("前", 1)
 	}
 	Send "{Del}"
 	if hasPairedBD {
 		Send "{Del}{Text}!"
 		Send "{Left}"
 		switch newP {
-			case '(': SendText(')')
-			case '（': SendText('）'), showTip("配对", 1)
-			case '"': SendText('"')
-			case '“': SendText('”'), showTip("配对", 1)
-			case "'": SendText("'")
-			case '‘': SendText('’'), showTip("配对", 1)
+			case '(': SendText ')'
+			case '（': SendText '）'
+			case '"': SendText '"'
+			case '“': SendText '”'
+			case "'": SendText "'"
+			case '‘': SendText '’'
 			case '{': SendText '}'
 			case '「': SendText '」'
 			case '『': SendText '』'
 			case '〘': SendText '〙'
-			case '｛': SendText('｝'), showTip("配对", 1)
+			case '｛': SendText '｝'
 			case '[': SendText ']'
 			case '【': SendText '】'
 			case '〖': SendText '〗'
 			case '〔': SendText '〕'
-			case '［': SendText('］'), showTip("配对", 1)
+			case '［': SendText '］'
 			case '<': SendText '>'
 			case '《': SendText '》'
 			case '〈': SendText '〉'
 		}
+		if Tip and newP ~= "（|“|‘|｛|［"
+			showTip("配对", 1)
 		Send "{Del}{Left}"
 		if newP = '≤'
 			Send "{Right}"
@@ -404,9 +412,15 @@ drift(q1p, p*) {
 			break
 		}
 	if i = 0 or i = p.length  ; 如果在漂移列表中不存在这个木示点符号 或者 是列表中最后1个镖点符号
-		Send "{BS}{Text}" p[1]  ; 上屏列表中第1个飚点符号
+		i := 1  ; 定位列表中第1个飚点符号
 	else
-		Send "{BS}{Text}" p[++i]  ; 上屏列表中所找到的镖点符号的下1个飚点符号
+		i += 1  ; 定位列表中所找到的镖点符号的下1个飚点符号
+	Send "{BS}{Text}" p[i]  ; 漂移飚点符号
+	if Tip
+		if p[i] ~= "，|：|；|？|！|｜|～|＄|／|＼"
+			showTip("中", 1)
+		else if p[i] = '｝' or p[i] = '］'
+			showTip("后", 1)
 }
 
 /*
@@ -417,9 +431,9 @@ drift(q1p, p*) {
 */
 showTip(info, sec) {
 	if CaretGetPos(&x, &y)  ; 如果能获取到光标位置，则……
-		ToolTip info, x, y - 25
+		ToolTip info, x, y-25
 	else if CaretGetPos2(&x, &y)  ; 如果能通过加强版函数获取到光标位置，则……
-		ToolTip info, x, y - 25
+		ToolTip info, x, y-25
 	else
 		ToolTip info
 	SetTimer ToolTip, -sec*1000  ; 提示信息显示sec秒后清除
@@ -452,10 +466,12 @@ handleError(ex, mode) {
 	}
 	else {
 		SendText "（"
-		showTip("前", 1)
+		if Tip and not (BetterCN and WinActive("ahk_group CN"))
+			showTip("前", 1)
 		if sh0uldPeiDvi() {
 			SendText "）"
-			showTip("配对", 1)
+			if Tip and not (BetterCN and WinActive("ahk_group CN"))
+				showTip("配对", 1)
 			Send "{Left}"
 		}
 	}
@@ -466,7 +482,7 @@ handleError(ex, mode) {
 	q1ZiFv := getQ1ZiFv()
 	thisZiFv := smartChoice(')', '）')
 	SendText thisZiFv
-	if thisZiFv = '）'
+	if Tip and thisZiFv = '）' and not (BetterCN and WinActive("ahk_group CN"))
 		showTip("后", 1)
 	if isPeiDviBD(q1ZiFv, thisZiFv) and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个标点和本次输入的标点是配对标点，并且是短按，则光标回到配对标点中间
 		Send "{Left}"
@@ -500,14 +516,17 @@ _:: {
 		Send '"'
 		thisZiFv := getQ1ZiFv()
 		if thisZiFv = '“' {
-			showTip("前", 1)
+			if Tip
+				showTip("前", 1)
 			if sh0uldPeiDvi('“') {  ; 如果 应该自动配对，则……
-				showTip("配对", 1)
+				if Tip
+					showTip("配对", 1)
 				Send '"{Left}'
 			}
 		}
 		else {
-			showTip("后", 1)
+			if Tip
+				showTip("后", 1)
 			if q1ZiFv = '“' and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是短按，则咣标回到配对标点中间
 				Send "{Left}"
 		}
@@ -597,14 +616,17 @@ _:: {
 		Send "'"
 		thisZiFv := getQ1ZiFv()
 		if thisZiFv = "‘" {
-			showTip("前", 1)
+			if Tip
+				showTip("前", 1)
 			if sh0uldPeiDvi('‘') {  ; 如果 应该自动配对，则……
-				showTip("配对", 1)
+				if Tip
+					showTip("配对", 1)
 				Send "'{Left}"
 			}
 		}
 		else {
-			showTip("后", 1)
+			if Tip
+				showTip("后", 1)
 			if q1ZiFv = '‘' and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，并且是短按，则咣标回到配对标点中间
 				Send "{Left}"
 		}
@@ -701,7 +723,9 @@ LShift:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
 		case '(', '〔', '〘': ch8PeiDviBD(q1ZiFv, '（')
 		case '（': ch8PeiDviBD('（', '(')
 
-		case ')', '〕', '〙': Send("{BS}{Text}）"), showTip("后", 1)
+		case ')', '〕', '〙': Send "{BS}{Text}）"
+			if Tip
+				showTip("后", 1)
 		case '）': SendText("!"), Send("{Left}{BS}{Text})"), Send("{Del}")
 
 		case '_': Send "{BS}{Text}——"
@@ -758,7 +782,7 @@ LShift:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
 
 		case '！', '!', '▲', '⚠', '△': drift(q1ZiFv, '！', '!')
 
-		case '\', '、', '→', '↔', '←': drift(q1ZiFv, '\', '、')
+		case '\', '、', '→', '↔', '←', '＼': drift(q1ZiFv, '\', '、')
 
 		case '｜', '|', '↑', '↕', '↓', '‖': drift(q1ZiFv, '｜', '|')
 
@@ -772,7 +796,7 @@ LShift:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
 
 		case '~', '～', 'Δ', 'Ω', 'Θ', 'Λ', 'Φ': drift(q1ZiFv, '~', '～')
 
-		case '$', '￥', '＄', '€', '£', '¥', '¢': drift(q1ZiFv, '$', '￥')
+		case '$', '￥', '＄', '€', '£', '¢', '¤': drift(q1ZiFv, '$', '￥')
 
 		default:
 			if FullKBD
@@ -868,8 +892,12 @@ RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 
 		case '：', ':', '∵', '∴', '∷': drift(q1ZiFv, '∵', '∴', '∷')
 
-		case '"': Send("{Left}{Del}{Text}“"), showTip("前", 1)
-		case '“': Send("{BS}{Text}”"), showTip("后", 1)
+		case '"': Send "{Left}{Del}{Text}“"
+			if Tip
+				showTip("前", 1)
+		case '“': Send "{BS}{Text}”"
+			if Tip
+				showTip("后", 1)
 		case '”': SendText("!"), Send('{Left}{BS}{Text}"'), Send("{Del}")
 
 		case '/', '÷', '／', '≠', '√': drift(q1ZiFv, '／', '≠', '√')
@@ -892,8 +920,12 @@ RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 
 		case '}', '」', '』', '｝': drift(q1ZiFv, '』', '｝')
 
-		case "'": Send("{Left}{Del}{Text}‘"), showTip("前", 1)
-		case "‘": Send("{BS}{Text}’"), showTip("后", 1)
+		case "'": Send "{Left}{Del}{Text}‘"
+			if Tip
+				showTip("前", 1)
+		case "‘": Send "{BS}{Text}’"
+			if Tip
+				showTip("后", 1)
 		case "’": SendText("!"), Send("{Left}{BS}{Text}'"), Send("{Del}")
 
 		case '*', '×', '·', '＊', '∏': drift(q1ZiFv, '·', '＊', '∏')
@@ -915,7 +947,7 @@ RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 
 		case '！', '!', '▲', '⚠', '△': drift(q1ZiFv, '▲', '⚠', '△')
 
-		case '\', '、', '→', '↔', '←': drift(q1ZiFv, '→', '↔', '←')
+		case '\', '、', '→', '↔', '←', '＼': drift(q1ZiFv, '→', '↔', '←', '＼')
 
 		case '｜', '|', '↑', '↕', '↓', '‖': drift(q1ZiFv, '↑', '↕', '↓', '‖')
 
@@ -928,7 +960,7 @@ RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 
 		case '~', '～', 'Δ', 'Ω', 'Θ', 'Λ', 'Φ': drift(q1ZiFv, 'Δ', 'Ω', 'Θ', 'Λ', 'Φ')
 
-		case '$', '￥', '＄', '€', '£', '¢': drift(q1ZiFv, '＄', '€', '£', '¢')
+		case '$', '￥', '＄', '€', '£', '¢', '¤': drift(q1ZiFv, '＄', '€', '£', '¢', '¤')
 
 		default:
 			if FullKBD
@@ -1033,26 +1065,37 @@ RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 		MsgBox "终点插件 表格兼容模式 已关闭。`n即 智能标点和自动配对功能 已开启。", "终点 输入法插件", "Iconi T5"
 	}
 }
+>^LWin:: {
+	global Tip
+	if Tip {
+		Tip := false
+		MsgBox "终点插件 中文标点提示 已关闭。", "终点 输入法插件", "Iconi T2"
+	}
+	else {
+		Tip := true
+		MsgBox "终点插件 中文标点提示 已开启。", "终点 输入法插件", "Iconi T2"
+	}
+}
 <+LWin:: {  ; 左Shift+左Win 开/关 全键盘漂移功能。另外，Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
 	global FullKBD
 	if FullKBD {
 		FullKBD := false
-		MsgBox "终点插件 全键盘漂移功能 已关闭。", "终点 输入法插件", "Iconi T3"
+		MsgBox "终点插件 全键盘漂移功能 已关闭。", "终点 输入法插件", "Iconi T2"
 	}
 	else {
 		FullKBD := true
-		MsgBox "终点插件 全键盘漂移功能 已开启。`n建议无需使用时关闭此功能。", "终点 输入法插件", "Icon! T5"
+		MsgBox "终点插件 全键盘漂移功能 已开启。`n建议无需使用时关闭此功能。", "终点 输入法插件", "Icon! T3"
 	}
 }
 >+LWin:: {  ; 右Shift+左Win 开/关 中文语境应用程序优化功能。
 	global BetterCN
 	if BetterCN {
 		BetterCN := false
-		MsgBox "终点插件 在所有应用程序上的体验一致。", "终点 输入法插件", "Iconi T3"
+		MsgBox "终点插件 在所有应用程序上的体验一致。", "终点 输入法插件", "Iconi T2"
 	}
 	else {
 		BetterCN := true
-		MsgBox "终点插件 针对中文语境应用程序优化。", "终点 输入法插件", "Iconi T3"
+		MsgBox "终点插件 针对中文语境应用程序优化。", "终点 输入法插件", "Iconi T2"
 	}
 }
 <+CapsLock:: {  ; 左Shift+CapsLock 将光镖前1个英文单词转换为太写。
