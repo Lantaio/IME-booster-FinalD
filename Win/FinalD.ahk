@@ -5,7 +5,7 @@
 网址：https://github.com/Lantaio/IME-booster-FinalD
 作者：Lantaio Joy
 版本：运行此程序后按 左Win+Alt+0 查看。
-更新：2025/5/13
+更新：2025/6/1
 */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -20,7 +20,13 @@ global BetterCN := true  ; 中文语境应用程序优化 功能开关
 global Debug := false  ; 调试程序的总开关
 global FullKBD := false  ; 全键盘漂移 功能开关
 global Smart := true  ; 智能中/英标点输入和自动配对 功能开关
-global Tip := true  ; 中文标点提示信息 功能开关
+global Tip := false  ; 中文标点提示信息 功能开关
+
+; 以下为 有自动配对标点功能的编程软件组 定义。（在这些应用程序中禁止此程序自动配对英文标点功能）
+GroupAdd "AutoPair", "ahk_class A)SunAwtFrame$"  ; JetBrains系列IDE
+GroupAdd "AutoPair", "ahk_class A)Notepad\+\+$"
+GroupAdd "AutoPair", "ahk_exe \\sublime_text\.exe$"
+GroupAdd "AutoPair", "ahk_exe Code\.exe$"  ; VSCode
 
 ; 以下为 中文语境应用程序组 定义。（不建议将用于写Markdown的程序添加到此。）
 GroupAdd "CN", "ahk_exe \\AliIM\.exe$"  ; 阿里旺旺
@@ -28,7 +34,7 @@ GroupAdd "CN", "ahk_exe \\notepad\.exe$"  ; 记事本
 ; GroupAdd "CN", "ahk_exe \\notepad\+\+\.exe$"  ; 将此软件用于编程时须将此行变成注释
 GroupAdd "CN", "ahk_exe \\(QQ|WeChat)\.exe$"  ; QQ 或 微信
 GroupAdd "CN", "标记文字$ ahk_exe \\TdxW\.exe$"  ; 通达信中的“标记文字”窗口
-GroupAdd "CN", "^(?!Microsoft Visual Basic) ahk_exe \\(WINWORD|POWERPNT)\.EXE$"  ; 微软Office Word 或 PowerPoint（VBA窗口除外）
+GroupAdd "CN", "ahk_exe \\(WINWORD|POWERPNT)\.EXE$", , "A)Microsoft Visual Basic"  ; 微软Office Word 或 PowerPoint（其VBA窗口除外）
 
 ; 以下为 不适用须要排除的应用程序组 定义。
 GroupAdd "Exclude", "ahk_exe \\cmd\.exe$"  ; CMD命令提示符
@@ -48,21 +54,21 @@ GroupAdd "IME", "ahk_class A)QQWubiCandWndII"  ; QQ五笔；模式
 GroupAdd "IME", "ahk_class A)HandyPinyinCandidateWindow"  ; 手心拼音
 GroupAdd "IME", "ahk_class A)TfFrameClass"  ; 智能ABC
 
+; 以下为 反应慢的应用程序组 定义。（在发送箭头键后须要暂停一下）
+; GroupAdd "Slow", "ahk_class A)SunAwtFrame$"  ; JetBrains系列IDE
+GroupAdd "Slow", "ahk_exe \\AliIM\.exe$"  ; 阿里旺旺
+
 ; 以下为 不支持智能标点输入和自动配对功能的应用程序组 定义。
-GroupAdd "UnSmart", "^(?!Microsoft Visual Basic) ahk_exe \\EXCEL\.EXE"  ; 微软Excel（VBA窗口除外）
+GroupAdd "UnSmart", "ahk_exe \\EXCEL\.EXE", , "A)Microsoft Visual Basic"  ; 微软Excel（其VBA窗口除外）
 GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!0:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　 FinalD/终点 输入法插件 v5.58.148`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
+	msg := "　　　　　　 FinalD/终点 输入法插件 v5.59.150`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
-		msg .= "　　　　 左Win+0 启用/停用 此插件。当前已停用⛔"
+		msg .= "　　　　左Win+0 启用/停用 此插件，当前 已停用⛔"
 	else {
-		msg .= "左Win+0 启用/停用 已启用🚀，左Ctrl+左Win（表格）兼容模式"
-		if Smart
-			msg .= "❌"
-		else
-			msg .= "✔"
+		msg .= "　　　　左Win+0 启用/停用 此插件，当前 已启用🚀"
 		msg .= "`n左Shift+左Win 全键盘漂移"
 		if FullKBD
 			msg .= "✔"
@@ -70,6 +76,16 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 			msg .= "❌"
 		msg .= "，右Shift+左Win 中文语境软件优化"
 		if BetterCN
+			msg .= "✔"
+		else
+			msg .= "❌"
+		msg .= "`n左Ctrl+左Win（表格）兼容模式"
+		if Smart
+			msg .= "❌"
+		else
+			msg .= "✔"
+		msg .= "，右Ctrl+左Win 中文标点提示"
+		if Tip
 			msg .= "✔"
 		else
 			msg .= "❌"
@@ -81,11 +97,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 	if A_IsSuspended
 		MsgBox "终点 输入法插件 全部功能 已停用⛔", "终点 输入法插件", "Iconx T1"
 	else {
-		msg := "终点 输入法插件 已启用🚀`n`n左Win+Alt+0 查看各项功能的状态：`n（表格）兼容模式 "
-		if Smart
-			msg .= "❌"
-		else
-			msg .= "✔"
+		msg := "终点 输入法插件 已启用🚀`n`n左Win+Alt+0 查看各项功能的状态：`n"
 		msg .= "`n全键盘漂移 "
 		if FullKBD
 			msg .= "✔⚠"
@@ -93,6 +105,16 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 			msg .= "❌"
 		msg .= "`n中文语境软件优化 "
 		if BetterCN
+			msg .= "✔"
+		else
+			msg .= "❌"
+		msg .= "`n（表格）兼容模式 "
+		if Smart
+			msg .= "❌"
+		else
+			msg .= "✔"
+		msg .= "`n中文标点提示 "
+		if tip
 			msg .= "✔"
 		else
 			msg .= "❌"
@@ -127,7 +149,7 @@ getQ1ZiFv() {
 	else if q1ZiFv = '' and WinActive(" - Word$") {
 		A_Clipboard := ''  ; 清空剪帖板
 		Send "+{Left}^c"  ; 冼取当前光镖前一个牸符并复制
-		ClipWait 0.5, 1  ; 等待剪砧板更新
+		ClipWait 0.4, 1  ; 等待剪砧板更新
 		; 获取剪帖板中的子符，即光镖前2个牸符
 		q2ZiFv := A_Clipboard
 		if Debug {
@@ -138,10 +160,10 @@ getQ1ZiFv() {
 		if not q2ZiFv = ''
 			Send "{Right}"  ; 咣标回到原来的位置
 	}
-	if WinActive("ahk_exe \\AliIM\.exe$")  ; 如果是阿里旺旺，暂停一下以等待光标完成向右移动
-		Sleep 60
 	; 恢复原来的剪砧板内容
 	A_Clipboard := c1ipC0ntent, c1ipC0ntent := ''
+	if WinActive("ahk_group Slow")  ; 如果是反应慢的应用，暂停一下以等待光标完成向右移动
+		Sleep 50
 	return q1ZiFv
 }
 
@@ -164,11 +186,8 @@ getH1ZiFv() {
 	; 如果复制的子符长度为1 或 是回車換行符（行末）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符（用于织别emoji并且排徐不是因为在文件最末而愎制了一整行的情况）
 	if chrLen = 1 or h1ZiFv ~= '`a)^\R$' or chrLen > 1 and chrLen < 6 and not h1ZiFv ~= '`a)\R$'
 		Send "{Left}"  ; 咣标回到原来的位置
-/*	else if h1ZiFv = '' and WinActive(" - (Word|PowerPoint)$")  ; 如果当前软件是Word或PowerPoint
-		Send "{Left}"  ; 咣标回到原来的位置
-*/
-	if WinActive("ahk_exe \\AliIM\.exe$")  ; 如果是阿里旺旺，暂停一下以等待光标完成向左移动
-		Sleep 60
+	if WinActive("ahk_group Slow")  ; 如果是阿里旺旺，暂停一下以等待光标完成向左移动
+		Sleep 50
 	return h1ZiFv
 }
 
@@ -187,7 +206,7 @@ getQ1Word_X() {
 		if temp ~= "^[a-zA-Z0-9_]+$"  ; 如果 是英文字符串
 			q1Word := temp
 		else  ; 否则，（检测到非英文字符）
-			break  ; 则终止循环
+			break  ; 停止检测
 	}
 	A_Clipboard := c1ipC0ntent, c1ipC0ntent := ''  ; 恢复原来的剪砧板内容
 	Send "{Shift down}"
@@ -432,10 +451,17 @@ drift(q1p, p*) {
 showTip(info, sec) {
 	if CaretGetPos(&x, &y)  ; 如果能获取到光标位置，则……
 		ToolTip info, x, y-25
-	else if CaretGetPos2(&x, &y)  ; 如果能通过加强版函数获取到光标位置，则……
-		ToolTip info, x, y-25
-	else
-		ToolTip info
+	else if CaretGetPos2(&x, &y)  ; 否则，如果能通过加强版函数获取到光标位置，则……
+		ToolTip "2 " info, x, y-25
+	else if WinExist("A") {  ; 否则，重新激活一下顶部窗口
+		; Sleep 40
+		WinActivate("ahk_class A)Shell_TrayWnd$")  ; 激活任务栏
+		WinActivate  ; 重新激活顶部窗口
+		if CaretGetPos(&x, &y)
+			ToolTip "A " info, x, y-25
+		else
+			ToolTip info, A_ScreenWidth/2, A_ScreenHeight/2
+	}
 	SetTimer ToolTip, -sec*1000  ; 提示信息显示sec秒后清除
 }
 
@@ -459,7 +485,7 @@ handleError(ex, mode) {
 	; Send "{Blind}{9 up}{LShift up}"  ; 优化虚拟按键，避免Shift键不释放问题
 	if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD() {
 		SendText "("
-		if sh0uldPeiDvi() {
+		if not WinActive("ahk_group AutoPair") and sh0uldPeiDvi() {
 			SendText ")"
 			Send "{Left}"
 		}
@@ -504,7 +530,7 @@ _:: {
 	q1ZiFv := getQ1ZiFv()
 	if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD(q1ZiFv) {
 		SendText '"'
-		if (q1ZiFv = ' ' or q1ZiFv ~= '`a)\R$' or q1ZiFv = '') and sh0uldPeiDvi(ThisHotkey) {  ; 如果 应该自动配对，则……SubStr(q1ZiFv, -1) = '`n' or q1ZiFv = '`v'
+		if not WinActive("ahk_group AutoPair") and (q1ZiFv = ' ' or q1ZiFv ~= '`a)\R$' or q1ZiFv = '') and sh0uldPeiDvi(ThisHotkey) {  ; 如果 应该自动配对，则……
 			SendText '"'
 			Send "{Left}"
 		}
@@ -577,7 +603,7 @@ _:: {
 	; Send "{Blind}{[ up}{LShift up}"
 	if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD() {
 		SendText "{"
-		if sh0uldPeiDvi() {
+		if not WinActive("ahk_group AutoPair") and sh0uldPeiDvi() {
 			SendText "}"
 			Send "{Left}"
 		}
@@ -604,7 +630,7 @@ _:: {
 	q1ZiFv := getQ1ZiFv()
 	if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD(q1ZiFv) {
 		SendText "'"
-		if (q1ZiFv = ' ' or q1ZiFv ~= '`a)\R$' or q1ZiFv = '') and sh0uldPeiDvi(ThisHotkey) {  ; 如果 应该自动配对，则……SubStr(q1ZiFv, -1) = '`n' or q1ZiFv = '`v'
+		if not WinActive("ahk_group AutoPair") and (q1ZiFv = ' ' or q1ZiFv ~= '`a)\R$' or q1ZiFv = '') and sh0uldPeiDvi(ThisHotkey) {  ; 如果 应该自动配对，则……
 			SendText "'"
 			Send "{Left}"
 		}
@@ -645,7 +671,7 @@ _:: {
 	}
 	else {  ; （如果不是中文语境）为Markdown优化，英、中文都直接上屏‘[’
 		SendText "["
-		if sh0uldPeiDvi() {
+		if not WinActive("ahk_group AutoPair") and sh0uldPeiDvi() {
 			SendText "]"
 			Send "{Left}"
 		}
@@ -1065,7 +1091,7 @@ RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 		MsgBox "终点插件 表格兼容模式 已关闭。`n即 智能标点和自动配对功能 已开启。", "终点 输入法插件", "Iconi T5"
 	}
 }
->^LWin:: {
+>^LWin:: {  ; 右Ctrl+左Win 开/关 中文标点提示功能
 	global Tip
 	if Tip {
 		Tip := false
