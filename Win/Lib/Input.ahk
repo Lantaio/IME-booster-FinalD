@@ -11,7 +11,7 @@ IsCNInputState() {
 	; 提取键盘布局的低16位(语言ID)
 	langID := hKL & 0xFFFF
 	; 检查是否是中文键盘布局(0x0804是简体中文，0x0404是繁体中文)
-	if (langID == 0x0804 || langID == 0x0404) {
+	if (langID == 0x0804 or langID == 0x0404) {
 		; 获取输入法状态
 		try {
 			imeStatus := DllCall("SendMessage", "UInt", DllCall("imm32\ImmGetDefaultIMEWnd", "UInt", WinExist("A")), "UInt", 0x0283, "Int", 0x0005, "Int", 0, "Int")
