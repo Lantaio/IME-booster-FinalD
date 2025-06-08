@@ -1,12 +1,12 @@
 /*
-加强版获取光标坐标位置函数
-来源：https://www.autoahk.com/archives/44158
-参数：
-	&x? (integer) （可选）（引用参数）光标相对于屏幕的横坐标值
-	&y? (integer) （可选）（引用参数）光标相对于屏幕的纵坐标值
-	&w? (integer) （可选）（引用参数）光标的宽度
-	&h? (integer) （可选）（引用参数）光标的高度
-*/
+ * 加强版获取光标坐标位置函数
+ * 来源：https://www.autoahk.com/archives/44158
+ * 参数：
+ *   &x? (integer) （引用、可选）光标相对于屏幕的横坐标值
+ *   &y? (integer) （引用、可选）光标相对于屏幕的纵坐标值
+ *   &w? (integer) （引用、可选）光标的宽度
+ *   &h? (integer) （引用、可选）光标的高度
+ */
 CaretGetPos2(&x?, &y?, &w?, &h?) {
 	x := y := w := h := 0
 	static iUIAutomation := 0, hOleacc := 0, IID_IAccessible, guiThreadInfo, _ := init()
