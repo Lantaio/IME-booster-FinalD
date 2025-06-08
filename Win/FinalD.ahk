@@ -16,11 +16,11 @@ KeyHistory 100
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（※ 此模式默认区分大小写）
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global BetterCN := true  ; 中文语境应用程序优化 功能开关
-global Debug := false  ; 调试程序的总开关
-global FullKBD := false  ; 全键盘漂移 功能开关
-global Smart := true  ; 智能中/英标点输入和自动配对 功能开关
-global Tip := false  ; 中文标点提示信息 功能开关
+global BetterCN := true  ; 中文语境应用程序优化 功能开关 的默认状态
+global Debug := false  ; 调试程序的总开关 的默认状态
+global FullKBD := false  ; 全键盘漂移 功能开关 的默认状态
+global Smart := true  ; 智能中/英标点输入和自动配对 功能开关 的默认状态（涉及表格兼容模式）
+global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 
 ; 以下为 有自动配对标点功能的编程软件组 定义。（在这些应用程序中禁止此程序自动配对英文标点功能）
 GroupAdd "AutoPair", "ahk_class A)SunAwtFrame$"  ; JetBrains系列IDE
