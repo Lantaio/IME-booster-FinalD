@@ -2,7 +2,7 @@
 *2025年6月8日*
 
 ## 摘要
-最新版本：[v5.59.151](archive/refs/tags/v5.59.151.zip)（*2025/6/8*）
+最新版本：[v5.59.151](https://github.com/Lantaio/IME-booster-FinalD/archive/refs/tags/v5.59.151.zip)（*2025/6/8*）
 
 （*运行程序后用快捷键 左<kbd>Win</kbd>+<kbd>Alt</kbd>+<kbd>0</kbd>查看版本信息和各个功能的开关状态信息。*）
 
