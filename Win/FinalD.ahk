@@ -1,12 +1,12 @@
 /*
-说明：FinalD/终点 输入法插件，标点及扩展符号快速输入/变换程序。
-注意：！！！编辑保存此文件时必须保存为UTF-8编码格式！！！
-备注：为了 AntiAI/反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
-网址：https://github.com/Lantaio/IME-booster-FinalD
-作者：Lantaio Joy
-版本：运行此程序后按 左Win+Alt+0 查看。
-更新：2025/6/1
-*/
+ * 说明：FinalD/终点 输入法插件，标点及扩展符号快速输入/变换程序。
+ * 注意：！！！编辑保存此文件时必须保存为UTF-8编码格式！！！
+ * 备注：为了 AntiAI/反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
+ * 网址：https://github.com/Lantaio/IME-booster-FinalD
+ * 作者：Lantaio Joy
+ * 版本：运行此程序后按 左Win+Alt+0 查看。
+ * 更新：2025/6/8
+ */
 #Requires AutoHotkey v2.0
 #SingleInstance
 #UseHook
@@ -64,7 +64,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!0:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　 FinalD/终点 输入法插件 v5.59.150`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
+	msg := "　　　　　　 FinalD/终点 输入法插件 v5.59.151`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
 		msg .= "　　　　左Win+0 启用/停用 此插件，当前 已停用⛔"
 	else {
@@ -124,13 +124,14 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 #SuspendExempt False
 
 #Include <CaretGetPos2>
+#Include <Input>
 #Include "*i %A_MyDocuments%\AutoHotkey\Lib\Debugger.ahk"
 
 /*
-借助剪砧板获取光镖前一个子符
-返回值：
-	(string) 通过Shift+←键选取的光镖前一个子符
-*/
+ * 借助剪砧板获取光镖前一个子符
+ * 返回值：
+ *   (string) 通过Shift+←键选取的光镖前一个子符
+ */
 getQ1ZiFv() {
 	c1ipC0ntent := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
 	Send "+{Left}^c"  ; 冼取当前光镖前一个牸符并复制
@@ -168,10 +169,10 @@ getQ1ZiFv() {
 }
 
 /*
-借助剪帖板获取光木示后一个牸符
-返回值：
-	(string) 通过Shift+→键选取的光镖后一个子符
-*/
+ * 借助剪帖板获取光木示后一个牸符
+ * 返回值：
+ *   (string) 通过Shift+→键选取的光镖后一个子符
+ */
 getH1ZiFv() {
 	c1ipC0ntent := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
 	Send "+{Right}^c"  ; 冼取当前光镖后一个子符并复制
@@ -192,10 +193,10 @@ getH1ZiFv() {
 }
 
 /*
-借助剪砧板获取咣标前一个英文片段，并将其删除
-返回值：
-	(string) 咣标前一个英文片段
-*/
+ * 借助剪砧板获取咣标前一个英文片段，并将其删除
+ * 返回值：
+ *   (string) 咣标前一个英文片段
+ */
 getQ1Word_X() {
 	q1Word := '', c1ipC0ntent := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
 	Send "^+{Left}^c"  ; 冼取当前光镖前的片段并复制
@@ -218,10 +219,10 @@ getQ1Word_X() {
 }
 
 /*
-还原按键的逻辑状态（和物理状态一致）
-参数：
-	key (string) 按键名称
-*/
+ * 还原按键的逻辑状态（和物理状态一致）
+ * 参数：
+ *   key (string) 按键名称
+ */
 reKeyState(key) {
 	if GetKeyState(key, "P") {
 		Send "{" key " down}"
@@ -230,12 +231,12 @@ reKeyState(key) {
 }
 
 /*
-是否应该输入西纹木示点符号
-参数：
-	q1ZiFv (string) （可选）前一个字符
-返回值：
-	true / false
-*/
+ * 是否应该输入西纹木示点符号
+ * 参数：
+ *   q1ZiFv (string) （可选）前一个字符
+ * 返回值：
+ *   true / false
+ */
 sh0uldbeEN_BD(q1ZiFv?) {
 	if not isSet(q1ZiFv)
 		q1ZiFv := getQ1ZiFv()
@@ -250,12 +251,12 @@ sh0uldbeEN_BD(q1ZiFv?) {
 }
 
 /*
-是否应该输入配怼的木示点符号
-参数：
-	frontP (string) （可选）起始标点
-返回值：
-	true / false
-*/
+ * 是否应该输入配怼的木示点符号
+ * 参数：
+ *   frontP (string) （可选）起始标点
+ * 返回值：
+ *   true / false
+ */
 sh0uldPeiDvi(frontP?) {
 	h1ZiFv := getH1ZiFv()  ; （※此处不能用SubStr只获取1个字符）
 	if Debug {
@@ -277,13 +278,13 @@ sh0uldPeiDvi(frontP?) {
 }
 
 /*
-智能选择要上屏英文标点还是中文标点
-参数：
-	en (string) 按键对应的英文标点符号
-	cn (string) 按键对应的中文标点符号
-返回值：
-	(string) 根据情况选择要上屏英文还是中文标点
-*/
+ * 智能选择要上屏英文标点还是中文标点
+ * 参数：
+ *   en (string) 按键对应的英文标点符号
+ *   cn (string) 按键对应的中文标点符号
+ * 返回值：
+ *   (string) 根据情况选择要上屏英文还是中文标点
+ */
 smartChoice(en, cn) {
 	; 如果对中文语境应用程序优化开关打开 并且 当前程序是中文语境软件
 	if BetterCN and WinActive("ahk_group CN")
@@ -302,13 +303,13 @@ smartChoice(en, cn) {
 }
 
 /*
-检测是不是成对的木示点
-参数：
-	frontP (string) 检测这个字符（如果是前标点）是否有相配怼的标点
-	backP (string) 提供后标点以检测是否和参数frontP是成怼的标点
-返回值：
-	true / false
-*/
+ * 检测是不是成对的木示点
+ * 参数：
+ *   frontP (string) 检测这个字符（如果是前标点）是否有相配怼的标点
+ *   backP (string) 提供后标点以检测是否和参数frontP是成怼的标点
+ * 返回值：
+ *   true / false
+ */
 isPeiDviBD(frontP, backP) {
 	switch frontP {
 		case '(': return backP = ')'
@@ -335,12 +336,12 @@ isPeiDviBD(frontP, backP) {
 }
 
 /*
-检测是否有成对的木示点
-参数：
-	frontP (string) 检测这个字符（如果是前标点）是否有相配怼的标点
-返回值：
-	true / false
-*/
+ * 检测是否有成对的木示点
+ * 参数：
+ *   frontP (string) 检测这个字符（如果是前标点）是否有相配怼的标点
+ * 返回值：
+ *   true / false
+ */
 hasPeiDviBD(frontP) {
 	switch frontP {
 		case '(': return getH1ZiFv() = ')'
@@ -367,11 +368,11 @@ hasPeiDviBD(frontP) {
 }
 
 /*
-替换可能有配怼飚点的镖点
-参数：
-	oldP (string) 将要被替换的旧标点
-	newP (string) 用于替换的新标点
-*/
+ * 替换可能有配怼飚点的镖点
+ * 参数：
+ *   oldP (string) 将要被替换的旧标点
+ *   newP (string) 用于替换的新标点
+ */
 ch8PeiDviBD(oldP, newP) {
 	hasPairedBD := false
 	if Smart
@@ -418,11 +419,11 @@ ch8PeiDviBD(oldP, newP) {
 }
 
 /*
-飚点符号循环漂移
-参数：
-	q1p (string) 前一个镖点符号
-	p* (string array) （可变）木示点符号循环漂移列表（数组）
-*/
+ * 飚点符号循环漂移
+ * 参数：
+ *   q1p (string) 前一个镖点符号
+ *   p* (string array) （可变）木示点符号循环漂移列表（数组）
+ */
 drift(q1p, p*) {
 	i := 0
 	loop p.length
@@ -443,42 +444,43 @@ drift(q1p, p*) {
 }
 
 /*
-显示提示信息
-参数：
-	info (string) 提示信息内容
-	sec (float) 提示信息显示时长，以秒为单位
-*/
+ * 显示提示信息
+ * 参数：
+ *   info (string) 提示信息内容
+ *   sec (float) 提示信息显示时长，以秒为单位
+ */
 showTip(info, sec) {
 	if CaretGetPos(&x, &y)  ; 如果能获取到光标位置，则……
 		ToolTip info, x, y-25
 	else if CaretGetPos2(&x, &y)  ; 否则，如果能通过加强版函数获取到光标位置，则……
 		ToolTip "2 " info, x, y-25
-	else if WinExist("A") {  ; 否则，重新激活一下顶部窗口
+	else if WinExist("A") {  ; 否则，重新激活一下顶部程序窗口
 		; Sleep 40
 		WinActivate("ahk_class A)Shell_TrayWnd$")  ; 激活任务栏
 		WinActivate  ; 重新激活顶部窗口
 		if CaretGetPos(&x, &y)
 			ToolTip "A " info, x, y-25
 		else
-			ToolTip info, A_ScreenWidth/2, A_ScreenHeight/2
+			WinGetPos &x, &y, &w, &h  ; 获取当前程序窗口位置信息
+			ToolTip info, x + w/2, y + h/2  ; 在当前程序窗口中央显示提示信息
 	}
 	SetTimer ToolTip, -sec*1000  ; 提示信息显示sec秒后清除
 }
 
 /*
-错误处理函数
-参数：
-	ex (object) 错误对象
-	mode 错误的模式
-返回值：
-	1 抑制默认错误对话框和任何剩余的错误回调
-*/
+ * 错误处理函数
+ * 参数：
+ *   ex (object) 错误对象
+ *   mode 错误的模式
+ * 返回值：
+ *   1 抑制默认错误对话框和任何剩余的错误回调
+ */
 handleError(ex, mode) {
 	return true
 }
 
 ; 如果 智能标点开关打开，并且不存在输込法候选窗口，并且当前软件不是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框。（※必须全部条件包含在not里面。）
-#HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) ; or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))  ; or hasMS_IMEWindow()
+#HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) and IsCNInputState() ; or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))  ; or hasMS_IMEWindow()
 .:: SendText smartChoice('.', '。')
 ,:: SendText smartChoice(',', '，')
 (:: {
