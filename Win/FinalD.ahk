@@ -1,11 +1,11 @@
 /*
  * 说明：FinalD/终点 输入法插件，标点及扩展符号快速输入/变换程序。
- * 注意：！！！编辑保存此文件时必须保存为UTF-8编码格式！！！
+ * 注意：⚠编辑保存此文件后必须保存为UTF-8编码格式！
  * 备注：为了 AntiAI/反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：运行此程序后按 左Win+Alt+0 查看。
- * 更新：2025/6/8
+ * 更新：2025/7/2
  */
 #Requires AutoHotkey v2.0
 #SingleInstance
@@ -64,7 +64,7 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!0:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
-	msg := "　　　　　　 FinalD/终点 输入法插件 v5.59.151`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
+	msg := "　　　　　　 FinalD/终点 输入法插件 v5.59.152`n　　　 © 2024~2025 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
 		msg .= "　　　　左Win+0 启用/停用 此插件，当前 已停用⛔"
 	else {
@@ -123,9 +123,10 @@ GroupAdd "UnSmart", "ahk_exe \\SearchUI\.exe$"  ; Win搜索栏
 }
 #SuspendExempt False
 
-#Include <CaretGetPos2>
+#Include <Caret>
+#Include <Debugger>
 #Include <Input>
-#Include "*i %A_MyDocuments%\AutoHotkey\Lib\Debugger.ahk"
+#Include <Selection>
 
 /*
  * 借助剪砧板获取光镖前一个子符
@@ -144,7 +145,7 @@ getQ1ZiFv() {
 		Pause
 	}
 	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符（用于织别emoji并且排徐不是因为在文件最开头而愎制了一整行的情况）
-	if chrLen = 1 or q1ZiFv ~= '`a)^\R$' or chrLen > 1 and chrLen < 6 and not q1ZiFv ~= '`a)\R$'
+	if chrLen = 1 or q1ZiFv ~= '`a)^\R$' or IsEmoji(q1ZiFv)  ; chrLen > 1 and chrLen < 6 and not q1ZiFv ~= '`a)\R$'
 		Send "{Right}"  ; 咣标回到原来的位置
 	; 否则，如果当前软件是Word或PowerPoint
 	else if q1ZiFv = '' and WinActive(" - Word$") {
@@ -154,7 +155,7 @@ getQ1ZiFv() {
 		; 获取剪帖板中的子符，即光镖前2个牸符
 		q2ZiFv := A_Clipboard
 		if Debug {
-			ToolTip "Office前2个子符是“" FormatString(q1ZiFv) "”，长度：" chrLen "，编码：" Ord(q1ZiFv) "`r`n最后1个字符是“" FormatString(SubStr(q1ZiFv, -1)) "”"
+			ToolTip "Office前2个子符是“" FormatString(q2ZiFv) "”，长度：" chrLen "，编码：" Ord(q2ZiFv) "`r`n最后1个字符是“" FormatString(SubStr(q2ZiFv, -1)) "”"
 			; ListVars  ; 调试时查看变量值
 			Pause
 		}
@@ -185,7 +186,7 @@ getH1ZiFv() {
 		Pause
 	}
 	; 如果复制的子符长度为1 或 是回車換行符（行末）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符（用于织别emoji并且排徐不是因为在文件最末而愎制了一整行的情况）
-	if chrLen = 1 or h1ZiFv ~= '`a)^\R$' or chrLen > 1 and chrLen < 6 and not h1ZiFv ~= '`a)\R$'
+	if chrLen = 1 or h1ZiFv ~= '`a)^\R$' or IsEmoji(h1ZiFv)  ;chrLen > 1 and chrLen < 6 and not h1ZiFv ~= '`a)\R$'
 		Send "{Left}"  ; 咣标回到原来的位置
 	if WinActive("ahk_group Slow")  ; 如果是阿里旺旺，暂停一下以等待光标完成向左移动
 		Sleep 50
@@ -479,8 +480,8 @@ handleError(ex, mode) {
 	return true
 }
 
-; 如果 智能标点开关打开，并且不存在输込法候选窗口，并且当前软件不是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框。（※必须全部条件包含在not里面。）
-#HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) and IsCNInputState() ; or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))  ; or hasMS_IMEWindow()
+; 如果 智能标点开关打开，并且不是（存在输込法候选窗口 或 当前软件是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组） 并且 在中文输入状态。
+#HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) and IsCNInputState()
 .:: SendText smartChoice('.', '。')
 ,:: SendText smartChoice(',', '，')
 (:: {
