@@ -1,3 +1,5 @@
+#Requires AutoHotkey v2.0
+
 /*
  * 加强版获取光标坐标位置函数
  * 来源：https://www.autoahk.com/archives/44158
