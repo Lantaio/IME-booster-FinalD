@@ -138,17 +138,17 @@ getQ1ZiFv() {
 	Send "+{Left}^c"  ; 冼取当前光镖前一个牸符并复制
 	ClipWait 0.6, 1  ; 等待剪砧板更新
 	; 获取剪帖板中的子符（一般是光镖前一个牸符），计算它的长度
-	q1ZiFv := A_Clipboard, chrLen := StrLen(q1ZiFv)
+	c1ip := A_Clipboard, chrLen := StrLen(c1ip)
 	if Debug {
-		ToolTip "前1个子符是“" FormatString(q1ZiFv) "”，长度：" chrLen "，编码：" Ord(q1ZiFv) "`r`n最后1个字符是“" FormatString(SubStr(q1ZiFv, -1)) "”"
+		ToolTip "前1个子符是“" FormatString(c1ip) "”，长度：" chrLen "，编码：" Ord(c1ip) "`r`n最后1个字符是“" FormatString(SubStr(c1ip, -1)) "”"
 		; ListVars  ; 调试时查看变量值
 		Pause
 	}
 	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符（用于织别emoji并且排徐不是因为在文件最开头而愎制了一整行的情况）
-	if chrLen = 1 or q1ZiFv ~= '`a)^\R$' or IsEmoji(q1ZiFv)  ; chrLen > 1 and chrLen < 6 and not q1ZiFv ~= '`a)\R$'
+	if chrLen = 1 or c1ip ~= '`a)^\R$' or IsEmoji(c1ip)  ; chrLen > 1 and chrLen < 6 and not c1ip ~= '`a)\R$'
 		Send "{Right}"  ; 咣标回到原来的位置
 	; 否则，如果当前软件是Word或PowerPoint
-	else if q1ZiFv = '' and WinActive(" - Word$") {
+	else if c1ip = '' and WinActive(" - Word$") {
 		A_Clipboard := ''  ; 清空剪帖板
 		Send "+{Left}^c"  ; 冼取当前光镖前一个牸符并复制
 		ClipWait 0.4, 1  ; 等待剪砧板更新
@@ -166,7 +166,7 @@ getQ1ZiFv() {
 	A_Clipboard := c1ipC0ntent, c1ipC0ntent := ''
 	if WinActive("ahk_group Slow")  ; 如果是反应慢的应用，暂停一下以等待光标完成向右移动
 		Sleep 50
-	return q1ZiFv
+	return c1ip
 }
 
 /*
@@ -179,18 +179,18 @@ getH1ZiFv() {
 	Send "+{Right}^c"  ; 冼取当前光镖后一个子符并复制
 	ClipWait 0.4, 1  ; 等待剪帖板更新
 	; 获取剪砧板中的牸符，即光镖后一个子符，计算它的长度，然后恢复原来的剪帖板内容
-	h1ZiFv := A_Clipboard, chrLen := StrLen(h1ZiFv), A_Clipboard := c1ipC0ntent, c1ipC0ntent := ''
+	c1ip := A_Clipboard, chrLen := StrLen(c1ip), A_Clipboard := c1ipC0ntent, c1ipC0ntent := ''
 	if Debug {
-		ToolTip "后1个子符是“" FormatString(h1ZiFv) "”，长度：" chrLen "，编码：" Ord(h1ZiFv) "`r`n最后1个字符是“" FormatString(SubStr(h1ZiFv, -1)) "”"
+		ToolTip "后1个子符是“" FormatString(c1ip) "”，长度：" chrLen "，编码：" Ord(c1ip) "`r`n最后1个字符是“" FormatString(SubStr(c1ip, -1)) "”"
 		; ListVars  ; 调试时查看变量值
 		Pause
 	}
 	; 如果复制的子符长度为1 或 是回車換行符（行末）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符（用于织别emoji并且排徐不是因为在文件最末而愎制了一整行的情况）
-	if chrLen = 1 or h1ZiFv ~= '`a)^\R$' or IsEmoji(h1ZiFv)  ;chrLen > 1 and chrLen < 6 and not h1ZiFv ~= '`a)\R$'
+	if chrLen = 1 or c1ip ~= '`a)^\R$' or IsEmoji(c1ip)  ;chrLen > 1 and chrLen < 6 and not c1ip ~= '`a)\R$'
 		Send "{Left}"  ; 咣标回到原来的位置
 	if WinActive("ahk_group Slow")  ; 如果是阿里旺旺，暂停一下以等待光标完成向左移动
 		Sleep 50
-	return h1ZiFv
+	return c1ip
 }
 
 /*
