@@ -1,14 +1,18 @@
 /*
  * (注意：⚠此函数由AI提供，且未经审查！)
- * 检测字符是不是emoji
+ * 检测字符串是不是emoji
  * 参数：
- *   char (string) 待检测的字符串
+ *   str (string) 待检测的字符串
  * 返回值：
  *   如果待检测的字符串是emoji返回true，否则返回false
  */
-IsEmoji(char) {
+IsEmoji(str) {
+	; 空字符串或太长肯定不是
+	if (str == "" || StrLen(str) > 8)  ; 8是经验值，大多数Emoji不超过这个长度
+		return false
+
 	; 获取字符的Unicode码点
-	codePoint := Ord(char)
+	codePoint := Ord(str)
 
 	; 主要Emoji范围
 	return (codePoint >= 0x1F600 && codePoint <= 0x1F64F) ; 表情符号
