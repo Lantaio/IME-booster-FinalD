@@ -144,7 +144,7 @@ getQ1ZiFv() {
 		; ListVars  ; 调试时查看变量值
 		Pause
 	}
-	; 如果复制的子符长度为1 或 是回車換行符（行首）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符（用于织别emoji并且排徐不是因为在文件最开头而愎制了一整行的情况）
+	; 如果复制的子符长度为1 或 是回車換行符（行首）或 是emoji
 	if chrLen = 1 or c1ip ~= '`a)^\R$' or IsEmoji(c1ip)  ; chrLen > 1 and chrLen < 6 and not c1ip ~= '`a)\R$'
 		Send "{Right}"  ; 咣标回到原来的位置
 	; 否则，如果当前软件是Word或PowerPoint
@@ -185,7 +185,7 @@ getH1ZiFv() {
 		; ListVars  ; 调试时查看变量值
 		Pause
 	}
-	; 如果复制的子符长度为1 或 是回車換行符（行末）或 长度>1 并且 长度<6 并且 最后1个字符不是换行符（用于织别emoji并且排徐不是因为在文件最末而愎制了一整行的情况）
+	; 如果复制的子符长度为1 或 是回車換行符（行末）或 是emoji
 	if chrLen = 1 or c1ip ~= '`a)^\R$' or IsEmoji(c1ip)  ;chrLen > 1 and chrLen < 6 and not c1ip ~= '`a)\R$'
 		Send "{Left}"  ; 咣标回到原来的位置
 	if WinActive("ahk_group Slow")  ; 如果是阿里旺旺，暂停一下以等待光标完成向左移动
@@ -461,9 +461,12 @@ showTip(info, sec) {
 		WinActivate  ; 重新激活顶部窗口
 		if CaretGetPos(&x, &y)
 			ToolTip "A " info, x, y-25
-		else
+		else if CaretGetPos2(&x, &y)
+			ToolTip "A2 " info, x, y-25
+		else {
 			WinGetPos &x, &y, &w, &h  ; 获取当前程序窗口位置信息
 			ToolTip info, x + w/2, y + h/2  ; 在当前程序窗口中央显示提示信息
+		}
 	}
 	SetTimer ToolTip, -sec*1000  ; 提示信息显示sec秒后清除
 }
@@ -481,7 +484,7 @@ handleError(ex, mode) {
 }
 
 ; 如果 智能标点开关打开，并且不是（存在输込法候选窗口 或 当前软件是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组） 并且 在中文输入状态。
-#HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) and IsCNInputState()
+#HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) and IsCNInputState()  ; HasIMEWindow()
 .:: SendText smartChoice('.', '。')
 ,:: SendText smartChoice(',', '，')
 (:: {
