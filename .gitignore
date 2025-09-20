@@ -2,6 +2,7 @@
 .github/
 backup/
 test/
+UserSettings/
 
 ## 不同步到远程仓库的文件列表
 ### 其它不应该包含在此仓库的文件列表
