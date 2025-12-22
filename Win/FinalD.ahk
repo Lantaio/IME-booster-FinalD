@@ -13,7 +13,6 @@
 CoordMode "Caret", "Screen"  ; 设置CaretGetPos函数的坐标模式为相对于屏幕
 CoordMode "ToolTip", "Screen"  ; 设置ToolTip函数的坐标模式为相对于屏幕
 ; KeyHistory 100
-SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（※ 此模式默认区分大小写）
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
 global BetterCN := true  ; 中文语境应用程序优化 功能开关 的默认状态
@@ -207,10 +206,8 @@ sh0uldbeEN_BD(q1ZiFv?) {
 		ToolTip "是否应该输入西文标点是“" FormatString(q1ZiFv) "”"
 		Pause
 	}
-	; 如果前一个子符在西纹牸符集中
-	if Ord(q1ZiFv) < 0x2000
-		return true
-	return false
+	; 返回前一个子符是否在西纹牸符集中的判断结果
+	return Ord(q1ZiFv) < 0x2000
 }
 
 /*
@@ -430,7 +427,7 @@ showTip(info, sec) {
 			ToolTip info, x + w/2, y + h/2  ; 在当前程序窗口中央显示提示信息
 		}
 	}
-	SetTimer ToolTip, -sec*1000  ; 提示信息显示sec秒后清除
+	SetTimer ToolTip, -sec*1000  ; 负数表示提示信息会在显示sec秒后清除
 }
 
 /*
@@ -480,7 +477,6 @@ handleError(ex, mode) {
 		showTip("后", 1)
 	if isPeiDviBD(q1ZiFv, thisZiFv) and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个标点和本次输入的标点是配怼标点，并且是短按，则光标回到配怼标点中间
 		Send "{Left}"
-	; KeyWait(ThisHotkey)
 	; reKeyState "LShift"
 }
 _:: {
@@ -496,6 +492,7 @@ _:: {
 ":: {
 	; Send "{Blind}{' up}{LShift up}"
 	q1ZiFv := getQ1ZiFv()
+	; 如果应该输入英文
 	if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD(q1ZiFv) {
 		SendText '"'
 		if not WinActive("ahk_group AutoPair") and (q1ZiFv = ' ' or q1ZiFv ~= '`a)\R$' or q1ZiFv = '') and sh0uldPeiDvi(ThisHotkey) {  ; 如果 应该自动配对，则……
@@ -506,7 +503,7 @@ _:: {
 			Send "{Left}"
 		}
 	}
-	else {
+	else {  ; 如果应该输入中文
 		Send '"'
 		thisZiFv := getQ1ZiFv()
 		if thisZiFv = '“' {
@@ -529,9 +526,9 @@ _:: {
 }
 /:: {
 	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
-		Send "/"  ; 交给输入法处理
+		Send ThisHotkey  ; 交给输入法处理
 	else
-		SendText "/"
+		SendText ThisHotkey
 }
 =:: SendText "="
 <:: {
@@ -539,7 +536,8 @@ _:: {
 	if not KeyWait(ThisHotkey, "T0.2") {  ; 长按
 		Send "<"  ; 交给输入法处理
 	}
-	else
+	else  ; 短按
+		; 如果应该输入英文
 		if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD()
 			SendText "<"
 		else {
@@ -576,7 +574,7 @@ _:: {
 	; Send "{Blind}{[ up}{LShift up}"
 	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
 		Send "{{}"  ; 交给输入法处理
-	else {
+	else {  ; 短按
 		if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD() {
 			SendText "{"
 			if not WinActive("ahk_group AutoPair") and sh0uldPeiDvi() {
@@ -598,7 +596,7 @@ _:: {
 	; Send "{Blind}{] up}{LShift up}"
 	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
 		Send "{}}"  ; 交给输入法处理
-	else {
+	else {  ; 短按
 		q1ZiFv := getQ1ZiFv()
 		thisZiFv := smartChoice('}', '」')
 		SendText thisZiFv
@@ -643,20 +641,20 @@ _:: {
 #:: SendText "#"
 [:: {
 	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
-		Send "["  ; 交给输入法处理
+		Send ThisHotkey  ; 交给输入法处理
 	else {  ; 短按
-		; 如果对中文语境应用程序优化开关打开 并且 当前程序是中文语境软件
-		if BetterCN and WinActive("ahk_group CN") {
-			SendText "【"
-			if sh0uldPeiDvi() {
-				SendText "】"
+		; 如果不是（中文语境应用程序优化开关打开 并且 当前程序是中文语境软件）
+		if not (BetterCN and WinActive("ahk_group CN")) {
+			SendText ThisHotkey  ; 为Markdown优化，英、中文都直接上屏‘[’
+			if not WinActive("ahk_group AutoPair") and sh0uldPeiDvi() {
+				SendText "]"
 				Send "{Left}"
 			}
 		}
-		else {  ; （如果不是中文语境）为Markdown优化，英、中文都直接上屏‘[’
-			SendText "["
-			if not WinActive("ahk_group AutoPair") and sh0uldPeiDvi() {
-				SendText "]"
+		else {  ; 否则（中文语境应用程序优化开关打开 并且 当前程序是中文语境软件）
+			SendText "【"
+			if sh0uldPeiDvi() {
+				SendText "】"
 				Send "{Left}"
 			}
 		}
@@ -664,11 +662,12 @@ _:: {
 }
 ]:: {
 	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
-		Send "]"  ; 交给输入法处理
+		Send ThisHotkey  ; 交给输入法处理
 	else {  ; 短按
 		q1ZiFv := getQ1ZiFv()
+		; 如果不是（前一个字符是'【' 或者 中文语境应用程序优化开关打开 并且 当前程序是中文语境软件）
 		if not (q1ZiFv = '【' or BetterCN and WinActive("ahk_group CN")) {
-			SendText "]"
+			SendText ThisHotkey
 			if q1ZiFv = '[' and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配怼标点，并且是短按，则光标回到配怼标点中间
 				Send "{Left}"
 		}
