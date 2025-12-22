@@ -1,8 +1,10 @@
-; 窗口标题的匹配模式为正则模式（※ 此模式默认区分大小写）
+; 版本：v5.60.155.1 （版本号前三位表示最低可适配的主程序版本号，第四位表示此程序的修订号）
 ; GroupAdd帮助文档网址：
 ; https://wyagd001.github.io/v2/docs/lib/GroupAdd.htm
 ; 正则表达式快速参考网址：
 ; https://wyagd001.github.io/v2/docs/misc/RegEx-QuickRef.htm
+
+SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（※ 此模式默认区分大小写）
 
 ; 以下为 有自动配对标点功能的编程软件组 定义。（在这些应用程序中禁止此程序自动配对英文标点功能）
 GroupAdd "AutoPair", "ahk_class A)SunAwtFrame$"  ; JetBrains系列IDE
