@@ -13,6 +13,7 @@
 CoordMode "Caret", "Screen"  ; 设置CaretGetPos函数的坐标模式为相对于屏幕
 CoordMode "ToolTip", "Screen"  ; 设置ToolTip函数的坐标模式为相对于屏幕
 ; KeyHistory 100
+SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（※ 此模式默认区分大小写）
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
 global BetterCN := true  ; 中文语境应用程序优化 功能开关 的默认状态
