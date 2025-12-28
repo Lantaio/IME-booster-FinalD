@@ -8,12 +8,11 @@
  * 更新：2025/10/2
  */
 #Requires AutoHotkey v2.0
-#SingleInstance
-#UseHook
+#SingleInstance  ; 只允许运行1个实例
+#UseHook  ; 使用键盘和鼠标钩子，相当于在每个热键前面使用$前缀，以避免Send函数触发它自己
 CoordMode "Caret", "Screen"  ; 设置CaretGetPos函数的坐标模式为相对于屏幕
 CoordMode "ToolTip", "Screen"  ; 设置ToolTip函数的坐标模式为相对于屏幕
 ; KeyHistory 100
-SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（※ 此模式默认区分大小写）
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
 global BetterCN := true  ; 中文语境应用程序优化 功能开关 的默认状态
@@ -247,15 +246,13 @@ sh0uldPeiDvi(frontP?) {
  *   (string) 根据情况选择要上屏英文还是中文标点
  */
 smartChoice(en, cn) {
-	; 如果对中文语境应用程序优化开关打开 并且 当前程序是中文语境软件
-	if BetterCN and WinActive("ahk_group CN")
-		; 如果按键是‘.’、‘:’或‘~’ 并且 前一个字符是数字，则应是英文标点
-		if en ~= "\.|:|~" and IsInteger(getQ1ZiFv())
-			Return en
-		else
-			Return cn
-	else if sh0uldbeEN_BD()  ; 否则（即所有程序使用一致的输入体验时），如果根据情况应该输入英文标点
+	; 如果*不是*（对中文语境应用程序优化开关打开 并且 当前程序是中文语境软件）并且 应该输入英文标点
+	if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD()
 		Return en
+	; 否则（是中文语境软件，或者应该输入中文标点），如果按键是‘.’、‘:’或‘~’ 并且 前一个字符是数字，则应是英文标点
+	else if en ~= "\.|:|~" and IsInteger(getQ1ZiFv())
+		Return en
+	; 否则，应是中文标点
 	else {
 		if Tip and cn ~= "，|：|；|？|！|｜|～"
 			showTip("中", 1)
@@ -832,7 +829,7 @@ LShift:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
 
 		case '~', '～', 'Δ', 'Ω', 'Θ', 'Λ', 'Φ': drift(q1ZiFv, '~', '～')
 
-		case '$', '￥', '＄', '€', '£', '¢', '¤': drift(q1ZiFv, '$', '￥')
+		case '$', '￥', '＄', '¥', '€', '£', '¢', '¤': drift(q1ZiFv, '$', '￥')
 
 		default:
 			if FullKBD
@@ -996,7 +993,7 @@ RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 
 		case '~', '～', 'Δ', 'Ω', 'Θ', 'Λ', 'Φ': drift(q1ZiFv, 'Δ', 'Ω', 'Θ', 'Λ', 'Φ')
 
-		case '$', '￥', '＄', '€', '£', '¢', '¤': drift(q1ZiFv, '＄', '€', '£', '¢', '¤')
+		case '$', '￥', '＄', '¥', '€', '£', '¢', '¤': drift(q1ZiFv, '＄', '¥', '€', '£', '¢', '¤')
 
 		default:
 			if FullKBD
