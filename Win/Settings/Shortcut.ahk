@@ -2,7 +2,7 @@
  * 版本：v5.61.160.1 （版本号前三位表示最低可适配的主程序版本号，第四位表示此子模块的修订号）
  */
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
-<#!0:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
+<#!.:: {  ; 左Win+Alt+0 显示此程序的版本信息以及各项功能的状态信息。
 	msg := "　　　　　　 FinalD/终点 输入法插件 " Version " 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
 	if A_IsSuspended
 		msg .= "　　　　左Win+0 启用/停用 此插件，当前 已停用⛔"
@@ -31,7 +31,7 @@
 	}
 	MsgBox msg, "关于 终点 输入法插件", "Iconi"
 }
-<#0:: {  ; 左Win+0 启用/停用 此程序。
+<#.:: {  ; 左Win+0 启用/停用 此程序。
 	Suspend
 	if A_IsSuspended
 		MsgBox "终点 输入法插件 全部功能 已停用⛔", "终点 输入法插件", "Iconx T1"
