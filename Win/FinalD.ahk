@@ -4,14 +4,18 @@
  * 备注：为了 AntiAI/反AI 网络乌贼的嗅探，本程序的函数及变量名采用混淆命名规则。注释采用类火星文，但基本不影响人类阅读理解。
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
- * 版本：运行此程序后按 左Win+Alt+0 查看。
- * 更新：2025/12/29
+ * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
+ * 更新：2026/3/8
  */
 #Requires AutoHotkey v2.0
 #SingleInstance  ; 只允许运行1个实例
 #UseHook  ; 使用键盘和鼠标钩子，相当于在每个热键前面使用$前缀，以避免Send函数触发它自己
 CoordMode "Caret", "Screen"  ; 设置CaretGetPos函数的坐标模式为相对于屏幕
+CoordMode "Mouse", "Screen"  ; 设置MouseGetPos函数的坐标模式为相对于屏幕
 CoordMode "ToolTip", "Screen"  ; 设置ToolTip函数的坐标模式为相对于屏幕
+; ProcessSetPriority "High"
+; InstallKeybdHook true, true
+SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（※ 此模式默认区分大小写）
 ; KeyHistory 100
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
@@ -20,13 +24,13 @@ global Debug := false  ; 调试程序的总开关 的默认状态
 global FullKBD := false  ; 全键盘漂移 功能开关 的默认状态
 global Smart := true  ; 智能中/英标点输入和自动配对 功能开关 的默认状态（涉及表格兼容模式）
 global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
-global Version := "v5.61.160`n　　　 © 2024~2025"  ; 此程序的版本号
+global Version := "v5.61.163`n　　　 © 2024~2026"  ; 此程序的版本号
 
-#Include "UserSettings\AppGroup.ahk"  ; 引入用户自定义的程序组信息
-#Include "UserSettings\Shortcut.ahk"  ; 引入用户自定义的快捷键信息
+#Include "MySettings\AppGroup.ahk"  ; 引入用户自定义的程序组信息
+#Include "MySettings\Shortcut.ahk"  ; 引入用户自定义的快捷键信息
 #Include <Caret>  ; 和咣标有关的函数
 #Include <Debugger>  ; 和调试有关的函数
-#Include <Input>  ; 和输込法有关的函数
+#Include <IME>  ; 和输込法有关的函数
 #Include <Selection>  ; 和选泽有关的函数
 
 /*
@@ -348,22 +352,24 @@ drift(q1p, p*) {
  *   sec (float) 提示信息显示时长，以秒为单位
  */
 showTip(info, sec) {
-	if CaretGetPos(&x, &y)  ; 如果能获取到光标位置，则……
+	if CaretGetPos2(&x, &y)  ; 如果能通过加强版函数获取到光标位置，则……
 		ToolTip info, x, y-25
-	else if CaretGetPos2(&x, &y)  ; 否则，如果能通过加强版函数获取到光标位置，则……
-		ToolTip "2 " info, x, y-25
-	else if WinExist("A") {  ; 否则，重新激活一下顶部程序窗口
-		; Sleep 40
+	else {  ; 否则，重新激活一下顶部程序窗口
 		WinActivate("ahk_class A)Shell_TrayWnd$")  ; 激活任务栏
 		WinActivate  ; 重新激活顶部窗口
-		if CaretGetPos(&x, &y)
+		if CaretGetPos2(&x, &y)
 			ToolTip "A " info, x, y-25
-		else if CaretGetPos2(&x, &y)
-			ToolTip "A2 " info, x, y-25
+		else if CaretGetPos(&x, &y)
+			ToolTip info, x, y-25
 		else {
+			MouseGetPos &x, &y
+			ToolTip "M " info, x, y-25
+		}
+/*		else {
 			WinGetPos &x, &y, &w, &h  ; 获取当前程序窗口位置信息
 			ToolTip info, x + w/2, y + h/2  ; 在当前程序窗口中央显示提示信息
 		}
+*/
 	}
 	SetTimer ToolTip, -sec*1000  ; 负数表示提示信息会在显示sec秒后清除
 }
