@@ -1,8 +1,9 @@
 ## 不同步到远程仓库的目录列表
 .github/
+.vscode/
 backup/
 test/
-UserSettings/
+MySettings/
 
 ## 不同步到远程仓库的文件列表
 ### 其它不应该包含在此仓库的文件列表
