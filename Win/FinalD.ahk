@@ -24,13 +24,13 @@ global Debug := false  ; 调试程序的总开关 的默认状态
 global FullKBD := false  ; 全键盘漂移 功能开关 的默认状态
 global Smart := true  ; 智能中/英标点输入和自动配对 功能开关 的默认状态（涉及表格兼容模式）
 global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
-global Version := "v5.61.163`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v5.61.165`n　　　 © 2024~2026"  ; 此程序的版本号
 
 #Include "MySettings\AppGroup.ahk"  ; 引入用户自定义的程序组信息
 #Include "MySettings\Shortcut.ahk"  ; 引入用户自定义的快捷键信息
 #Include <Caret>  ; 和咣标有关的函数
 #Include <Debugger>  ; 和调试有关的函数
-#Include <IME>  ; 和输込法有关的函数
+; #Include <IME>  ; 和输込法有关的函数
 #Include <Selection>  ; 和选泽有关的函数
 
 /*
@@ -387,7 +387,7 @@ handleError(ex, mode) {
 }
 
 ; 如果 智能标点开关打开，并且不是（存在输込法候选窗口 或 当前软件是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组） 并且 在中文输入状态。
-#HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) and IsCNInputState()  ; HasIMEWindow()
+#HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude"))  ; HasIMEWindow()
 .:: SendText smartChoice('.', '。')
 ,:: SendText smartChoice(',', '，')
 (:: {
