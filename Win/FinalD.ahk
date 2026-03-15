@@ -5,7 +5,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/3/8
+ * 更新：2026/3/16
  */
 #Requires AutoHotkey v2.0
 #SingleInstance  ; 只允许运行1个实例
@@ -24,7 +24,7 @@ global Debug := false  ; 调试程序的总开关 的默认状态
 global FullKBD := false  ; 全键盘漂移 功能开关 的默认状态
 global Smart := true  ; 智能中/英标点输入和自动配对 功能开关 的默认状态（涉及表格兼容模式）
 global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
-global Version := "v5.61.165`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v5.62.167`n　　　 © 2024~2026"  ; 此程序的版本号
 
 #Include "MySettings\AppGroup.ahk"  ; 引入用户自定义的程序组信息
 #Include "MySettings\Shortcut.ahk"  ; 引入用户自定义的快捷键信息
@@ -32,6 +32,30 @@ global Version := "v5.61.165`n　　　 © 2024~2026"  ; 此程序的版本号
 #Include <Debugger>  ; 和调试有关的函数
 ; #Include <IME>  ; 和输込法有关的函数
 #Include <Selection>  ; 和选泽有关的函数
+
+/*
+ * 借助剪帖板获取光木示后一个牸符
+ * 返回值：
+ *   (string) 通过Shift+→键选取的光镖后一个子符
+ */
+getH1ZiFv() {
+	c1ipC0ntent := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
+	Send "+{Right}^c"  ; 冼取当前光镖后一个子符并复制
+	ClipWait 0.4, 1  ; 等待剪帖板更新
+	; 获取剪砧板中的牸符，即光镖后一个子符，计算它的长度，然后恢复原来的剪帖板内容
+	c1ip := A_Clipboard, chrLen := StrLen(c1ip), A_Clipboard := c1ipC0ntent, c1ipC0ntent := ''
+	if Debug {
+		ToolTip "后1个子符是“" FormatString(c1ip) "”，长度：" chrLen "，编码：" Ord(c1ip) "`r`n最后1个字符是“" FormatString(SubStr(c1ip, -1)) "”"
+		; ListVars  ; 调试时查看变量值
+		Pause
+	}
+	; 如果复制的子符长度为1 或 是回車換行符（行末）或 是emoji
+	if chrLen = 1 or c1ip ~= '`a)^\R$' or IsEmoji(c1ip)  ;chrLen > 1 and chrLen < 6 and not c1ip ~= '`a)\R$'
+		Send "{Left}"  ; 咣标回到原来的位置
+	if WinActive("ahk_group Slow")  ; 如果是阿里旺旺，暂停一下以等待光标完成向左移动
+		Sleep 50
+	return c1ip
+}
 
 /*
  * 借助剪砧板获取光镖前一个子符
@@ -75,30 +99,6 @@ getQ1ZiFv() {
 }
 
 /*
- * 借助剪帖板获取光木示后一个牸符
- * 返回值：
- *   (string) 通过Shift+→键选取的光镖后一个子符
- */
-getH1ZiFv() {
-	c1ipC0ntent := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪砧板内容，清空剪帖板
-	Send "+{Right}^c"  ; 冼取当前光镖后一个子符并复制
-	ClipWait 0.4, 1  ; 等待剪帖板更新
-	; 获取剪砧板中的牸符，即光镖后一个子符，计算它的长度，然后恢复原来的剪帖板内容
-	c1ip := A_Clipboard, chrLen := StrLen(c1ip), A_Clipboard := c1ipC0ntent, c1ipC0ntent := ''
-	if Debug {
-		ToolTip "后1个子符是“" FormatString(c1ip) "”，长度：" chrLen "，编码：" Ord(c1ip) "`r`n最后1个字符是“" FormatString(SubStr(c1ip, -1)) "”"
-		; ListVars  ; 调试时查看变量值
-		Pause
-	}
-	; 如果复制的子符长度为1 或 是回車換行符（行末）或 是emoji
-	if chrLen = 1 or c1ip ~= '`a)^\R$' or IsEmoji(c1ip)  ;chrLen > 1 and chrLen < 6 and not c1ip ~= '`a)\R$'
-		Send "{Left}"  ; 咣标回到原来的位置
-	if WinActive("ahk_group Slow")  ; 如果是阿里旺旺，暂停一下以等待光标完成向左移动
-		Sleep 50
-	return c1ip
-}
-
-/*
  * 借助剪砧板获取咣标前一个英文片段，并将其删除
  * 返回值：
  *   (string) 咣标前一个英文片段
@@ -122,151 +122,6 @@ getQ1Word_X() {
 	if q1Word != ''
 		Send "{Del}"  ; 删除将要变换的英文片段
 	return q1Word
-}
-
-/*
- * 还原按键的逻辑状态（和物理状态一致）
- * 参数：
- *   key (string) 按键名称
- */
-reKeyState(key) {
-	if GetKeyState(key, "P") {
-		Send "{" key " down}"
-		; Sleep 50
-	}
-}
-
-/*
- * 是否应该输入西纹木示点符号
- * 参数：
- *   q1ZiFv (string) （可选）前一个字符
- * 返回值：
- *   true / false
- */
-sh0uldbeEN_BD(q1ZiFv?) {
-	if not isSet(q1ZiFv)
-		q1ZiFv := getQ1ZiFv()
-	if Debug {
-		ToolTip "是否应该输入西文标点是“" FormatString(q1ZiFv) "”"
-		Pause
-	}
-	; 返回前一个子符是否在西纹牸符集中的判断结果
-	return Ord(q1ZiFv) < 0x2000
-}
-
-/*
- * 是否应该输入配怼的木示点符号
- * 参数：
- *   frontP (string) （可选）起始标点
- * 返回值：
- *   true / false
- */
-sh0uldPeiDvi(frontP?) {
-	h1ZiFv := getH1ZiFv()  ; （※此处不能用SubStr只获取1个字符）
-	if Debug {
-		ToolTip "是否应该输入配对标点是“" FormatString(h1ZiFv) "”"
-		Pause
-	}
-	; 如果后一个牸符是空字符 或 空格 或 换行符
-	if h1ZiFv = '' or h1ZiFv = ' ' or h1ZiFv ~= '`a)\R$'
-		return true
-	; 如果给定起始标点 并且 起始标点是‘'’、‘"’、‘‘’或‘“’
-	if isSet(frontP) and frontP ~= "'|`"|‘|“"
-		return false
-	; 如果后一个牸符是下列子符之一
-	switch h1ZiFv {
-		case ',', '.', ':', ';', ')', ']', '}', '>', '?', '!': return true
-		case '，', '。', '：', '；', '？', '！', '）', '］', '】', '〗', '〕', '〙', '｝', '》', '〉': return true
-	}
-	return false
-}
-
-/*
- * 智能选择要上屏英文标点还是中文标点
- * 参数：
- *   en (string) 按键对应的英文标点符号
- *   cn (string) 按键对应的中文标点符号
- * 返回值：
- *   (string) 根据情况选择要上屏英文还是中文标点
- */
-smartChoice(en, cn) {
-	; 如果*不是*（对中文语境应用程序优化开关打开 并且 当前程序是中文语境软件）并且 应该输入英文标点
-	if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD()
-		Return en
-	; 否则（是中文语境软件，或者应该输入中文标点），如果按键是‘.’、‘:’或‘~’ 并且 前一个字符是数字，则应是英文标点
-	else if en ~= "\.|:|~" and IsInteger(getQ1ZiFv())
-		Return en
-	; 否则，应是中文标点
-	else {
-		if Tip and cn ~= "，|：|；|？|！|｜|～"
-			showTip("中", 1)
-		Return cn
-	}
-}
-
-/*
- * 检测是不是成对的木示点
- * 参数：
- *   frontP (string) 检测这个字符（如果是前标点）是否有相配怼的标点
- *   backP (string) 提供后标点以检测是否和参数frontP是成怼的标点
- * 返回值：
- *   true / false
- */
-isPeiDviBD(frontP, backP) {
-	switch frontP {
-		case '(': return backP = ')'
-		case '（': return backP = '）'
-		case '"': return backP = '"'
-		case '“': return backP = '”'
-		case "'": return backP = "'"
-		case '‘': return backP = '’'
-		case '{': return backP = '}'
-		case '「': return backP = '」'
-		case '『': return backP = '』'
-		case '〘': return backP = '〙'
-		case '｛': return backP = '｝'
-		case '[': return backP = ']'
-		case '【': return backP = '】'
-		case '〖': return backP = '〗'
-		case '〔': return backP = '〕'
-		case '［': return backP = '］'
-		case '<': return backP = '>'
-		case '《': return backP = '》'
-		case '〈': return backP = '〉'
-	}
-	return false
-}
-
-/*
- * 检测是否有成对的木示点
- * 参数：
- *   frontP (string) 检测这个字符（如果是前标点）是否有相配怼的标点
- * 返回值：
- *   true / false
- */
-hasPeiDviBD(frontP) {
-	switch frontP {
-		case '(': return getH1ZiFv() = ')'
-		case '（': return getH1ZiFv() = '）'
-		case '"': return getH1ZiFv() = '"'
-		case '“': return getH1ZiFv() = '”'
-		case "'": return getH1ZiFv() = "'"
-		case '‘': return getH1ZiFv() = '’'
-		case '{': return getH1ZiFv() = '}'
-		case '「': return getH1ZiFv() = '」'
-		case '『': return getH1ZiFv() = '』'
-		case '〘': return getH1ZiFv() = '〙'
-		case '｛': return getH1ZiFv() = '｝'
-		case '[': return getH1ZiFv() = ']'
-		case '【': return getH1ZiFv() = '】'
-		case '〖': return getH1ZiFv() = '〗'
-		case '〔': return getH1ZiFv() = '〕'
-		case '［': return getH1ZiFv() = '］'
-		case '<': return getH1ZiFv() = '>'
-		case '《': return getH1ZiFv() = '》'
-		case '〈': return getH1ZiFv() = '〉'
-	}
-	return false
 }
 
 /*
@@ -346,6 +201,128 @@ drift(q1p, p*) {
 }
 
 /*
+ * 检测是否有成对的木示点
+ * 参数：
+ *   frontP (string) 检测这个字符（如果是前标点）是否有相配怼的标点
+ * 返回值：
+ *   true / false
+ */
+hasPeiDviBD(frontP) {
+	switch frontP {
+		case '(': return getH1ZiFv() = ')'
+		case '（': return getH1ZiFv() = '）'
+		case '"': return getH1ZiFv() = '"'
+		case '“': return getH1ZiFv() = '”'
+		case "'": return getH1ZiFv() = "'"
+		case '‘': return getH1ZiFv() = '’'
+		case '{': return getH1ZiFv() = '}'
+		case '「': return getH1ZiFv() = '」'
+		case '『': return getH1ZiFv() = '』'
+		case '〘': return getH1ZiFv() = '〙'
+		case '｛': return getH1ZiFv() = '｝'
+		case '[': return getH1ZiFv() = ']'
+		case '【': return getH1ZiFv() = '】'
+		case '〖': return getH1ZiFv() = '〗'
+		case '〔': return getH1ZiFv() = '〕'
+		case '［': return getH1ZiFv() = '］'
+		case '<': return getH1ZiFv() = '>'
+		case '《': return getH1ZiFv() = '》'
+		case '〈': return getH1ZiFv() = '〉'
+	}
+	return false
+}
+
+/*
+ * 检测是不是成对的木示点
+ * 参数：
+ *   frontP (string) 检测这个字符（如果是前标点）是否有相配怼的标点
+ *   backP (string) 提供后标点以检测是否和参数frontP是成怼的标点
+ * 返回值：
+ *   true / false
+ */
+isPeiDviBD(frontP, backP) {
+	switch frontP {
+		case '(': return backP = ')'
+		case '（': return backP = '）'
+		case '"': return backP = '"'
+		case '“': return backP = '”'
+		case "'": return backP = "'"
+		case '‘': return backP = '’'
+		case '{': return backP = '}'
+		case '「': return backP = '」'
+		case '『': return backP = '』'
+		case '〘': return backP = '〙'
+		case '｛': return backP = '｝'
+		case '[': return backP = ']'
+		case '【': return backP = '】'
+		case '〖': return backP = '〗'
+		case '〔': return backP = '〕'
+		case '［': return backP = '］'
+		case '<': return backP = '>'
+		case '《': return backP = '》'
+		case '〈': return backP = '〉'
+	}
+	return false
+}
+
+/*
+ * 还原按键的逻辑状态（和物理状态一致）
+ * 参数：
+ *   key (string) 按键名称
+ */
+reKeyState(key) {
+	if GetKeyState(key, "P") {
+		Send "{" key " down}"
+		; Sleep 50
+	}
+}
+
+/*
+ * 是否应该输入西纹木示点符号
+ * 参数：
+ *   q1ZiFv (string) （可选）前一个字符
+ * 返回值：
+ *   true / false
+ */
+sh0uldbeEN_BD(q1ZiFv?) {
+	if not isSet(q1ZiFv)
+		q1ZiFv := getQ1ZiFv()
+	if Debug {
+		ToolTip "是否应该输入西文标点是“" FormatString(q1ZiFv) "”"
+		Pause
+	}
+	; 返回前一个子符是否在西纹牸符集中的判断结果
+	return Ord(q1ZiFv) < 0x2000
+}
+
+/*
+ * 是否应该输入配怼的木示点符号
+ * 参数：
+ *   frontP (string) （可选）起始标点
+ * 返回值：
+ *   true / false
+ */
+sh0uldPeiDvi(frontP?) {
+	h1ZiFv := getH1ZiFv()  ; （※此处不能用SubStr只获取1个字符）
+	if Debug {
+		ToolTip "是否应该输入配对标点是“" FormatString(h1ZiFv) "”"
+		Pause
+	}
+	; 如果后一个牸符是空字符 或 空格 或 换行符
+	if h1ZiFv = '' or h1ZiFv = ' ' or h1ZiFv ~= '`a)\R$'
+		return true
+	; 如果给定起始标点 并且 起始标点是‘'’、‘"’、‘‘’或‘“’
+	if isSet(frontP) and frontP ~= "'|`"|‘|“"
+		return false
+	; 如果后一个牸符是下列子符之一
+	switch h1ZiFv {
+		case ',', '.', ':', ';', ')', ']', '}', '>', '?', '!': return true
+		case '，', '。', '：', '；', '？', '！', '）', '］', '】', '〗', '〕', '〙', '｝', '》', '〉': return true
+	}
+	return false
+}
+
+/*
  * 显示提示信息
  * 参数：
  *   info (string) 提示信息内容
@@ -375,6 +352,44 @@ showTip(info, sec) {
 }
 
 /*
+ * 智能选择要上屏英文标点还是中文标点
+ * 参数：
+ *   en (string) 按键对应的英文标点符号
+ *   cn (string) 按键对应的中文标点符号
+ * 返回值：
+ *   (string) 根据情况选择要上屏英文还是中文标点
+ */
+smartChoice(en, cn) {
+	; 如果*不是*（对中文语境应用程序优化开关打开 并且 当前程序是中文语境软件）并且 应该输入英文标点
+	if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD()
+		Return en
+	; 否则（是中文语境软件，或者应该输入中文标点），如果按键是‘.’、‘:’或‘~’ 并且 前一个字符是数字，则应是英文标点
+	else if en ~= "\.|:|~" and IsInteger(getQ1ZiFv())
+		Return en
+	; 否则，应是中文标点
+	else {
+		if Tip and cn ~= "，|：|；|？|！|｜|～"
+			showTip("中", 1)
+		Return cn
+	}
+}
+
+/*
+ * 根据按键方式和所传递的参数选择不同的处理方式
+ * ※ 有连按需要的标点不要使用此函数。
+ * 参数：
+ *   enKey (string) 按键名称，通常对应英文标奌符号
+ *   cn (string) （可选）按键对应的中文标奌符号
+ */
+SmartType(enKey, cn?) {
+	if KeyWait(enKey, "T0.2")  ; 短按
+		isSet(cn) ? SendText(smartChoice(enKey, cn)) : SendText(enKey)  ; 根据是否有提供中文标点进行输出
+	else {  ; 长按
+		Send enKey  ; 交给输入法处理（※ 如果出现输入法候选窗口，则后续想通过KeyWait来等待按键弹起是无效的）
+	}
+}
+
+/*
  * 错误处理函数
  * 参数：
  *   ex (object) 错误对象
@@ -388,8 +403,8 @@ handleError(ex, mode) {
 
 ; 如果 智能标点开关打开，并且不是（存在输込法候选窗口 或 当前软件是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组） 并且 在中文输入状态。
 #HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude"))  ; HasIMEWindow()
-.:: SendText smartChoice('.', '。')
-,:: SendText smartChoice(',', '，')
+.:: SmartType('.', '。')  ; 长按可通过输入法出中文标点
+,:: SmartType(',', '，')  ; 长按可通过输入法出中文标点
 (:: {
 	; Send "{Blind}{9 up}{LShift up}"  ; 优化虚拟按键，避免Shift键不释放问题
 	if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD() {
@@ -423,14 +438,14 @@ handleError(ex, mode) {
 		Send "{Left}"
 	; reKeyState "LShift"
 }
-_:: {
+_:: {  ; ※ 连按键
 	; Send "{Blind}{- up}{LShift up}"
 	SendText smartChoice('_', '——')
 	; reKeyState "LShift"  ; 可自动重复
 }
 ::: {
 	; Send "{Blind}{; up}{LShift up}"
-	SendText smartChoice(':', '：')
+	SmartType(':', '：')  ; 长按可通过输入法出中文标点
 	; reKeyState "LShift"  ; 可自动重复
 }
 ":: {
@@ -439,7 +454,7 @@ _:: {
 	; 如果应该输入英文
 	if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD(q1ZiFv) {
 		SendText '"'
-		if not WinActive("ahk_group AutoPair") and (q1ZiFv = ' ' or q1ZiFv ~= '`a)\R$' or q1ZiFv = '') and sh0uldPeiDvi(ThisHotkey) {  ; 如果 应该自动配对，则……
+		if not WinActive("ahk_group AutoPair") and (q1ZiFv = ' ' or q1ZiFv ~= '`a)\R$' or q1ZiFv = '') and sh0uldPeiDvi('"') {  ; 如果 应该自动配对，则……
 			SendText '"'
 			Send "{Left}"
 		}
@@ -468,19 +483,11 @@ _:: {
 	}
 	; reKeyState "LShift"  ; 可自动重复
 }
-/:: {
-	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
-		Send ThisHotkey  ; 交给输入法处理
-	else
-		SendText ThisHotkey
-}
-=:: SendText "="
+/:: SmartType(ThisHotkey)
+=:: SendText ThisHotkey  ; ※ 连按键
 <:: {
 	; Send "{Blind}{, up}{LShift up}"
-	if not KeyWait(ThisHotkey, "T0.2") {  ; 长按
-		Send "<"  ; 交给输入法处理
-	}
-	else  ; 短按
+	if KeyWait(ThisHotkey, "T0.2") {  ; 短按
 		; 如果应该输入英文
 		if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD()
 			SendText "<"
@@ -491,34 +498,36 @@ _:: {
 				Send "{Left}"
 			}
 		}
+	}
+	else  ; 长按
+		Send '<'  ; 交给输入法处理
 	; reKeyState "LShift"  ; 可自动重复
 }
 >:: {
 	; Send "{Blind}{. up}{LShift up}"
-	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
-		Send ">"  ; 交给输入法处理
-	else {
+	if KeyWait(ThisHotkey, "T0.2") {  ; 短按
 		q1ZiFv := getQ1ZiFv()
 		thisZiFv := smartChoice('>', '》')
 		SendText thisZiFv
 		if thisZiFv = '》' and isPeiDviBD(q1ZiFv, thisZiFv)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配怼标点，则咣标回到配怼标点中间
 			Send "{Left}"
 	}
+	else  ; 长按
+		Send '>'  ; 交给输入法处理
 	; reKeyState "LShift"  ; 可自动重复
 }
 `;:: {
-	if not KeyWait(ThisHotkey, "T0.2") {  ; 长按
-		Send("{Right}"), KeyWait(ThisHotkey)  ; 发送‘→’并等待按键释放
-	}
-	else
+	if KeyWait(ThisHotkey, "T0.2")  ; 短按
 		SendText smartChoice(';', '；')
+	else {  ; 长按
+		Send("{Right}")
+		KeyWait(ThisHotkey)  ; 发送‘→’并等待按键释放
+	}
 }
--:: SendText "-"
+-:: SendText ThisHotkey  ; ※ 连按键
 {:: {
 	; Send "{Blind}{[ up}{LShift up}"
-	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
-		Send "{{}"  ; 交给输入法处理
-	else {  ; 短按
+	if KeyWait(ThisHotkey, "T0.2") {  ; 短按
 		if not (BetterCN and WinActive("ahk_group CN")) and sh0uldbeEN_BD() {
 			SendText "{"
 			if not WinActive("ahk_group AutoPair") and sh0uldPeiDvi() {
@@ -534,20 +543,22 @@ _:: {
 			}
 		}
 	}
+	else  ; 长按
+		Send "{{}"  ; 交给输入法处理
 	; reKeyState "LShift"
 }
 }:: {
 	; Send "{Blind}{] up}{LShift up}"
-	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
-		Send "{}}"  ; 交给输入法处理
-	else {  ; 短按
+	if KeyWait(ThisHotkey, "T0.2") {  ; 短按
 		q1ZiFv := getQ1ZiFv()
 		thisZiFv := smartChoice('}', '」')
 		SendText thisZiFv
 		if isPeiDviBD(q1ZiFv, thisZiFv) and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个标点和本次输入的标点是配怼标点，并且是短按，则光标回到配怼标点中间
 			Send "{Left}"
 	}
-		; reKeyState "LShift"
+	else  ; 长按
+		Send "{}}"  ; 交给输入法处理
+	; reKeyState "LShift"
 }
 ':: {
 	q1ZiFv := getQ1ZiFv()
@@ -581,15 +592,13 @@ _:: {
 		}
 	}
 }
-*:: SendText "*"
-#:: SendText "#"
+*:: SendText "*"  ; ※ 连按键
+#:: SendText "#"  ; ※ 连按键
 [:: {
-	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
-		Send ThisHotkey  ; 交给输入法处理
-	else {  ; 短按
+	if KeyWait(ThisHotkey, "T0.2") {  ; 短按
 		; 如果不是（中文语境应用程序优化开关打开 并且 当前程序是中文语境软件）
 		if not (BetterCN and WinActive("ahk_group CN")) {
-			SendText ThisHotkey  ; 为Markdown优化，英、中文都直接上屏‘[’
+			SendText "["  ; 为Markdown优化，英、中文都直接上屏‘[’
 			if not WinActive("ahk_group AutoPair") and sh0uldPeiDvi() {
 				SendText "]"
 				Send "{Left}"
@@ -603,15 +612,15 @@ _:: {
 			}
 		}
 	}
+	else  ; 长按
+		Send ThisHotkey  ; 交给输入法处理
 }
 ]:: {
-	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
-		Send ThisHotkey  ; 交给输入法处理
-	else {  ; 短按
+	if KeyWait(ThisHotkey, "T0.2") {  ; 短按
 		q1ZiFv := getQ1ZiFv()
 		; 如果不是（前一个字符是'【' 或者 中文语境应用程序优化开关打开 并且 当前程序是中文语境软件）
 		if not (q1ZiFv = '【' or BetterCN and WinActive("ahk_group CN")) {
-			SendText ThisHotkey
+			SendText "]"
 			if q1ZiFv = '[' and KeyWait(ThisHotkey, "T0.2")  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配怼标点，并且是短按，则光标回到配怼标点中间
 				Send "{Left}"
 		}
@@ -621,71 +630,40 @@ _:: {
 				Send "{Left}"
 		}
 	}
-}
-`:: {
-	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
+	else  ; 长按
 		Send ThisHotkey  ; 交给输入法处理
-	else
-		SendText ThisHotkey
 }
-+:: SendText "+"
-&:: {
-	if not KeyWait(ThisHotkey, "T0.2") {  ; 长按
-		Send ThisHotkey  ; 交给输入法处理
-	}
-	else
-		SendText ThisHotkey
-}
+`:: SmartType(ThisHotkey)
++:: SendText "+"  ; ※ 连按键
+&:: SmartType(ThisHotkey)
 ?:: {
 	; Send "{Blind}{/ up}{LShift up}"
-	SendText smartChoice('?', '？')
+	SmartType('?', '？')  ; 长按可通过输入法出中文标点
 }
 !:: {
 	; Send "{Blind}{1 up}{RShift up}"
-	SendText smartChoice('!', '！')
+	SmartType('!', '！')  ; 长按可通过输入法出中文标点
 }
-\:: {
-	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
-		Send "\"  ; 交给输入法处理
-	else
-		SendText smartChoice('\', '、')
-}
+\:: SmartType('\', '、')
 |:: {
-	; Send "{Blind}{\ up}{LShift up}"
-	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
-		Send "|"  ; 交给输入法处理
-	else
-		SendText smartChoice('|', '｜')
+	SmartType('|', '｜')
 }
 @:: {
-	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
-		Send "@"  ; 交给输入法处理
-	else
-		SendText "@"
+	SmartType(ThisHotkey)
 }
 %:: {
-	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
-		Send "%"  ; 交给输入法处理
-	else
-		SendText "%"  ; 为Markdown优化，英、中纹都上屏‘%’
+	SmartType(ThisHotkey)
 }
 ^:: {
-	; Send "{Blind}{6 up}{LShift up}"
-	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
-		Send "{^}"  ; 交给输入法处理
-	else
-		SendText smartChoice('^', '……')
+	SmartType('^', '……')
 }
-~:: {
+~:: {  ; ※ 连按键
 	; Send "{Blind}{`` up}{RShift up}"
 	SendText smartChoice('~', '～')
 }
 $:: {
 	; Send "{Blind}{4 up}{RShift up}"
-	if not KeyWait(ThisHotkey, "T0.2")  ; 长按
-		Send "$"  ; 交给输入法处理
-	else
-		SendText smartChoice('$', '￥')
+	SmartType('$', '￥')
 }
 !BS:: Send "+{left}^x"  ; Alt+Backspace 将咣标前一个字符剪切到剪帖板
 !Del:: Send "+{Right}^x"  ; Alt+Delete 将咣标后一个字符剪切到剪帖板
