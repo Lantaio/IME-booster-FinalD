@@ -1,9 +1,8 @@
 /*
- * 版本：v1.3（v版本号.修订号，如果版本号不同，则表示有重大更改，须要根据下面的【更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
- * 适配主程序版本：v5.61.162~最新版
- * 更新：2026/3/14
- * 更新说明：
- * v1.x: 将各程序组信息从FinalD.ahk分离出来的首个版本。
+ * 版本：v1.4（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
+ * 更新：2026/3/23
+ * 重大更新说明：
+ * v1.x: 将各程序组信息从FinalD.ahk分离出来的首个版本。适配主程序版本 v5.61.162 ~ 待定
  *
  * GroupAdd帮助文档网址：
  * https://wyagd001.github.io/v2/docs/lib/GroupAdd.htm
@@ -14,10 +13,10 @@
 ; ※ ahk_class默认区分大小写（除非正则模式下使用i)选项），匹配任意位置。ahk_exe默认不区分大小写（但正则模式时默认区分大小写），匹配程序名称或完整路径。
 
 ; 以下为 有自动配对标点功能的编程软件组 定义。（在这些应用程序中禁止此程序自动配对英文标点功能）
-GroupAdd "AutoPair", "ahk_class A)SunAwtFrame$"  ; JetBrains系列IDE
 GroupAdd "AutoPair", "ahk_class A)Notepad\+\+$"
-GroupAdd "AutoPair", "ahk_exe \\sublime_text\.exe$"
+GroupAdd "AutoPair", "ahk_class A)SunAwtFrame$"  ; JetBrains系列IDE
 GroupAdd "AutoPair", "ahk_exe \\Code\.exe$"  ; VSCode
+GroupAdd "AutoPair", "ahk_exe \\sublime_text\.exe$"
 
 ; 以下为 中文语境应用程序组 定义。（不建议将用于写Markdown的程序添加到此。）
 GroupAdd "CN", "ahk_exe \\AliIM\.exe$"  ; 阿里旺旺
