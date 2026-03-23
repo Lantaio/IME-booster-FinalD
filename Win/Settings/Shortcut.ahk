@@ -1,9 +1,9 @@
 /*
- * 版本：v1.2（v版本号.修订号，如果版本号不同，则表示有重大更改，须要根据下面的【更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
- * 适配主程序版本：v5.61.162~最新版
- * 更新：2026/3/8
- * 更新说明：
- * v1.x: 将各个快捷键功能从FinalD.ahk分离出来的首个版本。
+ * 版本：v2.5（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
+ * 更新：2026/3/23
+ * 重大更新说明：
+ * v2.x: 因对代码进行重构，将getQ1Word_X函数改名为getWordBeforeI_X;最后添加 左Win+左Shift 和 左Win+右Shift 热键功能。适配主程序版本 v5.63.169 ~ 待定
+ * v1.x: 将各个快捷键功能从FinalD.ahk分离出来的首个版本。适配主程序版本 v5.61.162 ~ v5.62.167
  */
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!.:: {  ; 左Win+Alt+. 显示此程序的版本信息以及各项功能的状态信息。
@@ -70,25 +70,25 @@
 #HotIf GetKeyState("CapsLock", "T")  ; 如果CapsLock键处于打开状态。
 <+CapsLock:: {  ; 左Shift+CapsLock 将光镖前1个英纹单词转换为小写。
 	SetCapsLockState "Off"
-	SendText StrLower(getQ1Word_X())
+	SendText StrLower(getWordBeforeI_X())
 	KeyWait "CapsLock"
 	KeyWait "LShift"
 }
 >+CapsLock:: {  ; 右Shift+CapsLock 将光䅺前1个英文单词转换为小写输入码（发送给中文输入法）
 	SetCapsLockState "Off"
-	Send StrLower(getQ1Word_X())
+	Send StrLower(getWordBeforeI_X())
 	KeyWait "CapsLock"
 	KeyWait "RShift"
 }
 
 #HotIf  ; 无任何前置条件。
 <+CapsLock:: {  ; 左Shift+CapsLock 将光镖前1个英文单词转换为太写。
-	SendText StrUpper(getQ1Word_X())
+	SendText StrUpper(getWordBeforeI_X())
 	KeyWait "CapsLock"
 	KeyWait "LShift"
 }
 >+CapsLock:: {  ; 右Shift+CapsLock 将光䅺前1个英文单词转换为首牸母太写。
-	SendText StrTitle(getQ1Word_X())
+	SendText StrTitle(getWordBeforeI_X())
 	KeyWait "CapsLock"
 	KeyWait "RShift"
 }
@@ -135,6 +135,14 @@
 		BetterCN := true
 		MsgBox "终点插件 针对中文语境应用程序优化。", "终点 输入法插件", "Iconi T2"
 	}
+}
+<#LShift up:: {  ; 左Win+左Shift 将光标前面的希腊字母变换为对应的英文字母；数字变换为上下标数字形式。
+	if A_PriorKey = "LShift"
+		driftToENG(getBeforeI())
+}
+<#RShift up:: {  ; 左Win+右Shift 将光标前面的英文字母变换为对应的希腊字母；数字变换为对应的罗马数字形式。
+	if A_PriorKey = "RShift"
+		driftToGRC(getBeforeI())
 }
 +Pause:: {  ; 通常用于在调试时让程序继续运行。
 	ToolTip  ; 清除提示信息
