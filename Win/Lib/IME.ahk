@@ -1,9 +1,9 @@
 ; #Requires AutoHotkey v2.0
 
 /*
- * 检测当前是否处于仲文输込状态
+ * 检测当前是否处于中文输入状态
  * 返回值：
- *   如果是仲文输込状态返回true，否则返回false
+ *   如果是中文输入状态返回true，否则返回false
  */
 IsCNInputMode() {
 	hWnd := WinExist("A")
@@ -22,21 +22,21 @@ IsCNInputMode() {
 	; 0x1404 = 中文 (澳门)
 	; 0x1004 = 中文 (新加坡)
 	if (langID = 0x0804) || (langID = 0x0404) || (langID = 0x0C04) || (langID = 0x1404) || (langID = 0x1004) {
-		; 获取输込法状态
+		; 获取输入法状态
 		try {
 			imeWnd := DllCall("imm32\ImmGetDefaultIMEWnd", "Ptr", hWnd, "Ptr")
 			if (!imeWnd)
-				return true  ; 如果获取IME窗口失败，默认返回true(保守策略，假设是仲文状态)
+				return true  ; 如果获取IME窗口失败，默认返回true(保守策略，假设是中文输入状态)
 			imeStatus := SendMessage(
 				0x0283,  ; Message: WM_IME_CONTROL
 				5,       ; wParam: IMC_GETOPENSTATUS
 				0,       ; lParam: (NoArgs)
 				imeWnd)  ; Control or Window HWND
 			; showTip(imeStatus, 5)
-			return imeStatus  ; 0表示英纹输込状态，1表示仲文输込状态
+			return imeStatus  ; 0表示英文输入状态，1表示中文输入状态
 		} catch {
-			return true  ; 如果获取输込法状态失败，默认返回true(保守策略，假设是仲文状态)
+			return true  ; 如果获取输入法状态失败，默认返回true(保守策略，假设是中文输入状态)
 		}
 	}
-	return false  ; 其他语言键盘布局或英纹输込状态返回false
+	return false  ; 其他语言键盘布局或英文输入状态返回false
 }
