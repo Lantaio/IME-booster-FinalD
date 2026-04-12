@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/4/10
+ * 更新：2026/4/12
  */
 #Requires AutoHotkey v2.0
 #SingleInstance  ; 只允许运行1个实例
@@ -18,12 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 100
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global BetterCN := true  ; 中文语境应用程序优化 功能开关 的默认状态
-global Debug := false  ; 调试程序的总开关 的默认状态
-global FullKBD := false  ; 全键盘漂移 功能开关 的默认状态
-global Smart := true  ; 智能中/英标点输入和自动配对 功能开关 的默认状态（涉及表格兼容模式）
-global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
-global Version := "v5.65.176`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v5.66.178`n　　　 © 2024~2026"  ; 此程序的版本号
 
 #Include "MySettings\AppGroup.ahk"  ; 引入用户自定义的程序组信息
 #Include "MySettings\Shortcut.ahk"  ; 引入用户自定义的快捷键信息
@@ -636,14 +631,7 @@ _:: {  ; ※ 连按键，不能用SmartType函数
 		Send '>'  ; 交给输入法处理
 	; reKeyState "LShift"  ; 可自动重复
 }
-`;:: {
-	if KeyWait(ThisHotkey, "T0.2")  ; 短按
-		SendText smartChoice(';', '；')
-	else {  ; 长按
-		Send("{Right}")
-		KeyWait(ThisHotkey)  ; 发送‘→’并等待按键释放
-	}
-}
+`;:: SmartType(';', '；')
 -:: SendText ThisHotkey  ; ※ 连按键
 {:: {
 	; Send "{Blind}{[ up}{LShift up}"
@@ -787,6 +775,78 @@ $:: {
 	; Send "{Blind}{4 up}{RShift up}"
 	SmartType('$', '￥')
 }
+i:: {
+	if not Arrow or KeyWait('i', "T0.2")  ; 如果 字母箭头键功能关闭 或者 短按
+		Send 'i'
+	else {  ; （字母箭头键功能打开 并且 长按）
+		while GetKeyState('i', "P") {  ; 当按键未释放
+			Send "{Up}"  ; 发送‘↑’
+			Sleep 200  ; 等待0.2秒
+		}
+	}
+}
+j:: {
+	if not Arrow or KeyWait('j', "T0.2")  ; 同上
+		Send 'j'
+	else {
+		while GetKeyState('j', "P") {
+			Send "{Left}"  ; 发送‘←’
+			Sleep 200
+		}
+	}
+}
+k:: {
+	if not Arrow or KeyWait('k', "T0.2")  ; 同上
+		Send 'k'
+	else {
+		while GetKeyState('k', "P") {
+			Send "{Down}"  ; 发送‘↓’
+			Sleep 200
+		}
+	}
+}
+l:: {
+	if not Arrow or KeyWait('l', "T0.2")  ; 同上
+		Send 'l'
+	else {
+		while GetKeyState('l', "P") {
+			Send "{Right}"  ; 发送‘→’
+			Sleep 200
+		}
+	}
+}
++i:: {
+	if not Arrow or KeyWait('i', "T0.2")  ; 如果 字母箭头键功能关闭 或者 短按
+		Send 'I'
+	else {  ; （字母箭头键功能打开 并且 长按）
+		Send "^{Home}"  ; 发送 Ctrl+Home（到页首）
+		KeyWait 'i'  ; 等待按键释放
+	}
+}
++j:: {
+	if not Arrow or KeyWait('j', "T0.2")  ; 同上
+		Send 'J'
+	else {
+		Send "{Home}"  ; 发送 Home（到行首）
+		KeyWait 'j'
+	}
+}
++k:: {
+	if not Arrow or KeyWait('k', "T0.2")  ; 同上
+		Send 'K'
+	else {
+		Send "^{End}"  ; 发送 Ctrl+End（到页尾）
+		KeyWait 'k'
+	}
+}
++l:: {
+	if not Arrow or KeyWait('l', "T0.2")  ; 同上
+		Send 'L'
+	else {
+		Send "{End}"  ; 发送 End (到行尾)
+		KeyWait 'l'
+	}
+}
 !BS:: Send "+{left}^x"  ; Alt+Backspace 将光标前一个字符剪切到剪贴板
 !Del:: Send "+{Right}^x"  ; Alt+Delete 将光标后一个字符剪切到剪贴板
 
@@ -876,10 +936,6 @@ LShift:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
 		case '~', '～', 'Δ', 'Ω', 'Θ', 'Λ', 'Φ': drift(before, '~', '～')
 
 		case '$', '￥', '＄', '¥', '€', '£', '¢', '¤': drift(before, '$', '￥')
-
-		default:
-			if FullKBD
-				driftToENG(before)
 	}
 }
 
@@ -968,10 +1024,6 @@ RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 		case '~', '～', 'Δ', 'Ω', 'Θ', 'Λ', 'Φ': drift(before, 'Δ', 'Ω', 'Θ', 'Λ', 'Φ')
 
 		case '$', '￥', '＄', '¥', '€', '£', '¢', '¤': drift(before, '＄', '¥', '€', '£', '¢', '¤')
-
-		default:
-			if FullKBD
-				driftToGRC(before)
 	}
 }
 

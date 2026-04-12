@@ -1,10 +1,17 @@
 /*
- * 版本：v2.6（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
- * 更新：2026/4/11
+ * 版本：v2.7（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
+ * 更新：2026/4/12
  * 重大更新说明：
- * v2.x: 因对代码进行重构，将getQ1Word_X函数改名为getWordBeforeI_X；最后添加 左Win+左Shift 和 左Win+右Shift 热键功能。适配主程序版本 v5.63.169 ~ 待定
- * v1.x: 将各个快捷键功能从FinalD.ahk分离出来的首个版本。适配主程序版本 v5.61.162 ~ v5.62.167
+ * v3.x：将部分和自定义设置有关的全局变量从主程序移动到此程序；将原来全键盘漂移功能替换为字母箭头键功能。适配主程序版本 v5.66.178 ~ 待定
+ * v2.x：因对代码进行重构，将getQ1Word_X函数改名为getWordBeforeI_X；最后添加 左Win+左Shift 和 左Win+右Shift 热键功能。适配主程序版本 v5.63.169 ~ v5.65.176
+ * v1.x：将各个快捷键功能从FinalD.ahk分离出来的首个版本。适配主程序版本 v5.61.162 ~ v5.62.167
  */
+global Arrow := true  ; 字母箭头键 功能开关 的默认状态
+global BetterCN := true  ; 中文语境应用程序优化 功能开关 的默认状态
+global Debug := false  ; 调试程序的总开关 的默认状态
+global Smart := true  ; 智能中/英标点输入和自动配对 功能开关 的默认状态（涉及表格兼容模式）
+global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
+
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!.:: {  ; 左Win+Alt+. 显示此程序的版本信息以及各项功能的状态信息。
 	msg := "　　　　　　 FinalD/终点 输入法插件 " Version " 由喵喵侠为你呕💔沥血打磨呈献。`n　　　https://github.com/Lantaio/IME-booster-FinalD`n`n　　　　　　　　　快捷键及各项功能的状态：`n"
@@ -12,8 +19,8 @@
 		msg .= "　　　　左Win+. 启用/停用 此插件，当前 已停用⛔"
 	else {
 		msg .= "　　　　左Win+. 启用/停用 此插件，当前 已启用🚀"
-		msg .= "`n左Shift+左Win 全键盘漂移"
-		if FullKBD
+		msg .= "`n左Shift+左Win 字母箭头键"
+		if Arrow
 			msg .= "✔"
 		else
 			msg .= "❌"
@@ -41,9 +48,9 @@
 		MsgBox "终点 输入法插件 全部功能 已停用⛔", "终点 输入法插件", "Iconx T1"
 	else {
 		msg := "终点 输入法插件 已启用🚀`n`n左Win+Alt+. 查看各项功能的状态：`n"
-		msg .= "`n全键盘漂移 "
-		if FullKBD
-			msg .= "✔⚠"
+		msg .= "`n字母箭头键 "
+		if Arrow
+			msg .= "✔"
 		else
 			msg .= "❌"
 		msg .= "`n中文语境软件优化 "
@@ -113,15 +120,15 @@
 		MsgBox "终点插件 中文标点提示 已开启。", "终点 输入法插件", "Iconi T2"
 	}
 }
-<+LWin:: {  ; 左Shift+左Win 开/关 全键盘漂移功能。另外，Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
-	global FullKBD
-	if FullKBD {
-		FullKBD := false
-		MsgBox "终点插件 全键盘漂移功能 已关闭。", "终点 输入法插件", "Iconi T2"
+<+LWin:: {  ; 左Shift+左Win 开/关 字母箭头键功能。另外，Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
+	global Arrow
+	if Arrow {
+		Arrow := false
+		MsgBox "终点插件 字母箭头键功能 已关闭。", "终点 输入法插件", "Iconi T2"
 	}
 	else {
-		FullKBD := true
-		MsgBox "终点插件 全键盘漂移功能 已开启。`n建议无需使用时关闭此功能。", "终点 输入法插件", "Icon! T3"
+		Arrow := true
+		MsgBox "终点插件 字母箭头键功能 已开启。", "终点 输入法插件", "Iconi T2"
 	}
 }
 >+LWin:: {  ; 右Shift+左Win 开/关 中文语境应用程序优化功能。
