@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/4/16
+ * 更新：2026/4/18
  */
 #Requires AutoHotkey v2.0
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 KeyHistory 100
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v5.67.181`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v5.67.182`n　　　 © 2024~2026"  ; 此程序的版本号
 
 #Include "MySettings\AppGroup.ahk"  ; 引入用户自定义的程序组信息
 #Include "MySettings\Shortcut.ahk"  ; 引入用户自定义的快捷键信息
@@ -404,7 +404,10 @@ shouldEN(before?) {
 		Pause
 	}
 	; 返回前一个字符是否在西文字符集中的判断结果
-	return Ord(before) < 0x2000
+	if Ord(before) < 0x2000
+		return true
+	else
+		return false
 }
 
 /*
@@ -498,24 +501,30 @@ SmartType(enKey, cn?) {
 		isSet(cn) ? SendText(smartChoice(enKey, cn)) : SendText(enKey)  ; 根据是否有提供中文标点进行输出
 	else {  ; 长按
 		; if BetterCN {
-		if enKey ~= "\.|,|:" {  ; 在英文或数字后可以通过长按这些标点直接上屏中文标点符号 and IsInteger(getBeforeI())
-			while GetKeyState(enKey, "P") {
-				SendText cn
-				Sleep 1000 * Interval
-			}
-		} else {
-			while GetKeyState(enKey, "P") {
-				(enKey ~= "{|}|^|#|\+|!") ? Send('{' enKey '}') : Send(enKey)  ; 交给输入法处理（※ 如果出现输入法候选窗口，则后续想通过KeyWait来等待按键弹起是无效的）
-				Sleep 1000 * Interval
-			}
+		before := getBeforeI()  ; 获取光标前一个内容
+		shouldEN_ := shouldEN(before)
+		; ## 长按的第1次输出
+		if enKey ~= "\.|,|:"  ; 在英文或数字后可以通过长按这些标点直接上屏中文标点符号
+			SendText cn
+		else
+			(enKey ~= "{|}|^|#|\+|!") ? Send('{' enKey '}') : Send(enKey)  ; 交给输入法处理（※ 如果出现输入法候选窗口，则后续想通过KeyWait来等待按键弹起是无效的）
+		Sleep 1000 * Interval
+		; ## 长按的第2次输出
+		if GetKeyState(enKey, "P") {  ; 如果按键未弹起
+			if shouldEN_
+				Send "{BS}{text}" enKey enKey
+			else
+				isSet(cn) ? SendText(cn) : SendText(enKey)
+			Sleep 1000 * Interval
 		}
-/*		} else {
-				while GetKeyState(enKey, "P") {
-					isSet(cn) ? SendText(smartChoice(enKey, cn)) : SendText(enKey)  ; 根据是否有提供中文标点进行输出
-					Sleep 1000 * Interval
-				}
+		; ## 长按的后续输出
+		while GetKeyState(enKey, "P") {  ; 当按键未弹起时……
+			if shouldEN_
+				SendText enKey
+			else
+				isSet(cn) ? SendText(cn) : SendText(enKey)
+			Sleep 1000 * Interval
 		}
-*/
 	}
 }
 
@@ -568,7 +577,7 @@ handleError(ex, mode) {
 		Send "{Left}"
 	; reKeyState "LShift"
 }
-_:: {  ; ※ 连按键，不能用SmartType函数
+_:: {  ; ※ 连按键（为了精简smartType函数的代码，此按键不使用smartType函数）
 	; Send "{Blind}{- up}{LShift up}"
 	SendText smartChoice('_', '——')
 	; reKeyState "LShift"  ; 可自动重复
@@ -715,8 +724,8 @@ _:: {  ; ※ 连按键，不能用SmartType函数
 		}
 	}
 }
-*:: SendText "*"  ; ※ 连按键
-#:: SendText "#"  ; ※ 连按键
+*:: SendText ThisHotkey  ; ※ 连按键
+#:: SendText ThisHotkey  ; ※ 连按键
 [:: {
 	if KeyWait(ThisHotkey, "T" String(Interval)) {  ; 短按
 		; 如果不是（中文语境应用程序优化开关打开 并且 当前程序是中文语境软件）
@@ -757,7 +766,7 @@ _:: {  ; ※ 连按键，不能用SmartType函数
 		Send ThisHotkey  ; 交给输入法处理
 }
 `:: SmartType(ThisHotkey)
-+:: SendText "+"  ; ※ 连按键
++:: SendText ThisHotkey  ; ※ 连按键
 &:: SmartType(ThisHotkey)
 ?:: {
 	; Send "{Blind}{/ up}{LShift up}"
@@ -780,7 +789,7 @@ _:: {  ; ※ 连按键，不能用SmartType函数
 }
 ^:: {
 	; Send "{Blind}{6 up}{LShift up}"
-	SmartType(ThisHotkey)
+	SmartType(ThisHotkey, '……')
 }
 ~:: {  ; ※ 连按键
 	; Send "{Blind}{`` up}{RShift up}"
