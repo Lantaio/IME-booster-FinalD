@@ -33,7 +33,10 @@ IsCNInputMode() {
 				0,       ; lParam: (NoArgs)
 				imeWnd)  ; Control or Window HWND
 			; showTip(imeStatus, 5)
-			return imeStatus  ; 0表示英文输入状态，1表示中文输入状态
+			if imeStatus  ; 0表示英文输入状态，1表示中文输入状态
+				return true
+			else
+				return false
 		} catch {
 			return true  ; 如果获取输入法状态失败，默认返回true(保守策略，假设是中文输入状态)
 		}
