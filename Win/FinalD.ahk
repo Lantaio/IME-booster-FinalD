@@ -500,7 +500,6 @@ SmartType(enKey, cn?) {
 	if KeyWait(enKey, "T" String(Interval))  ; 短按
 		isSet(cn) ? SendText(smartChoice(enKey, cn)) : SendText(enKey)  ; 根据是否有提供中文标点进行输出
 	else {  ; 长按
-		; if BetterCN {
 		before := getBeforeI()  ; 获取光标前一个内容
 		shouldEN_ := shouldEN(before)
 		; ## 长按的第1次输出
@@ -512,7 +511,7 @@ SmartType(enKey, cn?) {
 		; ## 长按的第2次输出
 		if GetKeyState(enKey, "P") {  ; 如果按键未弹起
 			if shouldEN_
-				Send "{BS}{text}" enKey enKey
+				Send "{BS}{Text}" enKey enKey
 			else
 				isSet(cn) ? SendText(cn) : SendText(enKey)
 			Sleep 1000 * Interval
