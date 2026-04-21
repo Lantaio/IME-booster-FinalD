@@ -1,8 +1,9 @@
 /*
- * 版本：v4.8（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
- * 更新：2026/4/16
+ * 版本：v5.9（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
+ * 更新：2026/4/21
  * 重大更新说明：
- * v4.x：增加全局变量Interval方便调整连按间隔时间。适配主程序版本 v5.67.180 ~ 待定
+ * v5.x：将字母箭头键功能从主程序移动到此，并添加了触发条件。适配主程序版本 v6.68.187 ~ 待定
+ * v4.x：增加全局变量Interval方便调整连按间隔时间。适配主程序版本 v5.67.180 ~ v6.68.186
  * v3.x：将部分和自定义设置有关的全局变量从主程序移动到此程序；将原来全键盘漂移功能替换为字母箭头键功能。适配主程序版本 v5.66.178
  * v2.x：因对代码进行重构，将getQ1Word_X函数改名为getWordBeforeI_X；最后添加 左Win+左Shift 和 左Win+右Shift 热键功能。适配主程序版本 v5.63.169 ~ v5.65.176
  * v1.x：将各个快捷键功能从FinalD.ahk分离出来的首个版本。适配主程序版本 v5.61.162 ~ v5.62.167
@@ -74,6 +75,103 @@ global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 	}
 }
 #SuspendExempt False
+
+; 如果 字母箭头键功能打开 并且 不是（大写状态打开 或 存在输入法候选窗口）
+#HotIf Arrow and not (GetKeyState("CapsLock", "T") or WinExist("ahk_group IME"))  ; or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")  and IsCNInputMode()
+i:: {
+	if KeyWait('i', "T" String(Interval))  ; 如果 字母箭头键功能关闭 或者 短按
+		Send 'i'
+	else {  ; （字母箭头键功能打开 并且 长按）
+		while GetKeyState('i', "P") {  ; 当按键未释放
+			Send "{Up}"  ; 发送‘↑’
+			Sleep 1000 * Interval  ; 等待重复按键时间间隔
+		}
+	}
+}
+j:: {
+	if KeyWait('j', "T" String(Interval))  ; 同上
+		Send 'j'
+	else {
+		while GetKeyState('j', "P") {
+			Send "{Left}"  ; 发送‘←’
+			Sleep 1000 * Interval
+		}
+	}
+}
+k:: {
+	if KeyWait('k', "T" String(Interval))  ; 同上
+		Send 'k'
+	else {
+		while GetKeyState('k', "P") {
+			Send "{Down}"  ; 发送‘↓’
+			Sleep 1000 * Interval
+		}
+	}
+}
+l:: {
+	if KeyWait('l', "T" String(Interval))  ; 同上
+		Send 'l'
+	else {
+		while GetKeyState('l', "P") {
+			Send "{Right}"  ; 发送‘→’
+			Sleep 1000 * Interval
+		}
+	}
+}
+u:: {
+	if KeyWait('u', "T" String(Interval))  ; 同上
+		Send 'u'
+	else {
+		while GetKeyState('u', "P") {
+			Send "{Esc}"  ; 发送‘Esc’
+			Sleep 1000 * Interval
+		}
+	}
+}
+o:: {
+	if KeyWait('o', "T" String(Interval))  ; 同上
+		Send 'o'
+	else {
+		while GetKeyState('o', "P") {
+			Send "{Del}"  ; 发送‘Del’
+			Sleep 1000 * Interval
+		}
+	}
+}
++i:: {
+	if KeyWait('i', "T" String(Interval))  ; 如果 字母箭头键功能关闭 或者 短按
+		Send 'I'
+	else {  ; （字母箭头键功能打开 并且 长按）
+		Send "^{Home}"  ; 发送 Ctrl+Home（到页首）
+		KeyWait 'i'  ; 等待按键释放
+	}
+}
++j:: {
+	if KeyWait('j', "T" String(Interval))  ; 同上
+		Send 'J'
+	else {
+		Send "{Home}"  ; 发送 Home（到行首）
+		KeyWait 'j'
+	}
+}
++k:: {
+	if KeyWait('k', "T" String(Interval))  ; 同上
+		Send 'K'
+	else {
+		Send "^{End}"  ; 发送 Ctrl+End（到页尾）
+		KeyWait 'k'
+	}
+}
++l:: {
+	if KeyWait('l', "T" String(Interval))  ; 同上
+		Send 'L'
+	else {
+		Send "{End}"  ; 发送 End (到行尾)
+		KeyWait 'l'
+	}
+}
+!BS:: Send "+{left}^x"  ; Alt+Backspace 将光标前一个字符剪切到剪贴板
+!Del:: Send "+{Right}^x"  ; Alt+Delete 将光标后一个字符剪切到剪贴板
 
 #HotIf GetKeyState("CapsLock", "T")  ; CapsLock键处于打开状态时启用的热键。
 <+CapsLock:: {  ; 左Shift+CapsLock 将光标前1个英文单词转换为小写。

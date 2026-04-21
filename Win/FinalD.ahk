@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/4/20
+ * 更新：2026/4/21
  */
 #Requires AutoHotkey v2.0
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 KeyHistory 100
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v6.68.186`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v6.68.187`n　　　 © 2024~2026"  ; 此程序的版本号
 
 #Include "MySettings\AppGroup.ahk"  ; 引入用户自定义的程序组信息
 #Include "MySettings\Shortcut.ahk"  ; 引入用户自定义的快捷键信息
@@ -835,100 +835,6 @@ $:: {
 	; Send "{Blind}{4 up}{RShift up}"
 	smartType('$', '￥')
 }
-i:: {
-	if not Arrow or KeyWait('i', "T" String(Interval))  ; 如果 字母箭头键功能关闭 或者 短按
-		Send 'i'
-	else {  ; （字母箭头键功能打开 并且 长按）
-		while GetKeyState('i', "P") {  ; 当按键未释放
-			Send "{Up}"  ; 发送‘↑’
-			Sleep 1000 * Interval  ; 等待重复按键时间间隔
-		}
-	}
-}
-j:: {
-	if not Arrow or KeyWait('j', "T" String(Interval))  ; 同上
-		Send 'j'
-	else {
-		while GetKeyState('j', "P") {
-			Send "{Left}"  ; 发送‘←’
-			Sleep 1000 * Interval
-		}
-	}
-}
-k:: {
-	if not Arrow or KeyWait('k', "T" String(Interval))  ; 同上
-		Send 'k'
-	else {
-		while GetKeyState('k', "P") {
-			Send "{Down}"  ; 发送‘↓’
-			Sleep 1000 * Interval
-		}
-	}
-}
-l:: {
-	if not Arrow or KeyWait('l', "T" String(Interval))  ; 同上
-		Send 'l'
-	else {
-		while GetKeyState('l', "P") {
-			Send "{Right}"  ; 发送‘→’
-			Sleep 1000 * Interval
-		}
-	}
-}
-u:: {
-	if not Arrow or KeyWait('u', "T" String(Interval))  ; 同上
-		Send 'u'
-	else {
-		while GetKeyState('u', "P") {
-			Send "{Esc}"  ; 发送‘Esc’
-			Sleep 1000 * Interval
-		}
-	}
-}
-o:: {
-	if not Arrow or KeyWait('o', "T" String(Interval))  ; 同上
-		Send 'o'
-	else {
-		while GetKeyState('o', "P") {
-			Send "{Del}"  ; 发送‘Del’
-			Sleep 1000 * Interval
-		}
-	}
-}
-+i:: {
-	if not Arrow or KeyWait('i', "T" String(Interval))  ; 如果 字母箭头键功能关闭 或者 短按
-		Send 'I'
-	else {  ; （字母箭头键功能打开 并且 长按）
-		Send "^{Home}"  ; 发送 Ctrl+Home（到页首）
-		KeyWait 'i'  ; 等待按键释放
-	}
-}
-+j:: {
-	if not Arrow or KeyWait('j', "T" String(Interval))  ; 同上
-		Send 'J'
-	else {
-		Send "{Home}"  ; 发送 Home（到行首）
-		KeyWait 'j'
-	}
-}
-+k:: {
-	if not Arrow or KeyWait('k', "T" String(Interval))  ; 同上
-		Send 'K'
-	else {
-		Send "^{End}"  ; 发送 Ctrl+End（到页尾）
-		KeyWait 'k'
-	}
-}
-+l:: {
-	if not Arrow or KeyWait('l', "T" String(Interval))  ; 同上
-		Send 'L'
-	else {
-		Send "{End}"  ; 发送 End (到行尾)
-		KeyWait 'l'
-	}
-}
-!BS:: Send "+{left}^x"  ; Alt+Backspace 将光标前一个字符剪切到剪贴板
-!Del:: Send "+{Right}^x"  ; Alt+Delete 将光标后一个字符剪切到剪贴板
 
 ; 如果不存在输入法候选窗口，并且当前软件不是 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))  ; or hasMS_IMEWindow()
