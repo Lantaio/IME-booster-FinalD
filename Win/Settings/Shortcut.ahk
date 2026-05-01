@@ -1,14 +1,14 @@
 /*
  * 版本：v5.9（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
- * 更新：2026/4/21
+ * 更新：2026/5/1
  * 重大更新说明：
- * v5.x：将字母箭头键功能从主程序移动到此，并添加了触发条件。适配主程序版本 v6.68.187 ~ 待定
+ * v5.x：将字母方向键功能从主程序移动到此，并添加了触发条件。适配主程序版本 v6.68.187 ~ 待定
  * v4.x：增加全局变量Interval方便调整连按间隔时间。适配主程序版本 v5.67.180 ~ v6.68.186
- * v3.x：将部分和自定义设置有关的全局变量从主程序移动到此程序；将原来全键盘漂移功能替换为字母箭头键功能。适配主程序版本 v5.66.178
+ * v3.x：将部分和自定义设置有关的全局变量从主程序移动到此程序；将原来全键盘漂移功能替换为字母方向键功能。适配主程序版本 v5.66.178
  * v2.x：因对代码进行重构，将getQ1Word_X函数改名为getWordBeforeI_X；最后添加 左Win+左Shift 和 左Win+右Shift 热键功能。适配主程序版本 v5.63.169 ~ v5.65.176
  * v1.x：将各个快捷键功能从FinalD.ahk分离出来的首个版本。适配主程序版本 v5.61.162 ~ v5.62.167
  */
-global Arrow := true  ; 字母箭头键 功能开关 的默认状态
+global Arrow := true  ; 字母方向键 功能开关 的默认状态
 global BetterCN := true  ; 中文语境应用程序优化 功能开关 的默认状态
 global Debug := false  ; 调试程序的总开关 的默认状态
 global Interval := 0.2  ; 重复按键的间隔时间，以秒为单位
@@ -22,7 +22,7 @@ global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 		msg .= "　　　　左Win+. 启用/停用 此插件，当前 已停用⛔"
 	else {
 		msg .= "　　　　左Win+. 启用/停用 此插件，当前 已启用🚀"
-		msg .= "`n左Shift+左Win 字母箭头键"
+		msg .= "`n左Shift+左Win 字母方向键"
 		if Arrow
 			msg .= "✔"
 		else
@@ -51,7 +51,7 @@ global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 		MsgBox "终点 输入法插件 全部功能 已停用⛔", "终点 输入法插件", "Iconx T1"
 	else {
 		msg := "终点 输入法插件 已启用🚀`n`n左Win+Alt+. 查看各项功能的状态：`n"
-		msg .= "`n字母箭头键 "
+		msg .= "`n字母方向键 "
 		if Arrow
 			msg .= "✔"
 		else
@@ -76,12 +76,12 @@ global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 }
 #SuspendExempt False
 
-; 如果 字母箭头键功能打开 并且 不是（大写状态打开 或 存在输入法候选窗口）
+; 如果 字母方向键功能打开 并且 不是（大写状态打开 或 存在输入法候选窗口）
 #HotIf Arrow and not (GetKeyState("CapsLock", "T") or WinExist("ahk_group IME"))  ; or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")  and IsCNInputMode()
 i:: {
-	if KeyWait('i', "T" String(Interval))  ; 如果 字母箭头键功能关闭 或者 短按
+	if KeyWait('i', "T" String(Interval))  ; 如果 字母方向键功能关闭 或者 短按
 		Send 'i'
-	else {  ; （字母箭头键功能打开 并且 长按）
+	else {  ; （字母方向键功能打开 并且 长按）
 		while GetKeyState('i', "P") {  ; 当按键未释放
 			Send "{Up}"  ; 发送‘↑’
 			Sleep 1000 * Interval  ; 等待重复按键时间间隔
@@ -139,9 +139,9 @@ o:: {
 	}
 }
 +i:: {
-	if KeyWait('i', "T" String(Interval))  ; 如果 字母箭头键功能关闭 或者 短按
+	if KeyWait('i', "T" String(Interval))  ; 如果 字母方向键功能关闭 或者 短按
 		Send 'I'
-	else {  ; （字母箭头键功能打开 并且 长按）
+	else {  ; （字母方向键功能打开 并且 长按）
 		Send "^{Home}"  ; 发送 Ctrl+Home（到页首）
 		KeyWait 'i'  ; 等待按键释放
 	}
@@ -220,15 +220,15 @@ o:: {
 		MsgBox "终点插件 中文标点提示 已开启。", "终点 输入法插件", "Iconi T2"
 	}
 }
-<+LWin:: {  ; 左Shift+左Win 开/关 字母箭头键功能。另外，Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
+<+LWin:: {  ; 左Shift+左Win 开/关 字母方向键功能。另外，Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
 	global Arrow
 	if Arrow {
 		Arrow := false
-		MsgBox "终点插件 字母箭头键功能 已关闭。", "终点 输入法插件", "Iconi T2"
+		MsgBox "终点插件 字母方向键功能 已关闭。", "终点 输入法插件", "Iconi T2"
 	}
 	else {
 		Arrow := true
-		MsgBox "终点插件 字母箭头键功能 已开启。", "终点 输入法插件", "Iconi T2"
+		MsgBox "终点插件 字母方向键功能 已开启。", "终点 输入法插件", "Iconi T2"
 	}
 }
 >+LWin:: {  ; 右Shift+左Win 开/关 中文语境应用程序优化功能。

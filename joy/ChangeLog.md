@@ -1,13 +1,13 @@
 # 更新日志
 
 ## v7.68.189
-*2026/4/26*
+*2026/5/1*
 
 ### 新增功能
 * 🐣️增加`smartType`函数，减少冗余代码，并实现长按时在英文或数字后出中文“。”、“，”和“：”（2026/3/16）
 * 🐣️增加`driftToENG`和`driftToGRC`函数进行代码复用，以便可通过不同方式进行全键盘漂移。用 左<kbd>Win</kbd>+左<kbd>Shift</kbd>快捷键将光标前的希腊字母变换为英文字母，用 左<kbd>Win</kbd>+右<kbd>Shift</kbd>快捷键将光标前的英文字母变换为希腊字母（2026/3/23）
 * 🎊英文字母或数字后长按标点键输入中文标点符号（2026/4/10）
-* 🎊增加字母箭头键功能，长按<kbd>i</kbd>、<kbd>k</kbd>、<kbd>j</kbd>和<kbd>l</kbd>键相当于按<kbd>↑</kbd>
+* 🎊增加字母方向键功能，长按<kbd>i</kbd>、<kbd>k</kbd>、<kbd>j</kbd>和<kbd>l</kbd>键相当于按<kbd>↑</kbd>
 、<kbd>↓</kbd>、<kbd>←</kbd>和<kbd>→</kbd>；长按<kbd>Shift</kbd>+<kbd>i</kbd>、<kbd>k</kbd>、<kbd>j</kbd>和<kbd>l</kbd>键相当于按<kbd>Ctrl</kbd>+<kbd>Home</kbd>（滚动到页首）
 、<kbd>Ctrl</kbd>+<kbd>End</kbd>（滚动到页尾）、<kbd>Home</kbd>和<kbd>End</kbd>；长按<kbd>u</kbd>、<kbd>o</kbd>键相当于按<kbd>Esc</kbd>、<kbd>Delete</kbd>（2026/4/12）
 * 🐣️增加全局变量`Interval`方便设置连按间隔时间（2026/4/16）
@@ -15,7 +15,7 @@
 ### 劈叉更改
 * 🤸‍♂️将启用/停用此程序的快捷键更改为 左<kbd>Win</kbd>+<kbd>.</kbd>；将显示此程序的版本信息以及各项功能状态信息的快捷键更改为 左<kbd>Win</kbd>+<kbd>Alt</kbd>+<kbd>.</kbd>(2025/12/29)
 * 🤸‍♀️将暂停/恢复执行此程序的快捷键更改为 <kbd>Shift</kbd>+<kbd>Pause</kbd>(2026/3/5)
-* 🤸‍♂️将 左<kbd>Shift</kbd>+左<kbd>Win</kbd>快捷键更改为开/关字母箭头键功能。调换 左<kbd>Shift</kbd>键 和 右<kbd>Shift</kbd>键 变换数字的方式，使变换逻辑更统一、更好记（2026/3/23）
+* 🤸‍♂️将 左<kbd>Shift</kbd>+左<kbd>Win</kbd>快捷键更改为开/关字母方向键功能。调换 左<kbd>Shift</kbd>键 和 右<kbd>Shift</kbd>键 变换数字的方式，使变换逻辑更统一、更好记（2026/3/23）
 
 ### 优化更改
 * ✨优化`showTip`函数（2026/3/8）
@@ -31,7 +31,7 @@
 * ✨️优化后标点代码（2026/4/26）
 
 ### 缺陷修复
-* 🛠️将字母箭头键功能从FinalD.ahk移动到Shortcut.ahk，并添加了触发条件（2026/4/22）
+* 🛠️将字母方向键功能从FinalD.ahk移动到Shortcut.ahk，并添加了触发条件（2026/4/22）
 
 ## v6.61.156
 *2025/12/28*
