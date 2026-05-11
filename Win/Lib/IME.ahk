@@ -1,4 +1,4 @@
-; #Requires AutoHotkey v2.0
+﻿; #Requires AutoHotkey v2.0
 
 /*
  * 检测当前是否处于中文输入状态

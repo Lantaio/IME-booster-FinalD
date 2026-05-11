@@ -1,3 +1,5 @@
+﻿; #Requires AutoHotkey v2.0
+
 /*
  * (注意：⚠此函数由AI提供，且未经审查！)
  * 检测字符串是不是emoji

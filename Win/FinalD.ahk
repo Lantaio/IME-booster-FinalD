@@ -1,12 +1,12 @@
-/*
+﻿/*
  * 说明：FinalD/终点 输入法插件，标点及扩展符号快速输入/变换程序。
- * 注意：⚠编辑此文件后必须保存为UTF-8编码格式！
+ * 注意：⚠编辑此文件后必须保存为UTF-8 with BOM编码格式！
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/4/26
+ * 更新：2026/5/11
  */
-#Requires AutoHotkey v2.0
+#Requires AutoHotkey >=v2.0.11 <=2.0.19  ; 此程序只能在v2.0.11版～v2.0.19版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
 #UseHook  ; 使用键盘和鼠标钩子，相当于在每个热键前面使用$前缀，以避免Send函数触发它自己
 CoordMode "Caret", "Screen"  ; 设置CaretGetPos函数的坐标模式为相对于屏幕
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 KeyHistory 100
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v7.68.189`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v7.68.190`n　　　 © 2024~2026"  ; 此程序的版本号
 
 #Include "MySettings\AppGroup.ahk"  ; 引入用户自定义的程序组信息
 #Include "MySettings\Shortcut.ahk"  ; 引入用户自定义的快捷键信息

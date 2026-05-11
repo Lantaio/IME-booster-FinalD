@@ -1,4 +1,4 @@
-#Requires AutoHotkey v2.0
+﻿; #Requires AutoHotkey v2.0
 
 /*
  * 加强版获取光标坐标位置函数
