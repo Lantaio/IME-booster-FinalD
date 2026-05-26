@@ -4,24 +4,20 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/5/11
+ * 更新：2026/5/25
  */
-#Requires AutoHotkey >=v2.0.11 <=2.0.19  ; 此程序只能在v2.0.11版～v2.0.19版的AutoHotkey正常运行
+#Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
-#UseHook  ; 使用键盘和鼠标钩子，相当于在每个热键前面使用$前缀，以避免Send函数触发它自己
+#UseHook  ; 使用键盘钩子，相当于在每个热键前面使用$前缀，以避免Send函数触发它自己
 CoordMode "Caret", "Screen"  ; 设置CaretGetPos函数的坐标模式为相对于屏幕
 CoordMode "Mouse", "Screen"  ; 设置MouseGetPos函数的坐标模式为相对于屏幕
 CoordMode "ToolTip", "Screen"  ; 设置ToolTip函数的坐标模式为相对于屏幕
-; ProcessSetPriority "High"
-; InstallKeybdHook true, true
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（※ 此模式默认区分大小写）
-KeyHistory 100
+; KeyHistory 60
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v7.68.190`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v7.69.192`n　　　 © 2024~2026"  ; 此程序的版本号
 
-#Include "MySettings\AppGroup.ahk"  ; 引入用户自定义的程序组信息
-#Include "MySettings\Shortcut.ahk"  ; 引入用户自定义的快捷键信息
 #Include <Caret>  ; 和光标有关的函数
 #Include <Debugger>  ; 和调试有关的函数
 #Include <IME>  ; 和输入法有关的函数
@@ -499,10 +495,12 @@ smartChoice(en, cn, before?) {
  *   cn (string) （可选）按键对应的中文标点符号
  */
 smartType(enKey, cn?) {  ;（※ 由于并非每个调用都会提供cn参数，所以此函数中所有输入cn的情况须进行检查；Send函数中部分标点须用{}包裹。）
-	before := getBeforeI()  ; 获取光标前一个内容
-	if KeyWait(enKey, "T" String(Interval))  ; 短按
+	if KeyWait(enKey, "T" String(Interval)) {  ; 短按
+		before := getBeforeI()  ; 获取光标前一个内容（※ 不能放在if语句之前，否则可能会导致 KeyWait检测有问题！）
 		isSet(cn) ? SendText(smartChoice(enKey, cn, before)) : SendText(enKey)  ; 根据是否有提供中文标点进行输入
+	}
 	else {  ; 长按
+		before := getBeforeI()  ; 获取光标前一个内容
 		shouldEN_ := shouldEN(before)
 		; ### 长按的第1次输入
 		if enKey ~= "\.|,|:"  ; 在英文或数字后可以通过长按这些标点直接输入中文标点
@@ -545,6 +543,9 @@ smartType(enKey, cn?) {  ;（※ 由于并非每个调用都会提供cn参数，
 handleError(ex, mode) {
 	return true
 }
+
+#Include "MySettings\AppGroup.ahk"  ; 引入用户自定义的程序组信息
+#Include "MySettings\Shortcut.ahk"  ; 引入用户自定义的快捷键信息
 
 ; 如果 智能标点开关打开，并且不是（存在输入法候选窗口 或 当前软件是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组） 并且 在中文输入状态。
 #HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) and IsCNInputMode()  ; HasIMEWindow()
@@ -839,185 +840,200 @@ $:: {
 	smartType('$', '￥')
 }
 
+global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
+
 ; 如果不存在输入法候选窗口，并且当前软件不是 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))  ; or hasMS_IMEWindow()
+~+LButton::
+~+RButton::
+~+MButton::
+~+XButton1::
+~+XButton2::
+~+WheelDown::
+~+WheelUp::
+~+WheelLeft::
+~+WheelRight::  ; 以上为Shift键+任何鼠标键
+~*Shift:: {  ; 防止仅按下 Shift键+任何鼠标键 或 其它的修饰键+Shift键 时，释放Shift键会触发漂移的问题。
+	Thread "Priority", 1  ; 须要提高此线程的优先级，丢弃长按产生的重复Shift按键事件，否则如果先释放修饰键再释放Shift键，会触发Shift热键使HolyShift变成true
+	global HolyShift := false
+	KeyWait "Shift"  ; （KeyWait函数在等待时可通过热键等启动新线程）
+}
+~LShift::
+~RShift:: {  ; 如果只按下Shift键，则HolyShift为true
+	global HolyShift := true
+}
 ; 英/中常用标点变换，处理有配对标点符号时按情况变换单个或者成对标点。
-LShift:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
-	switch origin := getBeforeI() {  ; 获取光标前一个内容（将要被变换的标点）
-		case '。', '.', '℃', '°', '℉': drift(origin, '。', '.')
+~LShift up:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
+	if HolyShift and A_PriorKey = "LShift"
+		switch origin := getBeforeI() {  ; 获取光标前一个内容（将要被变换的标点）
+			case '。', '.', '℃', '°', '℉': drift(origin, '。', '.')
 
-		case '，', ',', '∈', '⊆', '⊂': drift(origin, '，', ',')
+			case '，', ',', '∈', '⊆', '⊂': drift(origin, '，', ',')
 
-		case '(', '〔', '〘': driftPair(origin, '（')
-		case '（': driftPair('（', '(')
+			case '(', '〔', '〘': driftPair(origin, '（')
+			case '（': driftPair('（', '(')
 
-		case ')', '〕', '〙': Send "{BS}{Text}）"
-			if Tip
-				showTip("后", 1)
-		case '）': SendText("!"), Send("{Left}{BS}{Text})"), Send("{Del}")
+			case ')', '〕', '〙': Send "{BS}{Text}）"
+				if Tip
+					showTip("后", 1)
+			case '）': SendText("!"), Send("{Left}{BS}{Text})"), Send("{Del}")
 
-		case '_': Send "{BS}{Text}——"
-		case '—': Send "{BS 2}{Text}_"
-		case '∪', '∩': Send "{BS}{Text}_"
+			case '_': Send "{BS}{Text}——"
+			case '—': Send "{BS 2}{Text}_"
+			case '∪', '∩': Send "{BS}{Text}_"
 
-		case '：', ':', '∵', '∴', '∷': drift(origin, '：', ':')
+			case '：', ':', '∵', '∴', '∷': drift(origin, '：', ':')
 
-		case '"': driftPair('"', '“')
-		case '“': driftPair('“', '"')
-		case '”': SendText("!"), Send("{Left}{BS}{Text}`""), Send("{Del}")
+			case '"': driftPair('"', '“')
+			case '“': driftPair('“', '"')
+			case '”': SendText("!"), Send("{Left}{BS}{Text}`""), Send("{Del}")
 
-		case '/', '÷', '／', '≠', '√': drift(origin, '/', '÷')
+			case '/', '÷', '／', '≠', '√': drift(origin, '/', '÷')
 
-		case '=', '≈', '⇒', '⇔', '≡', '≌': drift(origin, '=', '≈')
+			case '=', '≈', '⇒', '⇔', '≡', '≌': drift(origin, '=', '≈')
 
-		case '<', '〈': driftPair(origin, '《')
-		case '《': driftPair('《', '<')
-		case '≤', '«', '‹': Send "{BS}{Text}《"
+			case '<', '〈': driftPair(origin, '《')
+			case '《': driftPair('《', '<')
+			case '≤', '«', '‹': Send "{BS}{Text}《"
 
-		case '》', '>', '〉', '≥', '»', '›': drift(origin, '》', '>')
+			case '》', '>', '〉', '≥', '»', '›': drift(origin, '》', '>')
 
-		case '；', ';', '☐', '☑', '☒': drift(origin, '；', ';')
+			case '；', ';', '☐', '☑', '☒': drift(origin, '；', ';')
 
-		case '-', '¬', '∨', '∧': drift(origin, '-', '¬')
+			case '-', '¬', '∨', '∧': drift(origin, '-', '¬')
 
-		case '{', '『', '｛': driftPair(origin, '「')
-		case '「': driftPair('「', '{')
+			case '{', '『', '｛': driftPair(origin, '「')
+			case '「': driftPair('「', '{')
 
-		case '}', '』', '｝': Send "{BS}{Text}」"
-		case '」': SendText("!"), Send("{Left}{BS}{Text}}"), Send("{Del}")
+			case '}', '』', '｝': Send "{BS}{Text}」"
+			case '」': SendText("!"), Send("{Left}{BS}{Text}}"), Send("{Del}")
 
-		case "'": driftPair("'", '‘')
-		case "‘": driftPair('‘', "'")
-		case "’": SendText("!"), Send("{Left}{BS}{Text}'"), Send("{Del}")
+			case "'": driftPair("'", '‘')
+			case "‘": driftPair('‘', "'")
+			case "’": SendText("!"), Send("{Left}{BS}{Text}'"), Send("{Del}")
 
-		case '*', '×', '·', '＊', '∏': drift(origin, '*', '×')
+			case '*', '×', '·', '＊', '∏': drift(origin, '*', '×')
 
-		case '#', '■', '◆', '◇', '□': drift(origin, '#', '■')
+			case '#', '■', '◆', '◇', '□': drift(origin, '#', '■')
 
-		case '[': driftPair('[', '【')
-		case '【', '〖', '［': driftPair(origin, '[')
+			case '[': driftPair('[', '【')
+			case '【', '〖', '［': driftPair(origin, '[')
 
-		case ']': Send "{BS}{Text}】"
-		case '】', '〗', '］': SendText("!"), Send("{Left}{BS}{Text}]"), Send("{Del}")
+			case ']': Send "{BS}{Text}】"
+			case '】', '〗', '］': SendText("!"), Send("{Left}{BS}{Text}]"), Send("{Del}")
 
-		case '``', 'π', 'α', 'β', 'γ', 'λ', 'μ': drift(origin, '``', 'π')
+			case '``', 'π', 'α', 'β', 'γ', 'λ', 'μ': drift(origin, '``', 'π')
 
-		case '+', '±', '∑', '∫', '∮': drift(origin, '+', '±')
+			case '+', '±', '∑', '∫', '∮': drift(origin, '+', '±')
 
-		case '&', '※', '§', '∞', '∝': drift(origin, '&', '※')
+			case '&', '※', '§', '∞', '∝': drift(origin, '&', '※')
 
-		case '？', '?', '✔', '❌', '✘', '⭕': drift(origin, '？', '?')
+			case '？', '?', '✔', '❌', '✘', '⭕': drift(origin, '？', '?')
 
-		case '！', '!', '▲', '⚠', '△': drift(origin, '！', '!')
+			case '！', '!', '▲', '⚠', '△': drift(origin, '！', '!')
 
-		case '\', '、', '→', '↔', '←', '＼': drift(origin, '\', '、')
+			case '\', '、', '→', '↔', '←', '＼': drift(origin, '\', '、')
 
-		case '｜', '|', '↑', '↕', '↓', '‖': drift(origin, '｜', '|')
+			case '｜', '|', '↑', '↕', '↓', '‖': drift(origin, '｜', '|')
 
-		case '@', '©', '●', '®', '™', '○': drift(origin, '@', '©')
+			case '@', '©', '●', '®', '™', '○': drift(origin, '@', '©')
 
-		case '%', '‰', '★', '☆', '✪': drift(origin, '%', '‰')
+			case '%', '‰', '★', '☆', '✪': drift(origin, '%', '‰')
 
-		case '^': Send "{BS}{Text}……"
-		case '…': Send "{BS 2}{Text}^"
-		case '⌘', '⌥', '⇧', '↩': Send "{BS}{Text}^"
+			case '^': Send "{BS}{Text}……"
+			case '…': Send "{BS 2}{Text}^"
+			case '⌘', '⌥', '⇧', '↩': Send "{BS}{Text}^"
 
-		case '~', '～', 'Δ', 'Ω', 'Θ', 'Λ', 'Φ': drift(origin, '~', '～')
+			case '~', '～', 'Δ', 'Ω', 'Θ', 'Λ', 'Φ': drift(origin, '~', '～')
 
-		case '$', '￥', '＄', '¥', '€', '£', '¢', '¤': drift(origin, '$', '￥')
-	}
+			case '$', '￥', '＄', '¥', '€', '£', '¢', '¤': drift(origin, '$', '￥')
+		}
 }
-
 ; 扩展标点变换。处理有配对标点符号时可快速变换单个或者成对标点。
-RShift:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
-	switch origin := getBeforeI() {  ; 获取光标前一个内容（将要被变换的标点）
-		case '。', '.', '℃', '°', '℉': drift(origin, '℃', '°', '℉')
+~RShift up:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
+	if HolyShift and A_PriorKey = "RShift"
+		switch origin := getBeforeI() {  ; 获取光标前一个内容（将要被变换的标点）
+			case '。', '.', '℃', '°', '℉': drift(origin, '℃', '°', '℉')
 
-		case '，', ',', '∈', '⊆', '⊂': drift(origin, '∈', '⊆', '⊂')
+			case '，', ',', '∈', '⊆', '⊂': drift(origin, '∈', '⊆', '⊂')
 
-		case '(', '（', '〘': driftPair(origin, '〔')
-		case '〔': driftPair('〔', '〘')
+			case '(', '（', '〘': driftPair(origin, '〔')
+			case '〔': driftPair('〔', '〘')
 
-		case ')', '）', '〕', '〙': drift(origin, '〕', '〙')
+			case ')', '）', '〕', '〙': drift(origin, '〕', '〙')
 
-		case '_', '∪', '∩': drift(origin, '∪', '∩')
-		case '—': Send "{BS 2}{Text}∪"
+			case '_', '∪', '∩': drift(origin, '∪', '∩')
+			case '—': Send "{BS 2}{Text}∪"
 
-		case '：', ':', '∵', '∴', '∷': drift(origin, '∵', '∴', '∷')
+			case '：', ':', '∵', '∴', '∷': drift(origin, '∵', '∴', '∷')
 
-		case '"': Send "{Left}{Del}{Text}“"
-			if Tip
-				showTip("前", 1)
-		case '“': Send "{BS}{Text}”"
-			if Tip
-				showTip("后", 1)
-		case '”': SendText("!"), Send('{Left}{BS}{Text}"'), Send("{Del}")
+			case '"': Send "{Left}{Del}{Text}“"
+				if Tip
+					showTip("前", 1)
+			case '“': Send "{BS}{Text}”"
+				if Tip
+					showTip("后", 1)
+			case '”': SendText("!"), Send('{Left}{BS}{Text}"'), Send("{Del}")
 
-		case '/', '÷', '／', '≠', '√': drift(origin, '／', '≠', '√')
+			case '/', '÷', '／', '≠', '√': drift(origin, '／', '≠', '√')
 
-		case '=', '≈', '⇒', '⇔', '≡', '≌': drift(origin, '⇒', '⇔', '≡', '≌')
+			case '=', '≈', '⇒', '⇔', '≡', '≌': drift(origin, '⇒', '⇔', '≡', '≌')
 
-		case '<', '《': driftPair(origin, '〈')
-		case '〈': driftPair('〈', '≤')
-		case '≤', '«', '‹': drift(origin, '〈', '≤', '«', '‹')
+			case '<', '《': driftPair(origin, '〈')
+			case '〈': driftPair('〈', '≤')
+			case '≤', '«', '‹': drift(origin, '〈', '≤', '«', '‹')
 
-		case '》', '>', '〉', '≥', '»', '›': drift(origin, '〉', '≥', '»', '›')
+			case '》', '>', '〉', '≥', '»', '›': drift(origin, '〉', '≥', '»', '›')
 
-		case '；', ';', '☐', '☑', '☒': drift(origin, '☐', '☑', '☒')
+			case '；', ';', '☐', '☑', '☒': drift(origin, '☐', '☑', '☒')
 
-		case '-', '¬', '∨', '∧': drift(origin, '∨', '∧')
+			case '-', '¬', '∨', '∧': drift(origin, '∨', '∧')
 
-		case '{', '「', '｛': driftPair(origin, '『')
-		case '『': driftPair('『', '｛')
+			case '{', '「', '｛': driftPair(origin, '『')
+			case '『': driftPair('『', '｛')
 
-		case '}', '」', '』', '｝': drift(origin, '』', '｝')
+			case '}', '」', '』', '｝': drift(origin, '』', '｝')
 
-		case "'": Send "{Left}{Del}{Text}‘"
-			if Tip
-				showTip("前", 1)
-		case "‘": Send "{BS}{Text}’"
-			if Tip
-				showTip("后", 1)
-		case "’": SendText("!"), Send("{Left}{BS}{Text}'"), Send("{Del}")
+			case "'": Send "{Left}{Del}{Text}‘"
+				if Tip
+					showTip("前", 1)
+			case "‘": Send "{BS}{Text}’"
+				if Tip
+					showTip("后", 1)
+			case "’": SendText("!"), Send("{Left}{BS}{Text}'"), Send("{Del}")
 
-		case '*', '×', '·', '＊', '∏': drift(origin, '·', '＊', '∏')
+			case '*', '×', '·', '＊', '∏': drift(origin, '·', '＊', '∏')
 
-		case '#', '■', '◆', '◇', '□': drift(origin, '◆', '◇', '□')
+			case '#', '■', '◆', '◇', '□': drift(origin, '◆', '◇', '□')
 
-		case '[', '【', '［': driftPair(origin, '〖')
-		case '〖': driftPair('〖', '［')
+			case '[', '【', '［': driftPair(origin, '〖')
+			case '〖': driftPair('〖', '［')
 
-		case ']', '】', '〗', '］': drift(origin, '〗', '］')
+			case ']', '】', '〗', '］': drift(origin, '〗', '］')
 
-		case '``', 'π', 'α', 'β', 'γ', 'λ', 'μ': drift(origin, 'α', 'β', 'γ', 'λ', 'μ')
+			case '``', 'π', 'α', 'β', 'γ', 'λ', 'μ': drift(origin, 'α', 'β', 'γ', 'λ', 'μ')
 
-		case '+', '±', '∑', '∫', '∮': drift(origin, '∑', '∫', '∮')
+			case '+', '±', '∑', '∫', '∮': drift(origin, '∑', '∫', '∮')
 
-		case '&', '※', '§', '∞', '∝': drift(origin, '§', '∞', '∝')
+			case '&', '※', '§', '∞', '∝': drift(origin, '§', '∞', '∝')
 
-		case '？', '?', '✔', '❌', '✘', '⭕': drift(origin, '✔', '❌', '✘', '⭕')
+			case '？', '?', '✔', '❌', '✘', '⭕': drift(origin, '✔', '❌', '✘', '⭕')
 
-		case '！', '!', '▲', '⚠', '△': drift(origin, '▲', '⚠', '△')
+			case '！', '!', '▲', '⚠', '△': drift(origin, '▲', '⚠', '△')
 
-		case '\', '、', '→', '↔', '←', '＼': drift(origin, '→', '↔', '←', '＼')
+			case '\', '、', '→', '↔', '←', '＼': drift(origin, '→', '↔', '←', '＼')
 
-		case '｜', '|', '↑', '↕', '↓', '‖': drift(origin, '↑', '↕', '↓', '‖')
+			case '｜', '|', '↑', '↕', '↓', '‖': drift(origin, '↑', '↕', '↓', '‖')
 
-		case '@', '©', '●', '®', '™', '○': drift(origin, '●', '®', '™', '○')
+			case '@', '©', '●', '®', '™', '○': drift(origin, '●', '®', '™', '○')
 
-		case '%', '‰', '★', '☆', '✪': drift(origin, '★', '☆', '✪')
+			case '%', '‰', '★', '☆', '✪': drift(origin, '★', '☆', '✪')
 
-		case '^', '⌘', '⌥', '⇧', '↩': drift(origin, '⌘', '⌥', '⇧', '↩')
-		case '…': Send "{BS 2}{Text}⌘"
+			case '^', '⌘', '⌥', '⇧', '↩': drift(origin, '⌘', '⌥', '⇧', '↩')
+			case '…': Send "{BS 2}{Text}⌘"
 
-		case '~', '～', 'Δ', 'Ω', 'Θ', 'Λ', 'Φ': drift(origin, 'Δ', 'Ω', 'Θ', 'Λ', 'Φ')
+			case '~', '～', 'Δ', 'Ω', 'Θ', 'Λ', 'Φ': drift(origin, 'Δ', 'Ω', 'Θ', 'Λ', 'Φ')
 
-		case '$', '￥', '＄', '¥', '€', '£', '¢', '¤': drift(origin, '＄', '¥', '€', '£', '¢', '¤')
-	}
+			case '$', '￥', '＄', '¥', '€', '£', '¢', '¤': drift(origin, '＄', '¥', '€', '£', '¢', '¤')
+		}
 }
-
-#HotIf
-~+Ctrl::  ; 防止仅按下 Shift+Ctrl 时，先释放Ctrl键再释放Shift键会触发漂移的问题。
-~+Alt::  ; 防止仅按下 Shift+Alt 时，先释放Alt键再释放Shift键会触发漂移的问题。
-~*Shift::  ; 防止仅按下 其它的修饰键+Shift 时，先释放其它修饰键再释放Shift键会触发漂移的问题。
-~+MButton:: return  ; 防止 Shift+鼠标滚论左右移动屏幕时触发漂移的问题。
