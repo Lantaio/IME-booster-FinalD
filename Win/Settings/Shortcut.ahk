@@ -1,7 +1,7 @@
 ﻿/*
  * 说明：存放FinalD项目的各种功能开关（全局变量）及其初始状态，还有自定义快捷键设置。
- * 版本：v6.10（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
- * 更新：2026/5/11
+ * 版本：v6.12（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
+ * 更新：2026/5/25
  * 重大更新说明：
  * v6.x：将此项目所有ahk脚本程序的编码方式统一更改为UTF-8 with BOM格式。只需将你自己的Shortcut.ahk文件的编码格式修改为此编码格式并保存即可。适配主程序版本 v7.68.190 ~ 待定
  * v5.x：将字母方向键功能从主程序移动到此，并添加了触发条件。适配主程序版本 v6.68.187 ~ v7.68.189
@@ -78,104 +78,53 @@ global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 }
 #SuspendExempt False
 
-; 如果 字母方向键功能打开 并且 不是（大写状态打开 或 存在输入法候选窗口）
-#HotIf Arrow and not (GetKeyState("CapsLock", "T") or WinExist("ahk_group IME"))  ; or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")  and IsCNInputMode()
-i:: {
-	if KeyWait('i', "T" String(Interval))  ; 如果 字母方向键功能关闭 或者 短按
-		Send 'i'
-	else {  ; （字母方向键功能打开 并且 长按）
-		while GetKeyState('i', "P") {  ; 当按键未释放
-			Send "{Up}"  ; 发送‘↑’
-			Sleep 1000 * Interval  ; 等待重复按键时间间隔
+/*
+ * 接受一个按键名称和一个功能作为参数，根据按键的按下时间来决定是发送按键本身还是发送设定的功能
+ * 参数：
+ *   key (string) 按键名称
+ *   fn (string) 长按时执行的功能
+ */
+smartLetter(key, fn) {
+	Critical "On"  ; 将当前线程设置为不可中断，使短按按键可以按顺序执行，并缓存未处理的按键
+	if KeyWait(key, "T" String(Interval))  ; 短按
+		if GetKeyState("Shift", "P")  ; 如果按下了Shift键
+			Send StrUpper(key)  ; 发送按键的大写形式
+		else
+			Send key  ; 发送按键的小写形式
+	else {  ; 长按
+		Critical "Off"
+		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的按键
+		if not WinExist("ahk_group IME") {  ; 如果没有输入法候选窗口，则……
+			while GetKeyState(key, "P") {  ; 当按键未释放
+				Send fn  ; 发送设定的功能
+				Sleep 1000 * Interval  ; 等待重复按键时间间隔
+			}
+		}
+		else {  ; 有输入法候选窗口，则……
+			while GetKeyState(key, "P") {  ; 当按键未释放
+				if GetKeyState("Shift", "P")  ; 如果按下了Shift键
+					Send StrUpper(key)  ; 发送按键的大写形式
+				else
+					Send fn  ; 发送设定的功能
+				Sleep 1000 * Interval  ; 等待重复按键时间间隔
+			}
 		}
 	}
 }
-j:: {
-	if KeyWait('j', "T" String(Interval))  ; 同上
-		Send 'j'
-	else {
-		while GetKeyState('j', "P") {
-			Send "{Left}"  ; 发送‘←’
-			Sleep 1000 * Interval
-		}
-	}
-}
-k:: {
-	if KeyWait('k', "T" String(Interval))  ; 同上
-		Send 'k'
-	else {
-		while GetKeyState('k', "P") {
-			Send "{Down}"  ; 发送‘↓’
-			Sleep 1000 * Interval
-		}
-	}
-}
-l:: {
-	if KeyWait('l', "T" String(Interval))  ; 同上
-		Send 'l'
-	else {
-		while GetKeyState('l', "P") {
-			Send "{Right}"  ; 发送‘→’
-			Sleep 1000 * Interval
-		}
-	}
-}
-u:: {
-	if KeyWait('u', "T" String(Interval))  ; 同上
-		Send 'u'
-	else {
-		while GetKeyState('u', "P") {
-			Send "{Esc}"  ; 发送‘Esc’
-			Sleep 1000 * Interval
-		}
-	}
-}
-o:: {
-	if KeyWait('o', "T" String(Interval))  ; 同上
-		Send 'o'
-	else {
-		while GetKeyState('o', "P") {
-			Send "{Del}"  ; 发送‘Del’
-			Sleep 1000 * Interval
-		}
-	}
-}
-+i:: {
-	if KeyWait('i', "T" String(Interval))  ; 如果 字母方向键功能关闭 或者 短按
-		Send 'I'
-	else {  ; （字母方向键功能打开 并且 长按）
-		Send "^{Home}"  ; 发送 Ctrl+Home（到页首）
-		KeyWait 'i'  ; 等待按键释放
-	}
-}
-+j:: {
-	if KeyWait('j', "T" String(Interval))  ; 同上
-		Send 'J'
-	else {
-		Send "{Home}"  ; 发送 Home（到行首）
-		KeyWait 'j'
-	}
-}
-+k:: {
-	if KeyWait('k', "T" String(Interval))  ; 同上
-		Send 'K'
-	else {
-		Send "^{End}"  ; 发送 Ctrl+End（到页尾）
-		KeyWait 'k'
-	}
-}
-+l:: {
-	if KeyWait('l', "T" String(Interval))  ; 同上
-		Send 'L'
-	else {
-		Send "{End}"  ; 发送 End (到行尾)
-		KeyWait 'l'
-	}
-}
-!BS:: Send "+{left}^x"  ; Alt+Backspace 将光标前一个字符剪切到剪贴板
-!Del:: Send "+{Right}^x"  ; Alt+Delete 将光标后一个字符剪切到剪贴板
 
-#HotIf GetKeyState("CapsLock", "T")  ; CapsLock键处于打开状态时启用的热键。
+; 如果 字母方向键功能打开 并且 不是（大写状态打开 或 存在输入法候选窗口）
+#HotIf Arrow and not GetKeyState("CapsLock", "T")
+i:: smartLetter('i', "{Up}")  ; 长按时发送‘↑’
+j:: smartLetter('j', "{Left}")  ; 长按时发送‘←’
+k:: smartLetter('k', "{Down}")  ; 长按时发送‘↓’
+l:: smartLetter('l', "{Right}")  ; 长按时发送‘→’
++i:: smartLetter('i', "^{Home}")  ; 长按时发送‘Ctrl+Home’（光标到文件头）
++j:: smartLetter('j', "{Home}")  ; 长按时发送‘Home’（光标到行首）
++k:: smartLetter('k', "^{End}")  ; 长按时发送‘Ctrl+End’（光标到文件尾）
++l:: smartLetter('l', "{End}")  ; 长按时发送‘End’（光标到行尾）
+
+; CapsLock键处于打开状态时启用的热键。
+#HotIf GetKeyState("CapsLock", "T")
 <+CapsLock:: {  ; 左Shift+CapsLock 将光标前1个英文单词转换为小写。
 	SetCapsLockState "Off"
 	SendText StrLower(getWordBeforeI_X())
@@ -189,7 +138,8 @@ o:: {
 	KeyWait "RShift"
 }
 
-#HotIf  ; 无任何前置条件的热键。
+; 无任何前置条件的热键。
+#HotIf
 <+CapsLock:: {  ; 左Shift+CapsLock 将光标前1个英文单词转换为大写。
 	SendText StrUpper(getWordBeforeI_X())
 	KeyWait "CapsLock"
@@ -222,7 +172,7 @@ o:: {
 		MsgBox "终点插件 中文标点提示 已开启。", "终点 输入法插件", "Iconi T2"
 	}
 }
-<+LWin:: {  ; 左Shift+左Win 开/关 字母方向键功能。另外，Shift键作为前缀键时，可使得Shift键单独作为热键时只在弹起，并且没有按过其它键时触发。
+<+LWin:: {  ; 左Shift+左Win 开/关 字母方向键功能。
 	global Arrow
 	if Arrow {
 		Arrow := false
@@ -256,3 +206,7 @@ o:: {
 	ToolTip  ; 清除提示信息
 	Pause -1  ; 切换暂停状态
 }
+u:: smartLetter('u', "{Esc}")  ; 长按时发送‘Esc’
+o:: smartLetter('o', "{Del}")  ; 长按时发送‘Del’
+!BS:: Send "+{left}^x"  ; Alt+Backspace 将光标前一个字符剪切到剪贴板
+!Del:: Send "+{Right}^x"  ; Alt+Delete 将光标后一个字符剪切到剪贴板
