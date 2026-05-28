@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/5/25
+ * 更新：2026/5/28
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -16,7 +16,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v7.69.192`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v7.69.194`n　　　 © 2024~2026"  ; 此程序的版本号
 
 #Include <Caret>  ; 和光标有关的函数
 #Include <Debugger>  ; 和调试有关的函数
@@ -86,32 +86,6 @@ getAfterI() {
 	if WinActive("ahk_group Slow")  ; 如果是阿里旺旺，暂停一下以等待光标完成向左移动
 		Sleep 50
 	return clip
-}
-
-/*
- * 借助剪贴板获取光标前一个英文片段，并将其删除
- * 返回值：
- *   (string) 光标前一个英文片段
- */
-getWordBeforeI_X() {
-	wordBeforeI := '', clipCache := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪贴板内容，清空剪贴板
-	Send "^+{Left}^c"  ; 选取当前光标前的片段并复制
-	ClipWait 0.6  ; 等待剪贴板更新
-	Send "{Right}"  ; 取消选择
-	Loop StrLen(A_Clipboard) {  ; 执行以剪贴板内容长度作为次数的循环
-		temp := SubStr(A_Clipboard, -A_Index)  ; 从最后1个字符逐个增量向前检测
-		if temp ~= "^[a-zA-Z0-9_]+$"  ; 如果 是英文字符串
-			wordBeforeI := temp
-		else  ; 否则，（检测到非英文字符）
-			break  ; 停止检测
-	}
-	A_Clipboard := clipCache, clipCache := ''  ; 恢复原来的剪贴板内容
-	Send "{Shift down}"
-	Send "{Left " StrLen(wordBeforeI) "}"
-	Send "{Shift up}"
-	if wordBeforeI != ''
-		Send "{Del}"  ; 删除将要变换的英文片段
-	return wordBeforeI
 }
 
 /*

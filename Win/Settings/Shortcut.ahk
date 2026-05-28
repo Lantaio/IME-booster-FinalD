@@ -1,9 +1,10 @@
 ﻿/*
  * 说明：存放FinalD项目的各种功能开关（全局变量）及其初始状态，还有自定义快捷键设置。
- * 版本：v6.12（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
- * 更新：2026/5/25
+ * 版本：v7.15（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
+ * 更新：2026/5/28
  * 重大更新说明：
- * v6.x：将此项目所有ahk脚本程序的编码方式统一更改为UTF-8 with BOM格式。只需将你自己的Shortcut.ahk文件的编码格式修改为此编码格式并保存即可。适配主程序版本 v7.68.190 ~ 待定
+ * v7.x：将getWordBeforeI_X函数从主程序移动到此程序。适配主程序版本 v7.69.194 ~ 待定
+ * v6.x：将此项目所有ahk脚本程序的编码方式统一更改为UTF-8 with BOM格式。只需将你自己的Shortcut.ahk文件的编码格式修改为此编码格式并保存即可。适配主程序版本 v7.68.190 ~ v7.69.193
  * v5.x：将字母方向键功能从主程序移动到此，并添加了触发条件。适配主程序版本 v6.68.187 ~ v7.68.189
  * v4.x：增加全局变量Interval方便调整连按间隔时间。适配主程序版本 v5.67.180 ~ v6.68.186
  * v3.x：将部分和自定义设置有关的全局变量从主程序移动到此程序；将原来全键盘漂移功能替换为字母方向键功能。适配主程序版本 v5.66.178
@@ -122,6 +123,32 @@ l:: smartLetter('l', "{Right}")  ; 长按时发送‘→’
 +j:: smartLetter('j', "{Home}")  ; 长按时发送‘Home’（光标到行首）
 +k:: smartLetter('k', "^{End}")  ; 长按时发送‘Ctrl+End’（光标到文件尾）
 +l:: smartLetter('l', "{End}")  ; 长按时发送‘End’（光标到行尾）
+
+/*
+ * 借助剪贴板获取光标前一个英文片段，并将其删除
+ * 返回值：
+ *   (string) 光标前一个英文片段
+ */
+getWordBeforeI_X() {
+	wordBeforeI := '', clipCache := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪贴板内容，清空剪贴板
+	Send "^+{Left}^c"  ; 选取当前光标前的片段并复制
+	ClipWait 0.6  ; 等待剪贴板更新
+	Send "{Right}"  ; 取消选择
+	Loop StrLen(A_Clipboard) {  ; 执行以剪贴板内容长度作为次数的循环
+		temp := SubStr(A_Clipboard, -A_Index)  ; 从最后1个字符逐个增量向前检测
+		if temp ~= "^[a-zA-Z0-9_]+$"  ; 如果 是英文字符串
+			wordBeforeI := temp
+		else  ; 否则，（检测到非英文字符）
+			break  ; 停止检测
+	}
+	A_Clipboard := clipCache, clipCache := ''  ; 恢复原来的剪贴板内容
+	Send "{Shift down}"
+	Send "{Left " StrLen(wordBeforeI) "}"
+	Send "{Shift up}"
+	if wordBeforeI != ''
+		Send "{Del}"  ; 删除将要变换的英文片段
+	return wordBeforeI
+}
 
 ; CapsLock键处于打开状态时启用的热键。
 #HotIf GetKeyState("CapsLock", "T")
