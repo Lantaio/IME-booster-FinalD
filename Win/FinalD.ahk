@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/5/28
+ * 更新：2026/6/1
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -16,12 +16,14 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v7.69.194`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v7.69.195`n　　　 © 2024~2026"  ; 此程序的版本号
 
 #Include <Caret>  ; 和光标有关的函数
 #Include <Debugger>  ; 和调试有关的函数
 #Include <IME>  ; 和输入法有关的函数
 #Include <Selection>  ; 和选择有关的函数
+#Include "MySettings\AppGroup.ahk"  ; 引入用户自定义的程序组信息
+#Include "MySettings\Shortcut.ahk"  ; 引入用户自定义的快捷键信息
 
 /*
  * 借助剪贴板获取光标前一个内容（字符）
@@ -518,9 +520,6 @@ handleError(ex, mode) {
 	return true
 }
 
-#Include "MySettings\AppGroup.ahk"  ; 引入用户自定义的程序组信息
-#Include "MySettings\Shortcut.ahk"  ; 引入用户自定义的快捷键信息
-
 ; 如果 智能标点开关打开，并且不是（存在输入法候选窗口 或 当前软件是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组） 并且 在中文输入状态。
 #HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) and IsCNInputMode()  ; HasIMEWindow()
 .:: smartType('.', '。')  ; 长按输入中文标点
@@ -827,10 +826,11 @@ global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 ~+WheelUp::
 ~+WheelLeft::
 ~+WheelRight::  ; 以上为Shift键+任何鼠标键
-~*Shift:: {  ; 防止仅按下 Shift键+任何鼠标键 或 其它的修饰键+Shift键 时，释放Shift键会触发漂移的问题。
-	Thread "Priority", 1  ; 须要提高此线程的优先级，丢弃长按产生的重复Shift按键事件，否则如果先释放修饰键再释放Shift键，会触发Shift热键使HolyShift变成true
+~*Shift:: {  ; 防止仅按下 Shift键+任何鼠标键 或 其它的修饰键+Shift键 时，最后释放Shift键会触发漂移的问题。
+	Thread "Priority", 1  ; 须要提高此线程的优先级，丢弃长按产生的重复Shift按键事件，否则如果最后释放Shift键，会触发Shift热键使HolyShift变成true
 	global HolyShift := false
-	KeyWait "Shift"  ; （KeyWait函数在等待时可通过热键等启动新线程）
+	if GetKeyState("Ctrl", "P") or GetKeyState("Alt", "P")
+		KeyWait "Shift"  ; （KeyWait函数在等待时可通过热键等启动新线程）
 }
 ~LShift::
 ~RShift:: {  ; 如果只按下Shift键，则HolyShift为true

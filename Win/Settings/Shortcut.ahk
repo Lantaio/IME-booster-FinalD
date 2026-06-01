@@ -1,7 +1,7 @@
 ﻿/*
  * 说明：存放FinalD项目的各种功能开关（全局变量）及其初始状态，还有自定义快捷键设置。
- * 版本：v7.15（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
- * 更新：2026/5/28
+ * 版本：v7.16（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
+ * 更新：2026/5/30
  * 重大更新说明：
  * v7.x：将getWordBeforeI_X函数从主程序移动到此程序。适配主程序版本 v7.69.194 ~ 待定
  * v6.x：将此项目所有ahk脚本程序的编码方式统一更改为UTF-8 with BOM格式。只需将你自己的Shortcut.ahk文件的编码格式修改为此编码格式并保存即可。适配主程序版本 v7.68.190 ~ v7.69.193
@@ -78,6 +78,17 @@ global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 	}
 }
 #SuspendExempt False
+
+; 如果不存在输入法候选窗口，并且当前软件不是 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
+#HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))  ; or hasMS_IMEWindow()
+<#LShift up:: {  ; 左Win+左Shift 将光标前面的希腊字母变换为对应的英文字母；数字变换为上下标数字形式。
+	if A_PriorKey = "LShift"
+		driftToENG(getBeforeI())
+}
+<#RShift up:: {  ; 左Win+右Shift 将光标前面的英文字母变换为对应的希腊字母；数字变换为对应的罗马数字形式。
+	if A_PriorKey = "RShift"
+		driftToGRC(getBeforeI())
+}
 
 /*
  * 接受一个按键名称和一个功能作为参数，根据按键的按下时间来决定是发送按键本身还是发送设定的功能
@@ -221,19 +232,9 @@ getWordBeforeI_X() {
 		MsgBox "终点插件 针对中文语境应用程序优化。", "终点 输入法插件", "Iconi T2"
 	}
 }
-<#LShift up:: {  ; 左Win+左Shift 将光标前面的希腊字母变换为对应的英文字母；数字变换为上下标数字形式。
-	if A_PriorKey = "LShift"
-		driftToENG(getBeforeI())
-}
-<#RShift up:: {  ; 左Win+右Shift 将光标前面的英文字母变换为对应的希腊字母；数字变换为对应的罗马数字形式。
-	if A_PriorKey = "RShift"
-		driftToGRC(getBeforeI())
-}
 +Pause:: {  ; 通常用于在调试时让程序继续运行。
 	ToolTip  ; 清除提示信息
 	Pause -1  ; 切换暂停状态
 }
 u:: smartLetter('u', "{Esc}")  ; 长按时发送‘Esc’
 o:: smartLetter('o', "{Del}")  ; 长按时发送‘Del’
-!BS:: Send "+{left}^x"  ; Alt+Backspace 将光标前一个字符剪切到剪贴板
-!Del:: Send "+{Right}^x"  ; Alt+Delete 将光标后一个字符剪切到剪贴板
