@@ -4,11 +4,12 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/6/1
+ * 更新：2026/6/4
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
 #UseHook  ; 使用键盘钩子，相当于在每个热键前面使用$前缀，以避免Send函数触发它自己
+Critical "On"  ; 将所有线程默认设置为关键线程（不可中断），使短按按键可以按顺序执行，并缓存未处理的按键
 CoordMode "Caret", "Screen"  ; 设置CaretGetPos函数的坐标模式为相对于屏幕
 CoordMode "Mouse", "Screen"  ; 设置MouseGetPos函数的坐标模式为相对于屏幕
 CoordMode "ToolTip", "Screen"  ; 设置ToolTip函数的坐标模式为相对于屏幕
@@ -16,7 +17,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v7.69.195`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v7.70.198`n　　　 © 2024~2026"  ; 此程序的版本号
 
 #Include <Caret>  ; 和光标有关的函数
 #Include <Debugger>  ; 和调试有关的函数
@@ -476,6 +477,8 @@ smartType(enKey, cn?) {  ;（※ 由于并非每个调用都会提供cn参数，
 		isSet(cn) ? SendText(smartChoice(enKey, cn, before)) : SendText(enKey)  ; 根据是否有提供中文标点进行输入
 	}
 	else {  ; 长按
+		Critical "Off"
+		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的按键
 		before := getBeforeI()  ; 获取光标前一个内容
 		shouldEN_ := shouldEN(before)
 		; ### 长按的第1次输入
@@ -520,8 +523,32 @@ handleError(ex, mode) {
 	return true
 }
 
+/*
+ * 基本的按键处理函数，直接将按键发送给系统处理
+ * 参数：
+ *   thisHotkey (string) 触发的热键名称
+ */
+keyHandler(thisHotkey) {
+	; key := SubStr(thisHotkey, -1)  ; 提取热键的最后1个键名
+	Send "{Blind}" thisHotkey  ;
+}
+
+; ~~~~~~ Optional Hotkeys Begin ~~~~~~
+; 这部分热键为非必须热键，如果和你使用的其它AHK脚本有冲突，可以将这部分代码注释或删除。但这将失去按键按顺序执行的功能，当输入太快时顺序可能会出现错乱。
+; (条件和下面相同）
+;HotIf 'Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) and IsCNInputMode()'
+nums := "0123456789"
+Loop Parse, nums  ;添加数字热键，使按键可以按顺序执行
+	Hotkey A_LoopField, keyHandler
+letters := "abcdefghijklmnopqrstuvwxyz"
+Loop Parse, letters  ;添加小写字母热键，使按键可以按顺序执行
+	Hotkey A_LoopField, keyHandler
+Loop Parse, letters  ;添加大写字母热键，使按键可以按顺序执行
+	Hotkey '+' A_LoopField, keyHandler
+; ~~~~~~ Optional Hotkeys End ~~~~~~
+
 ; 如果 智能标点开关打开，并且不是（存在输入法候选窗口 或 当前软件是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组） 并且 在中文输入状态。
-#HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) and IsCNInputMode()  ; HasIMEWindow()
+#HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) and IsCNInputMode()
 .:: smartType('.', '。')  ; 长按输入中文标点
 ,:: smartType(',', '，')  ; 长按输入中文标点
 (:: {
@@ -815,7 +842,7 @@ $:: {
 
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 
-; 如果不存在输入法候选窗口，并且当前软件不是 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框（※必须全部条件包含在not里面）
+; 如果不是（存在输入法候选窗口 或 当前软件是 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框）
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))  ; or hasMS_IMEWindow()
 ~+LButton::
 ~+RButton::
@@ -827,10 +854,11 @@ global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 ~+WheelLeft::
 ~+WheelRight::  ; 以上为Shift键+任何鼠标键
 ~*Shift:: {  ; 防止仅按下 Shift键+任何鼠标键 或 其它的修饰键+Shift键 时，最后释放Shift键会触发漂移的问题。
+	Critical "Off"
 	Thread "Priority", 1  ; 须要提高此线程的优先级，丢弃长按产生的重复Shift按键事件，否则如果最后释放Shift键，会触发Shift热键使HolyShift变成true
 	global HolyShift := false
 	if GetKeyState("Ctrl", "P") or GetKeyState("Alt", "P")
-		KeyWait "Shift"  ; （KeyWait函数在等待时可通过热键等启动新线程）
+		KeyWait "Shift"  ; （※ KeyWait函数在等待时可通过热键等启动新线程，因此要提高此线程的优先级）
 }
 ~LShift::
 ~RShift:: {  ; 如果只按下Shift键，则HolyShift为true
