@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/6/10
+ * 更新：2026/6/11
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -17,7 +17,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v7.70.202`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v7.70.205`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 
 #Include <Caret>  ; 和光标有关的函数
@@ -1037,14 +1037,14 @@ $:: {
 ; 这部分热键为非必须热键，如果和你使用的其它AHK脚本有冲突，可以将这部分代码注释或删除。但这将失去按键按顺序执行的功能，当输入太快时顺序可能会出现错乱。
 Enter::
 Space:: Send "{Blind}{" thisHotkey "}"
-~+LButton::
-~+RButton::
 ~+MButton::
 ~+XButton1::
 ~+XButton2::
 ~+WheelLeft::
 ~+WheelRight::
 ; ~~~~~~ Optional Hotkeys End ~~~~~~
+~+LButton::
+~+RButton::
 ~+WheelDown::
 ~+WheelUp::  ; 以上为Shift键+任何鼠标键
 ~*Shift:: {  ; 防止仅按下 Shift键+任何鼠标键 或 其它的修饰键+Shift键 时，最后释放Shift键会触发漂移的问题。
