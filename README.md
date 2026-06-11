@@ -1,5 +1,5 @@
 # *FinalD / 终点 🏁*
-*2026年6月8日*
+*2026年6月11日*
 
 ## 摘要
 🚨 **因AutoHotkey有重大改动，此插件程序v7.69.195版及之后的版本只能在AutoHotkey v2.0.26版及之后的版本中运行！v7.68.190及之前的版本只能在AutoHotkey v2.0.11 ~ v2.0.19版中运行！**
@@ -8,7 +8,7 @@
 
 | 脚本名称              | 最新版本                                                     | 说明                |
 | --------------------- | ------------------------------------------------------------ | --------------------- |
-| [FinalD.ahk](https://github.com/Lantaio/IME-booster-FinalD/archive/refs/tags/v7.70.198.zip)✨️ | v7.70.198（*2026/6/4*） | 主程序                |
+| [FinalD.ahk](https://github.com/Lantaio/IME-booster-FinalD/archive/refs/tags/v7.70.205.zip)✨️ | v7.70.205（*2026/6/11*） | 主程序                |
 | MySettings\AppGroup.ahk✨ | v3.7 (*2026/6/11*)                                             | 用户设置\自定义程序组 |
 | MySettings\Shortcut.ahk✨️ | v9.18 (*2026/6/4*)                                     | 用户设置\自定义快捷键 |
 
