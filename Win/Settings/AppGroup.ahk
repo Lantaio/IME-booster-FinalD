@@ -1,9 +1,10 @@
 ﻿/*
  * 说明：存放FinalD项目的自定义程序组信息。
- * 版本：v2.6（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
- * 更新：2026/6/9
+ * 版本：v3.7（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新，或查找文件中有“✨”符号的地方。修订号为不影响功能的修改，可以不管。）
+ * 更新：2026/6/11
  * 重大更新说明：
- * v2.x：将此项目所有ahk脚本程序的编码方式统一更改为UTF-8 with BOM格式。只需将你自己的AppGroup.ahk文件的编码格式修改为此编码格式并保存即可。适配主程序版本 v7.68.190 ~ 待定
+ * v3.x：添加Win系统打开文件窗口（ahk_class #32770）到文件管理器组。适配主程序版本 v7.70.205 ~ 待定
+ * v2.x：将此项目所有ahk脚本程序的编码方式统一更改为UTF-8 with BOM格式。只需将你自己的AppGroup.ahk文件的编码格式修改为此编码格式并保存即可。适配主程序版本 v7.68.190 ~ v7.70.204
  * v1.x：将各程序组信息从FinalD.ahk分离出来的首个版本。适配主程序版本 v5.61.162 ~ v7.68.189
  *
  * GroupAdd帮助文档网址：
@@ -36,6 +37,7 @@ GroupAdd "Exclude", "ahk_exe \\mintty\.exe$"  ; git-bash终端
 GroupAdd "FileManager", "ahk_exe \\dopus\.exe$"  ; Directory Opus
 GroupAdd "FileManager", "ahk_exe \\explorer\.exe$"  ; Win系统的资源管理器
 GroupAdd "FileManager", "ahk_exe \\Totalcmd\.exe$"  ; Total Commander
+GroupAdd "FileManager", "ahk_class #32770"  ; ✨Win系统的“打开文件”窗口
 
 ; 以下为 输入法组 定义。（※ 在所有输入法候选窗口中须禁用此程序。）
 GroupAdd "IME", "ahk_class A)ATL:"  ; Rime输入法
