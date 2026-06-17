@@ -1,6 +1,6 @@
 /*
  * 说明：存放FinalD项目的各种功能开关（全局变量）及其初始状态，还有自定义快捷键设置。
- * 版本：v10.20（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
+ * 版本：v10.21（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
  * 更新：2026/6/15
  * 重大更新说明：
  * v10.x：将BetterCN开关升级为AI智能模式开关，v8.72.208 ~ 待定
@@ -86,11 +86,11 @@ global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "i)Edit"))  ; or hasMS_IMEWindow()
 <#LShift up:: {  ; 左Win+左Shift 将光标前面的希腊字母变换为对应的英文字母；数字变换为上下标数字形式。
 	if A_PriorKey = "LShift"
-		driftToENG(getBeforeI())
+		driftToENG(getPrev())
 }
 <#RShift up:: {  ; 左Win+右Shift 将光标前面的英文字母变换为对应的希腊字母；数字变换为对应的罗马数字形式。
 	if A_PriorKey = "RShift"
-		driftToGRC(getBeforeI())
+		driftToGRC(getPrev())
 }
 
 /*
@@ -141,38 +141,38 @@ o:: smartLetter('o', "{Del}")  ; 长按时发送‘Del’
  * 返回值：
  *   (string) 光标前一个英文片段
  */
-getWordBeforeI_X() {
-	wordBeforeI := '', clipCache := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪贴板内容，清空剪贴板
+getPrevWord_X() {
+	prevWord := '', clipCache := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪贴板内容，清空剪贴板
 	Send "^+{Left}^c"  ; 选取当前光标前的片段并复制
 	ClipWait 0.6  ; 等待剪贴板更新
 	Send "{Right}"  ; 取消选择
 	Loop StrLen(A_Clipboard) {  ; 执行以剪贴板内容长度作为次数的循环
 		temp := SubStr(A_Clipboard, -A_Index)  ; 从最后1个字符逐个增量向前检测
 		if temp ~= "^[a-zA-Z0-9_]+$"  ; 如果 是英文字符串
-			wordBeforeI := temp
+			prevWord := temp
 		else  ; 否则，（检测到非英文字符）
 			break  ; 停止检测
 	}
 	A_Clipboard := clipCache, clipCache := ''  ; 恢复原来的剪贴板内容
 	Send "{Shift down}"
-	Send "{Left " StrLen(wordBeforeI) "}"
+	Send "{Left " StrLen(prevWord) "}"
 	Send "{Shift up}"
-	if wordBeforeI != ''
+	if prevWord != ''
 		Send "{Del}"  ; 删除将要变换的英文片段
-	return wordBeforeI
+	return prevWord
 }
 
 ; CapsLock键处于打开状态时启用的热键。
 #HotIf GetKeyState("CapsLock", "T")
 <+CapsLock:: {  ; 左Shift+CapsLock 将光标前1个英文单词转换为小写。
 	SetCapsLockState "Off"
-	SendText StrLower(getWordBeforeI_X())
+	SendText StrLower(getPrevWord_X())
 	KeyWait "CapsLock"
 	KeyWait "LShift"
 }
 >+CapsLock:: {  ; 右Shift+CapsLock 将光标前1个英文单词转换为小写输入码（发送给中文输入法）。
 	SetCapsLockState "Off"
-	Send StrLower(getWordBeforeI_X())
+	Send StrLower(getPrevWord_X())
 	KeyWait "CapsLock"
 	KeyWait "RShift"
 }
@@ -180,12 +180,12 @@ getWordBeforeI_X() {
 ; 无任何前置条件的热键。
 #HotIf
 <+CapsLock:: {  ; 左Shift+CapsLock 将光标前1个英文单词转换为大写。
-	SendText StrUpper(getWordBeforeI_X())
+	SendText StrUpper(getPrevWord_X())
 	KeyWait "CapsLock"
 	KeyWait "LShift"
 }
 >+CapsLock:: {  ; 右Shift+CapsLock 将光标前1个英文单词转换为首字母大写。
-	SendText StrTitle(getWordBeforeI_X())
+	SendText StrTitle(getPrevWord_X())
 	KeyWait "CapsLock"
 	KeyWait "RShift"
 }
