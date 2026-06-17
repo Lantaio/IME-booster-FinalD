@@ -17,7 +17,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v8.72.208`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v8.72.209`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 
 #Include <Caret>  ; 和光标有关的函数
@@ -893,8 +893,8 @@ $:: {
 	smartType('$', '￥')
 }
 
-; 如果不是（存在输入法候选窗口 或 当前软件是 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框）
-#HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))  ; or hasMS_IMEWindow()
+; 如果*不是*（存在输入法候选窗口 或 当前软件是 不适用须要排除的应用程序组 或 文件管理器且活动控件*不是*输入框）
+#HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "i)Edit"))  ; or hasMS_IMEWindow()
 ; 英/中常用标点变换，处理有配对标点符号时按情况变换单个或者成对标点。
 ~LShift up:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
 	if HolyShift and A_PriorKey = "LShift"

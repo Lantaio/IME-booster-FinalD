@@ -1,6 +1,6 @@
 /*
  * 说明：存放FinalD项目的各种功能开关（全局变量）及其初始状态，还有自定义快捷键设置。
- * 版本：v10.19（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
+ * 版本：v10.20（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
  * 更新：2026/6/15
  * 重大更新说明：
  * v10.x：将BetterCN开关升级为AI智能模式开关，v8.72.208 ~ 待定
@@ -15,10 +15,10 @@
  * v1.x：将各个快捷键功能从FinalD.ahk分离出来的首个版本。适配主程序版本 v5.61.162 ~ v5.62.167
  */
 global Arrow := true  ; 字母方向键 功能开关 的默认状态
-global AI := false  ; 智能模式 功能开关 的默认状态
-global Debug := false  ; 调试程序的总开关 的默认状态
+global AI := false  ; 智慧/操控模式 功能开关 的默认状态
+; global Debug := false  ; 调试程序的总开关 的默认状态
 global Interval := 0.2  ; 重复按键的间隔时间，以秒为单位
-global Smart := true  ; 智能中/英标点输入和自动配对 功能开关 的默认状态（表格兼容模式）
+global Smart := true  ; 聪明中/英标点输入和自动配对 功能开关 的默认状态（表格兼容模式）
 global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
@@ -33,7 +33,7 @@ global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 			msg .= "✔"
 		else
 			msg .= "❌"
-		msg .= "，右Shift+左Win 中文语境软件优化"
+		msg .= "，右Shift+左Win 智慧模式"
 		if AI
 			msg .= "✔"
 		else
@@ -62,7 +62,7 @@ global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 			msg .= "✔"
 		else
 			msg .= "❌"
-		msg .= "`n中文语境软件优化 "
+		msg .= "`n智慧模式 "
 		if AI
 			msg .= "✔"
 		else
@@ -82,8 +82,8 @@ global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 }
 #SuspendExempt False
 
-; 如果不是（存在输入法候选窗口 或 当前软件是 不适用须要排除的应用程序组 或 文件管理器且活动控件不是输入框）
-#HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "Ai)Edit"))  ; or hasMS_IMEWindow()
+; 如果*不是*（存在输入法候选窗口 或 当前软件是 不适用须要排除的应用程序组 或 文件管理器且活动控件*不是*输入框）
+#HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "i)Edit"))  ; or hasMS_IMEWindow()
 <#LShift up:: {  ; 左Win+左Shift 将光标前面的希腊字母变换为对应的英文字母；数字变换为上下标数字形式。
 	if A_PriorKey = "LShift"
 		driftToENG(getBeforeI())
