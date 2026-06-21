@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/6/17
+ * 更新：2026/6/21
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -17,7 +17,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v8.72.210`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v8.72.212`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 
 #Include <Caret>  ; 和光标有关的函数
@@ -464,22 +464,14 @@ smartChoice(en, cn, prev?) {
 		; 否则（是中文语境软件，或者应该输入中文标点），如果按键是“.”、“:”或“~” 并且 前一个字符是数字，则应是英文标点
 		else if en ~= "\.|:|~" and IsInteger(prev)
 			Return en
-		; 否则，应是中文标点
-		else {
-			if Tip and cn ~= "，|：|；|？|！|｜|～"
-				showTip("中", 1)
+		else  ; 否则，应是中文标点
 			Return cn
-		}
 	else {  ; 操控模式
 		; 如果*不是* （（前一个内容是换行符 或 空））并且 当前程序是中文语境软件） 并且 前一个内容是西文
 		if not ((prev ~= '`a)\R$' or prev = '') and WinActive("ahk_group CN")) and isPrevEN(prev)
 			Return en
-		; 否则，应是中文标点
-		else {
-			if Tip and cn ~= "，|：|；|？|！|｜|～"
-				showTip("中", 1)
+		else  ; 否则，应是中文标点
 			Return cn
-		}
 	}
 }
 
@@ -494,7 +486,18 @@ smartChoice(en, cn, prev?) {
  */
 smartType(enKey, cn?) {  ;（※ 由于并非每个调用都会提供cn参数，所以此函数中所有输入cn的情况须进行检查；Send函数中部分标点须用{}包裹。）
 	if KeyWait(enKey, "T" String(Interval)) {  ; 短按
-		isSet(cn) ? SendText(smartChoice(enKey, cn)) : SendText(enKey)
+		if isSet(cn) {
+			choice := smartChoice(enKey, cn)
+			if choice = enKey
+				SendText enKey
+			else {
+				if Tip and cn ~= "，|：|；|？|！|｜|～"
+					showTip("中", 1)
+				SendText cn
+			}
+		}
+		else
+			SendText(enKey)
 	}
 	else {  ; 妙按 和 长按
 		Critical "Off"
@@ -502,8 +505,11 @@ smartType(enKey, cn?) {  ;（※ 由于并非每个调用都会提供cn参数，
 		; ### 妙按
 		isSet(cn) ? choice := smartChoice(enKey, cn) : choice := enKey
 		if AI  ; 智慧模式
-			if enKey ~= "\.|,|:"  ; 在英文或数字后可以通过长按这些标点直接输入中文标点
+			if enKey ~= "\.|,|:" {  ; 在英文或数字后可以通过长按这些标点直接输入中文标点
+				if Tip
+					showTip("中", 1)
 				SendText cn
+			}
 			else
 				(enKey = "!" or enKey = "^") ? Send("{" enKey "}") : Send(enKey)  ; 交给输入法处理（※ 如果出现输入法候选窗口，则后续想通过KeyWait来等待按键弹起是无效的）
 		else {  ; 操控模式
@@ -515,7 +521,13 @@ smartType(enKey, cn?) {  ;（※ 由于并非每个调用都会提供cn参数，
 						enKey = '^' ? Send("{BS 2}{Text}……") : Send("{BS}{Text}" cn)
 				}
 				else
-					isSet(cn) ? SendText(cn) : SendText(enKey)
+					if isSet(cn) {
+						if Tip and cn ~= "，|：|；|？|！|｜|～"
+							showTip("中", 1)
+						SendText(cn)
+					}
+					else
+						SendText(enKey)
 			else  ; 本来应该输入中文标点（变成输入英文标点）
 				if enKey ~= "\^|\$|\|" {  ; 如果是Rime功能触发键
 					enKey = '^' ? Send("{" enkey "}") : Send(enKey)  ; 交给输入法处理
@@ -533,10 +545,18 @@ smartType(enKey, cn?) {  ;（※ 由于并非每个调用都会提供cn参数，
 				if (enKey = '^' or enKey = '_') and not WinExist("ahk_group IME")  ; 如果妙按输入的是“……”或“——”，并且没有输入法候选窗口（有则表示未上屏）
 					Send "{BS}"  ; 多输入1个退格键
 				Send "{BS}{Text}" enKey  ; 删除长按1时输入的中文标点，并输入1个英文标点
+				showTip("En", 1)
 			}
 			else {  ; 如果应该输入中文
-				Send "{BS}"  ; 删除妙按时输入的中文标点（为了统一不同中文输入法的行为），并输入1个中文标点
-				isSet(cn) ? SendText(cn) : SendText(enKey)
+				Send "{BS}"  ; 删除妙按时输入的标点（为了统一不同中文输入法的行为），并
+				if isSet(cn) {  ; 如果有提供中文输入1个中文标点
+					showTip("中", 1)
+					SendText(cn)
+				}
+				else {
+					showTip("En", 1)
+					SendText(enKey)
+				}
 			}
 			Sleep 1000 * Interval
 		}
