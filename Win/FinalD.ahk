@@ -457,7 +457,7 @@ showTip(info, sec) {
 smartChoice(en, cn, prev?) {
 	if not isSet(prev)
 		prev := getPrev()
-	if AI  ; 智能模式
+	if AI  ; 智慧模式
 		; 如果*不是* 当前程序是中文语境软件 并且 前一个内容是西文
 		if not WinActive("ahk_group CN") and isPrevEN(prev)
 			Return en
@@ -486,8 +486,8 @@ smartChoice(en, cn, prev?) {
 /*
  * 根据按键方式和是否有提供中文标点参数来选择处理方式。
  * **短按**时如果没有提供中文标点，则直接上屏英文标点，否则用smartChoice函数判断应该上屏英文标点还是中文标点；
- * **喵按**时的输入逻辑和短按时反转；
- * **长按**时删除喵按时上屏的标点，然后连续上屏短按时应该上屏的标点。
+ * **妙按**时的输入逻辑和短按时反转；
+ * **长按**时删除妙按时上屏的标点，然后连续上屏短按时应该上屏的标点。
  * 参数：
  *   enKey (string) 按键名称，通常对应英文标点符号
  *   cn (string) （可选）按键对应的中文标点符号
@@ -496,12 +496,12 @@ smartType(enKey, cn?) {  ;（※ 由于并非每个调用都会提供cn参数，
 	if KeyWait(enKey, "T" String(Interval)) {  ; 短按
 		isSet(cn) ? SendText(smartChoice(enKey, cn)) : SendText(enKey)
 	}
-	else {  ; 喵按 和 长按
+	else {  ; 妙按 和 长按
 		Critical "Off"
 		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的按键
-		; ### 喵按
+		; ### 妙按
 		isSet(cn) ? choice := smartChoice(enKey, cn) : choice := enKey
-		if AI  ; 智能模式
+		if AI  ; 智慧模式
 			if enKey ~= "\.|,|:"  ; 在英文或数字后可以通过长按这些标点直接输入中文标点
 				SendText cn
 			else
@@ -510,7 +510,7 @@ smartType(enKey, cn?) {  ;（※ 由于并非每个调用都会提供cn参数，
 			if choice = enKey  ; 本来应该输入英文标点（变成输入中文标点）
 				if enKey ~= "\^|\$|\|" {  ; 如果是Rime功能触发键
 					enKey = '^' ? Send("{" enkey "}") : Send(enKey)  ; 交给输入法处理
-					Sleep 80
+					Sleep 100
 					if not WinExist("ahk_class A)ATL:")
 						enKey = '^' ? Send("{BS 2}{Text}……") : Send("{BS}{Text}" cn)
 				}
@@ -519,7 +519,7 @@ smartType(enKey, cn?) {  ;（※ 由于并非每个调用都会提供cn参数，
 			else  ; 本来应该输入中文标点（变成输入英文标点）
 				if enKey ~= "\^|\$|\|" {  ; 如果是Rime功能触发键
 					enKey = '^' ? Send("{" enkey "}") : Send(enKey)  ; 交给输入法处理
-					Sleep 80
+					Sleep 100
 					if not WinExist("ahk_class A)ATL:")
 						enKey = '^' ? Send("{BS 2}{Text}^") : Send("{BS}{Text}" enKey)
 				}
@@ -530,12 +530,12 @@ smartType(enKey, cn?) {  ;（※ 由于并非每个调用都会提供cn参数，
 		; ### 长按的第1次输入
 		if GetKeyState(enKey, "P") {  ; 如果按键未弹起
 			if choice = enKey {  ; 如果应该输入英文标点
-				if (enKey = '^' or enKey = '_') and not WinExist("ahk_group IME")  ; 如果喵按输入的是“……”或“——”，并且没有输入法候选窗口（有则表示未上屏）
+				if (enKey = '^' or enKey = '_') and not WinExist("ahk_group IME")  ; 如果妙按输入的是“……”或“——”，并且没有输入法候选窗口（有则表示未上屏）
 					Send "{BS}"  ; 多输入1个退格键
 				Send "{BS}{Text}" enKey  ; 删除长按1时输入的中文标点，并输入1个英文标点
 			}
 			else {  ; 如果应该输入中文
-				Send "{BS}"  ; 删除喵按时输入的中文标点（为了统一不同中文输入法的行为），并输入1个中文标点
+				Send "{BS}"  ; 删除妙按时输入的中文标点（为了统一不同中文输入法的行为），并输入1个中文标点
 				isSet(cn) ? SendText(cn) : SendText(enKey)
 			}
 			Sleep 1000 * Interval
@@ -594,7 +594,7 @@ Loop Parse, letters  ;添加大写字母热键，使按键可以按顺序执行
 	Hotkey '+' A_LoopField, keyHandler
 ; ~~~~~~ Optional Hotkeys End ~~~~~~
 
-; 如果 智能标点开关打开，并且不是（存在输入法候选窗口 或 当前软件是 不支持智能标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组） 并且 在中文输入状态。
+; 如果 聪明标点开关打开，并且不是（存在输入法候选窗口 或 当前软件是 不支持聪明标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组） 并且 在中文输入状态。
 #HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) and IsCNInputMode()
 .:: smartType('.', '。')  ; 长按输入中文标点
 ,:: smartType(',', '，')  ; 长按输入中文标点
