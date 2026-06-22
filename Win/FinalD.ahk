@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/6/21
+ * 更新：2026/6/22
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -17,7 +17,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v8.72.212`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v8.73.215`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 
 #Include <Caret>  ; 和光标有关的函数
@@ -484,55 +484,55 @@ smartChoice(en, cn, prev?) {
  *   enKey (string) 按键名称，通常对应英文标点符号
  *   cn (string) （可选）按键对应的中文标点符号
  */
-smartType(enKey, cn?) {  ;（※ 由于并非每个调用都会提供cn参数，所以此函数中所有输入cn的情况须进行检查；Send函数中部分标点须用{}包裹。）
+smartType(enKey, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
+	if not isSet(cn)
+		cn := enKey
 	if KeyWait(enKey, "T" String(Interval)) {  ; 短按
-		if isSet(cn) {
-			choice := smartChoice(enKey, cn)
-			if choice = enKey
-				SendText enKey
-			else {
-				if Tip and cn ~= "，|：|；|？|！|｜|～"
-					showTip("中", 1)
-				SendText cn
-			}
+		choice := smartChoice(enKey, cn)
+		if choice = enKey
+			SendText enKey
+		else {
+			if Tip and cn ~= "，|：|；|？|！|｜|～"
+				showTip("中", 1)
+			SendText cn
 		}
-		else
-			SendText(enKey)
 	}
 	else {  ; 妙按 和 长按
 		Critical "Off"
 		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的按键
 		; ### 妙按
-		isSet(cn) ? choice := smartChoice(enKey, cn) : choice := enKey
+		choice := smartChoice(enKey, cn)
 		if AI  ; 智慧模式
-			if enKey ~= "\.|,|:" {  ; 在英文或数字后可以通过长按这些标点直接输入中文标点
-				if Tip
-					showTip("中", 1)
-				SendText cn
+			if choice = enKey {  ; 本来应该输入英文标点（变成输入中文标点）
+				(enKey = "!" or enKey = "^") ? Send("{" enKey "}") : Send(enKey)  ; 先交给输入法处理
+				Sleep 100
+				if not WinExist("ahk_group IME")
+					(enKey = '^' or enKey = '_') ? Send("{BS 2}{Text}" cn) : Send("{BS}{Text}" cn)
 			}
-			else
-				(enKey = "!" or enKey = "^") ? Send("{" enKey "}") : Send(enKey)  ; 交给输入法处理（※ 如果出现输入法候选窗口，则后续想通过KeyWait来等待按键弹起是无效的）
+			else {  ; 本来应该输入中文标点（变成输入英文标点）
+					(enKey = "!" or enKey = "^") ? Send("{" enKey "}") : Send(enKey)  ; 先交给输入法处理
+				Sleep 100
+				if not WinExist("ahk_group IME")
+					(enKey = '^' or enKey = '_') ? Send("{BS 2}{Text}" enKey) : Send("{BS}{Text}" enKey)
+			}
 		else {  ; 操控模式
 			if choice = enKey  ; 本来应该输入英文标点（变成输入中文标点）
-				if enKey ~= "\^|\$|\|" {  ; 如果是Rime功能触发键
+				if enKey ~= "/|\^|\$|\|" {  ; 如果是Rime功能触发键
 					enKey = '^' ? Send("{" enkey "}") : Send(enKey)  ; 交给输入法处理
 					Sleep 100
-					if not WinExist("ahk_class A)ATL:")
+					if not WinExist("ahk_group IME") and enKey != '/'
 						enKey = '^' ? Send("{BS 2}{Text}……") : Send("{BS}{Text}" cn)
 				}
-				else
-					if isSet(cn) {
-						if Tip and cn ~= "，|：|；|？|！|｜|～"
-							showTip("中", 1)
-						SendText(cn)
-					}
-					else
-						SendText(enKey)
+				else {
+					if Tip and cn ~= "，|：|；|？|！|｜|～"
+						showTip("中", 1)
+					SendText(cn)
+				}
 			else  ; 本来应该输入中文标点（变成输入英文标点）
-				if enKey ~= "\^|\$|\|" {  ; 如果是Rime功能触发键
+				if enKey ~= "/|\^|\$|\|" {  ; 如果是Rime功能触发键
 					enKey = '^' ? Send("{" enkey "}") : Send(enKey)  ; 交给输入法处理
 					Sleep 100
-					if not WinExist("ahk_class A)ATL:")
+					if not WinExist("ahk_group IME")
 						enKey = '^' ? Send("{BS 2}{Text}^") : Send("{BS}{Text}" enKey)
 				}
 				else
@@ -544,12 +544,12 @@ smartType(enKey, cn?) {  ;（※ 由于并非每个调用都会提供cn参数，
 			if choice = enKey {  ; 如果应该输入英文标点
 				if (enKey = '^' or enKey = '_') and not WinExist("ahk_group IME")  ; 如果妙按输入的是“……”或“——”，并且没有输入法候选窗口（有则表示未上屏）
 					Send "{BS}"  ; 多输入1个退格键
-				Send "{BS}{Text}" enKey  ; 删除长按1时输入的中文标点，并输入1个英文标点
+				Send "{BS}{Text}" enKey  ; 删除妙按输入的中文标点，并输入1个英文标点
 				showTip("En", 1)
 			}
 			else {  ; 如果应该输入中文
-				Send "{BS}"  ; 删除妙按时输入的标点（为了统一不同中文输入法的行为），并
-				if isSet(cn) {  ; 如果有提供中文输入1个中文标点
+				Send "{BS}"  ; 删除妙按时输入的英文标点（或者关闭输入法候选窗口）（※ 此操作统一不同中文输入法的行为）
+				if isSet(cn) {
 					showTip("中", 1)
 					SendText(cn)
 				}
@@ -565,7 +565,7 @@ smartType(enKey, cn?) {  ;（※ 由于并非每个调用都会提供cn参数，
 			if choice = enKey
 				SendText enKey
 			else
-				isSet(cn) ? SendText(cn) : SendText(enKey)
+				SendText cn
 			Sleep 1000 * Interval
 		}
 	}
