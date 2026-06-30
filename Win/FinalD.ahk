@@ -17,7 +17,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v8.74.221`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v8.74.222`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 global Prev := ''  ; 光标前1个内容
 
@@ -474,6 +474,8 @@ showTip(info, sec) {
  *   en / cn (string) 根据情况选择要上屏英文还是中文标点
  */
 smartChoice(en, cn) {
+	if en = cn
+		return en
 	if AI  ; 智慧模式
 		; 如果*不是* 当前程序是中文语境软件 并且 前一个内容是西文
 		if not WinActive("ahk_group CN") and isPrevEN()
