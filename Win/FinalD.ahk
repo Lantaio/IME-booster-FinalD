@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/6/29
+ * 更新：2026/7/1
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -17,8 +17,9 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v8.74.220`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v8.74.221`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
+global Prev := ''  ; 光标前1个内容
 
 #Include <Caret>  ; 和光标有关的函数
 ; #Include <Debugger>  ; 和调试有关的函数
@@ -391,21 +392,17 @@ reKeyState(key) {
 
 /*
  * 检测光标前的内容是否在西文字符集中
- * 参数：
- *   prev (string)(可选) 光标前一个内容
  * 返回值：
  *   true / false
  */
-isPrevEN(prev?) {
-	if not isSet(prev)
-		prev := getPrev()  ; 如果没有提供则获取光标前一个内容
+isPrevEN() {
 /* 	if Debug {
-		ToolTip "是否应该输入西文标点是“" FormatString(prev) "”"
+		ToolTip "是否应该输入西文标点是“" FormatString(Prev) "”"
 		Pause
 	}
  */
 	; 返回前一个字符是否在西文字符集中的判断结果
-	if Ord(prev) < 0x2000
+	if Ord(Prev) < 0x2000
 		return true
 	else
 		return false
@@ -473,25 +470,22 @@ showTip(info, sec) {
  * 参数：
  *   en (string) 按键对应的英文标点符号
  *   cn (string) 按键对应的中文标点符号
- *   prev (string)（可选）光标前一个内容，提供以提高性能
  * 返回值：
  *   en / cn (string) 根据情况选择要上屏英文还是中文标点
  */
-smartChoice(en, cn, prev?) {
-	if not isSet(prev)
-		prev := getPrev()
+smartChoice(en, cn) {
 	if AI  ; 智慧模式
 		; 如果*不是* 当前程序是中文语境软件 并且 前一个内容是西文
-		if not WinActive("ahk_group CN") and isPrevEN(prev)
+		if not WinActive("ahk_group CN") and isPrevEN()
 			Return en
 		; 否则（是中文语境软件，或者应该输入中文标点），如果按键是“.”、“:”或“~” 并且 前一个字符是数字，则应是英文标点
-		else if (en = '.' or en = ':' or en = '~') and IsInteger(prev)
+		else if (en = '.' or en = ':' or en = '~') and IsInteger(Prev)
 			Return en
 		else  ; 否则，应是中文标点
 			Return cn
 	else {  ; 操控模式
 		; 如果*不是* （（前一个内容是换行符 或 空）并且 当前程序是中文语境软件） 并且 前一个内容是西文
-		if not ((prev ~= '`a)\R$' or prev = '') and WinActive("ahk_group CN")) and isPrevEN(prev)
+		if not ((Prev ~= '`a)\R$' or Prev = '') and WinActive("ahk_group CN")) and isPrevEN()
 			Return en
 		else  ; 否则，应是中文标点
 			Return cn
@@ -504,23 +498,23 @@ smartChoice(en, cn, prev?) {
  * **妙按**时的输入逻辑和短按时反转；
  * **长按**时删除妙按时上屏的标点，然后连续上屏短按时应该上屏的标点。
  * 参数：
- *   en (string) 按键名称，通常对应英文标点符号
+ *   en (string) 按键名称，对应英文标点符号
  *   cn (string) （可选）按键对应的中文标点符号
  */
 smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 	if not isSet(cn)
 		cn := en
 	if KeyWait(en, "T" String(Interval)) {  ; ### 短按
-		commit := '', prev := getPrev()
-		choice := smartChoice(en, cn, prev)
+		global Prev := getPrev()  ; （※ 不能放在if语句之前，否则可能导致检测是短按还是长按不正确）
+		choice := smartChoice(en, cn), commit := ''
 		if choice = en {  ; 如果 应该输入英文标点
 			SendText en
-			if (InStr("([{", en) or ((en = '"' or en = "'") and (prev = ' ' or prev ~= '`a)\R$' or prev = '`t' or prev = ''))) and not WinActive("ahk_group AutoPair") and shouldPair(en) {  ; 如果 是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
+			if (InStr("([{", en) or ((en = '"' or en = "'") and (Prev = ' ' or Prev ~= '`a)\R$' or Prev = '`t' or Prev = ''))) and not WinActive("ahk_group AutoPair") and shouldPair(en) {  ; 如果 是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
 				SendText getPair(en)  ; 输入对应的后标点
 				Send "{Left}"  ; 光标回到配对标点中间
 			}
 		}
-		else {  ; 否则 应该输入中文标点
+		else {  ; 应该输入中文标点
 			switch cn {
 				case '“', '‘':
 					Send en  ; ⚠注意此处是交给输入法处理
@@ -534,7 +528,7 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 							Send en "{Left}"  ; ⚠再次交给输入法处理
 						}
 					}
-					else  ; 否则 刚输入的是中文引号后标点
+					else  ; 刚输入的是中文引号后标点
 						if Tip
 							showTip("后", 1)
 				case '（', '【', '「', '《':
@@ -562,8 +556,8 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 		Critical "Off"
 		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的按键
 		; ### 妙按
-		commit := '', prev := getPrev()
-		choice := smartChoice(en, cn, prev)
+		global Prev := getPrev()
+		choice := smartChoice(en, cn), commit := ''
 		if AI  ; 智慧模式
 			if choice = en {  ; 本来应该输入英文标点，变成输入中文标点
 				(en = '!' or en = '^' or en = '{' or en = '}') ? Send("{" en "}") : Send(en)  ; 先交给输入法处理（Rime输入法时妙按弹出候选窗口）
@@ -675,7 +669,7 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 				}
 			}
 			else if choice = cn  ; 否则 如果妙按时输入英文前标点
-				if (InStr("([{", en) or ((en = '"' or en = "'") and (prev = ' ' or prev ~= '`a)\R$' or prev = '`t' or prev = ''))) and not WinActive("ahk_group AutoPair") and shouldPair(en) {  ; 如果是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
+				if (InStr("([{", en) or ((en = '"' or en = "'") and (Prev = ' ' or Prev ~= '`a)\R$' or Prev = '`t' or Prev = ''))) and not WinActive("ahk_group AutoPair") and shouldPair(en) {  ; 如果是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
 					SendText getPair(en)  ; 输入对应的后标点
 					Send "{Left}"  ; 光标回到配对标点中间
 				}
