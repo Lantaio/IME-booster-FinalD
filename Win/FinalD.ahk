@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/6/25
+ * 更新：2026/6/29
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -17,7 +17,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v8.73.216`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v8.74.220`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 
 #Include <Caret>  ; 和光标有关的函数
@@ -30,7 +30,7 @@ global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 /*
  * 借助剪贴板获取光标前一个内容（字符）
  * 返回值：
- *   (string) 通过 Shift+← 键选取的光标前一个内容（字符）
+ *   clip (string) 通过 Shift+← 键选取的光标前一个内容（字符）
  */
 getPrev() {
 	clipCache := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪贴板内容，清空剪贴板
@@ -73,7 +73,7 @@ getPrev() {
 /*
  * 借助剪贴板获取光标后一个内容（字符）
  * 返回值：
- *   (string) 通过Shift+→键选取的光标后一个内容（字符）
+ *   clip (string) 通过Shift+→键选取的光标后一个内容（字符）
  */
 getNext() {
 	clipCache := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪贴板内容，清空剪贴板
@@ -90,7 +90,7 @@ getNext() {
 	; 如果复制的字符长度为1 或 是回车換行符（行末）或 是emoji
 	if clipLen = 1 or clip ~= '`a)^\R$' or IsEmoji(clip)  ;chrLen > 1 and chrLen < 6 and not c1ip ~= '`a)\R$'
 		Send "{Left}"  ; 光标回到原来的位置
-	if WinActive("ahk_group Slow")  ; 如果是阿里旺旺，暂停一下以等待光标完成向左移动
+	if WinActive("ahk_group Slow")  ; 如果是反应慢的软件，暂停一下以等待光标完成向左移动
 		Sleep 50
 	return clip
 }
@@ -116,10 +116,10 @@ drift(origin, pList*) {
 		Send "{BS}"  ; 多输入1个退格键
 	Send "{BS}{Text}" pList[i]  ; 漂移标点符号
 	if Tip
-		if pList[i] ~= "，|：|；|？|！|｜|～|＄|／|＼|〈"
-			showTip("中", 1)
-		else if pList[i] ~= '｝|］|〉'
-			showTip("后", 1)
+		switch pList[i] {
+			case '，', '：', '；', '？', '！', '｜', '～', '＄', '／', '＼', '〈': showTip("中", 1)
+			case '］', '｝', '〉': showTip("后", 1)
+		}
 }
 
 /*
@@ -132,7 +132,7 @@ driftPair(origin, target) {
 	SendText "!"
 	Send "{Left}{BS}"
 	SendText target
-	if Tip and target ~= '（|“|‘|｛|［|〈'
+	if Tip and InStr("（“‘［｛〈", target)
 		showTip("前", 1)
 	Send "{Del}"
 	if Smart and hasPair(origin) {
@@ -159,7 +159,7 @@ driftPair(origin, target) {
 			case '《': SendText '》'
 			case '〈': SendText '〉'
 		}
-		if Tip and target ~= "（|“|‘|｛|［|〈"
+		if Tip and InStr("（“‘［｛〈", target)
 			showTip("配对", 1)
 		Send "{Del}{Left}"
 		if target = '≤'
@@ -312,6 +312,27 @@ driftToGRC(char) {
 }
 
 /*
+ * 根据提供的前标点返回对应的后标点。
+ * 参数：
+ *   front (string) 前标点
+ * 返回值：
+ *   (string) 对应的后标点
+ */
+getPair(front) {
+	switch front {
+		case '(': return ')'
+		case '（': return '）'
+		case '"': return '"'
+		case "'": return "'"
+		case '{': return '}'
+		case '「': return '」'
+		case '[': return ']'
+		case '【': return '】'
+		case '《': return '》'
+	}
+}
+
+/*
  * 检测front标点是否有配对的后标点
  * 参数：
  *   front (string) 检测这个前标点是否有相配对的后标点
@@ -407,8 +428,8 @@ shouldPair(front?) {
 	; 如果后一个字符是空字符 或 空格 或 换行符
 	if next = '' or next = ' ' or next ~= '`a)\R$'
 		return true
-	; 如果给定起始标点 并且 起始标点是‘'’、‘"’、‘‘’或‘“’
-	if isSet(front) and front ~= "'|`"|‘|“"
+	; 如果给定前标点 并且 前标点是‘'’、‘"’、‘‘’或‘“’
+	if isSet(front) and InStr("`"'“‘", front)
 		return false
 	; 如果后一个字符是下列字符之一
 	switch next {
@@ -454,7 +475,7 @@ showTip(info, sec) {
  *   cn (string) 按键对应的中文标点符号
  *   prev (string)（可选）光标前一个内容，提供以提高性能
  * 返回值：
- *   (string) 根据情况选择要上屏英文还是中文标点
+ *   en / cn (string) 根据情况选择要上屏英文还是中文标点
  */
 smartChoice(en, cn, prev?) {
 	if not isSet(prev)
@@ -464,7 +485,7 @@ smartChoice(en, cn, prev?) {
 		if not WinActive("ahk_group CN") and isPrevEN(prev)
 			Return en
 		; 否则（是中文语境软件，或者应该输入中文标点），如果按键是“.”、“:”或“~” 并且 前一个字符是数字，则应是英文标点
-		else if en ~= "\.|:|~" and IsInteger(prev)
+		else if (en = '.' or en = ':' or en = '~') and IsInteger(prev)
 			Return en
 		else  ; 否则，应是中文标点
 			Return cn
@@ -483,91 +504,190 @@ smartChoice(en, cn, prev?) {
  * **妙按**时的输入逻辑和短按时反转；
  * **长按**时删除妙按时上屏的标点，然后连续上屏短按时应该上屏的标点。
  * 参数：
- *   enKey (string) 按键名称，通常对应英文标点符号
+ *   en (string) 按键名称，通常对应英文标点符号
  *   cn (string) （可选）按键对应的中文标点符号
  */
-smartType(enKey, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
+smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 	if not isSet(cn)
-		cn := enKey
-	if KeyWait(enKey, "T" String(Interval)) {  ; 短按
-		choice := smartChoice(enKey, cn)
-		if choice = enKey
-			SendText enKey
-		else {
-			if Tip and cn ~= "，|：|；|？|！|｜|～"
-				showTip("中", 1)
-			SendText cn
+		cn := en
+	if KeyWait(en, "T" String(Interval)) {  ; ### 短按
+		commit := '', prev := getPrev()
+		choice := smartChoice(en, cn, prev)
+		if choice = en {  ; 如果 应该输入英文标点
+			SendText en
+			if (InStr("([{", en) or ((en = '"' or en = "'") and (prev = ' ' or prev ~= '`a)\R$' or prev = '`t' or prev = ''))) and not WinActive("ahk_group AutoPair") and shouldPair(en) {  ; 如果 是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
+				SendText getPair(en)  ; 输入对应的后标点
+				Send "{Left}"  ; 光标回到配对标点中间
+			}
+		}
+		else {  ; 否则 应该输入中文标点
+			switch cn {
+				case '“', '‘':
+					Send en  ; ⚠注意此处是交给输入法处理
+					commit := getPrev()
+					if commit = '“' or commit = '‘' {  ; 如果 刚输入的是中文引号前标点
+						if Tip
+							showTip("前", 1)
+						if shouldPair(commit) {  ; 如果 应该自动配对，则……
+							if Tip
+								showTip("配对", 1)
+							Send en "{Left}"  ; ⚠再次交给输入法处理
+						}
+					}
+					else  ; 否则 刚输入的是中文引号后标点
+						if Tip
+							showTip("后", 1)
+				case '（', '【', '「', '《':
+					SendText cn
+					if Tip and cn = '（'
+						showTip("前", 1)
+					if shouldPair() {
+						SendText getPair(cn)
+						if Tip and cn = '（'
+							showTip("配对", 1)
+						Send "{Left}"
+					}
+				case '）', '】', '」', '》':
+					SendText cn
+					if Tip and cn = '）'
+						showTip("后", 1)
+				default:  ; 其他中文单标点
+					if Tip and InStr("，：；？！｜～", cn)
+						showTip("中", 1)
+					SendText cn
+			}
 		}
 	}
 	else {  ; 妙按 和 长按
 		Critical "Off"
 		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的按键
 		; ### 妙按
-		choice := smartChoice(enKey, cn)
+		commit := '', prev := getPrev()
+		choice := smartChoice(en, cn, prev)
 		if AI  ; 智慧模式
-			if choice = enKey {  ; 本来应该输入英文标点（变成输入中文标点）
-				(enKey = "!" or enKey = "^") ? Send("{" enKey "}") : Send(enKey)  ; 先交给输入法处理
+			if choice = en {  ; 本来应该输入英文标点，变成输入中文标点
+				(en = '!' or en = '^' or en = '{' or en = '}') ? Send("{" en "}") : Send(en)  ; 先交给输入法处理（Rime输入法时妙按弹出候选窗口）
 				Sleep 100
-				if not WinExist("ahk_group IME")
-					(enKey = '^' or enKey = '_') ? Send("{BS 2}{Text}" cn) : Send("{BS}{Text}" cn)
+				if not WinExist("ahk_group IME") {
+					if en = '.' or en = "~"  ; or en = ',' or en = ':'
+						Send("{BS}{Text}" cn)  ; (※ 必须删除上一步输入的标点，因为中文输入法在数字后可能会输入英文标点)
+				}
 			}
-			else {  ; 本来应该输入中文标点（变成输入英文标点）
-				(enKey = "!" or enKey = "^") ? Send("{" enKey "}") : Send(enKey)  ; 先交给输入法处理
+			else {  ; 本来应该输入中文标点，变成输入英文标点
+				if en != '"' and en != "'"
+					(en = '!' or en = '^' or en = '{' or en = '}') ? Send("{" en "}") : Send(en)  ; 先交给输入法处理（Rime输入法时妙按弹出候选窗口）
+				else
+					SendText en
 				Sleep 100
-				if not WinExist("ahk_group IME")
-					(enKey = '^' or enKey = '_') ? Send("{BS 2}{Text}" enKey) : Send("{BS}{Text}" enKey)
-				
+				if en != '"' and en != "'" and not WinExist("ahk_group IME")
+					(en = '^' or en = '_') ? Send("{BS 2}{Text}" en) : Send("{BS}{Text}" en)
 			}
 		else {  ; 操控模式
-			if choice = enKey  ; 本来应该输入英文标点（变成输入中文标点）
-				if enKey ~= "/|\^|\$|\|" {  ; 如果是Rime功能触发键
-					enKey = '^' ? Send("{" enkey "}") : Send(enKey)  ; 交给输入法处理
+			if choice = en  ; 本来应该输入英文标点，变成输入中文标点
+				if InStr("/^$|", en) {  ; 如果是Rime功能触发键
+					en = '^' ? Send("{" en "}") : Send(en)  ; 交给输入法处理
 					Sleep 100
-					if not WinExist("ahk_group IME") and enKey != '/'
-						enKey = '^' ? Send("{BS 2}{Text}……") : Send("{BS}{Text}" cn)
+					if en != '/' and not WinExist("ahk_group IME")
+						en = '^' ? Send("{BS 2}{Text}……") : Send("{BS}{Text}" cn)
 				}
-				else {
-					if Tip and cn ~= "，|：|；|？|！|｜|～"
-						showTip("中", 1)
-					SendText(cn)
+				else {  ; 不是Rime功能触发键
+					switch cn {
+						case '“', "‘":
+							Send en  ; ⚠注意此处是交给输入法处理
+							commit := getPrev()
+							if commit = '“' or commit = '‘'  ; 如果 刚输入的是中文引号前标点
+								if Tip
+									showTip("前", 1)
+							else  ; 否则 刚输入的是中文引号后标点
+								if Tip
+									showTip("后", 1)
+						case '（', '）', '【', '】', '「', '」', '《', '》':
+							SendText cn
+							if Tip
+								if cn = '（'
+									showTip("前", 1)
+								else if cn = '）'
+									showTip("后", 1)
+						default:  ; 其他中文单标点
+							if Tip and InStr("，：；？！｜～", cn)
+								showTip("中", 1)
+							SendText cn
+					}
 				}
-			else  ; 本来应该输入中文标点（变成输入英文标点）
-				if enKey ~= "/|\^|\$|\|" {  ; 如果是Rime功能触发键
-					enKey = '^' ? Send("{" enkey "}") : Send(enKey)  ; 交给输入法处理
+			else  ; 本来应该输入中文标点，变成输入英文标点
+				if InStr("/^$|", en) {  ; 如果是Rime功能触发键
+					en = '^' ? Send("{" en "}") : Send(en)  ; 交给输入法处理
 					Sleep 100
-					if not WinExist("ahk_group IME")
-						enKey = '^' ? Send("{BS 2}{Text}^") : Send("{BS}{Text}" enKey)
+					if en != '/' and not WinExist("ahk_group IME")
+						en = '^' ? Send("{BS 2}{Text}^") : Send("{BS}{Text}" en)
 				}
-				else
-					SendText enKey
+				else  ; 否则（不是Rime功能触发键）
+					SendText en
 		}
 		Sleep 1000 * Interval
 		; ### 长按的第1次输入
-		if GetKeyState(enKey, "P") {  ; 如果按键未弹起
-			if choice = enKey {  ; 如果应该输入英文标点
-				if (enKey = '^' or enKey = '_') and not WinExist("ahk_group IME")  ; 如果妙按输入的是“……”或“——”，并且没有输入法候选窗口（有则表示未上屏）
+		if GetKeyState(en, "P") {  ; 如果按键未弹起
+			if choice = en {  ; 如果应该输入英文标点
+				if (en = '^' or en = '_') and not WinExist("ahk_group IME")  ; 如果妙按输入的是“……”或“——”，并且没有输入法候选窗口（有则表示未上屏）
 					Send "{BS}"  ; 多输入1个退格键
-				Send "{BS}{Text}" enKey  ; 删除妙按输入的中文标点，并输入1个英文标点
-				showTip("En", 1)
+				Send "{BS}{Text}" en  ; 删除妙按输入的中文标点，并输入1个英文标点
 			}
 			else {  ; 如果应该输入中文
 				Send "{BS}"  ; 删除妙按时输入的英文标点（或者关闭输入法候选窗口）（※ 此操作统一不同中文输入法的行为）
-				if isSet(cn) {
-					showTip("中", 1)
-					SendText(cn)
-				}
-				else {
-					showTip("En", 1)
-					SendText(enKey)
+				switch cn {
+					case '“', '‘':
+						Send en  ; ⚠注意此处是交给输入法处理
+						commit := getPrev()
+						if commit = '“' or commit = '‘'  ; 如果 刚输入的是中文引号前标点
+							if Tip
+								showTip("前", 1)
+						else  ; 否则 刚输入的是中文引号后标点
+							if Tip
+								showTip("后", 1)
+					case '（', '）', '【', '】', '「', '」', '《', '》':
+						SendText cn
+						if Tip
+							if cn = '（'
+								showTip("前", 1)
+							else if cn = '）'
+								showTip("后", 1)
+					default:  ; 其他中文单标点
+						if Tip and InStr("，：；？！｜～", cn)
+							showTip("中", 1)
+						SendText cn
 				}
 			}
 			Sleep 1000 * Interval
 		}
+		else {  ; 妙按后没有长按
+			if choice = en and InStr("“‘（【「《", cn) and shouldPair(cn) {  ; 如果妙按时输入中文前标点 并且 应该输入配对的后标点
+				if (commit = '“' or commit = '‘') {  ;
+					Send en  ; ⚠注意此处是交给输入法处理
+					if Tip
+						showTip("配对", 1)
+					Send "{Left}"
+				}
+				else if InStr("（【「《", cn)  {
+					SendText getPair(cn)
+					if Tip and cn = '（'
+						showTip("配对", 1)
+					Send "{Left}"
+				}
+			}
+			else if choice = cn  ; 否则 如果妙按时输入英文前标点
+				if (InStr("([{", en) or ((en = '"' or en = "'") and (prev = ' ' or prev ~= '`a)\R$' or prev = '`t' or prev = ''))) and not WinActive("ahk_group AutoPair") and shouldPair(en) {  ; 如果是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
+					SendText getPair(en)  ; 输入对应的后标点
+					Send "{Left}"  ; 光标回到配对标点中间
+				}
+			return
+		}
 		; ### 长按的后续输入
-		while GetKeyState(enKey, "P") {  ; 当按键未弹起时……
-			if choice = enKey
-				SendText enKey
-			else
+		while GetKeyState(en, "P") {  ; 当按键未弹起时
+			if choice = en  ; 如果 应该输入英文标点
+				SendText en
+			else if cn = '“' or cn = '‘'  ; 否则 如果 是中文引号
+				Send en  ; ⚠注意此处是交给输入法处理
+			else  ; 否则 是其它中文标点
 				SendText cn
 			Sleep 1000 * Interval
 		}
@@ -621,52 +741,8 @@ Loop Parse, letters  ;添加大写字母热键，使按键可以按顺序执行
 #HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) and IsCNInputMode()
 .:: smartType('.', '。')
 ,:: smartType(',', '，')
-(:: {
-	; Send "{Blind}{9 up}{LShift up}"  ; 优化虚拟按键，避免Shift键不释放问题
-	if KeyWait(ThisHotkey, "T" String(Interval))  ; 短按
-		; 如果不是（中文语境应用程序优化开关打开 并且 当前程序是中文语境软件）并且 应该输入英文标点
-		if not (AI and WinActive("ahk_group CN")) and isPrevEN() {
-			SendText "("
-			if not WinActive("ahk_group AutoPair") and shouldPair() {
-				SendText ")"
-				Send "{Left}"
-			}
-		}
-		else {
-			SendText "（"
-			if Tip and not (AI and WinActive("ahk_group CN"))
-				showTip("前", 1)
-			if shouldPair() {
-				SendText "）"
-				if Tip and not (AI and WinActive("ahk_group CN"))
-					showTip("配对", 1)
-				Send "{Left}"
-			}
-		}
-	else  ; 长按
-		Send ThisHotkey  ; 交给输入法处理
-	; reKeyState "LShift"  ; 可自动重复
-}
-):: {
-	; Send "{Blind}{0 up}{LShift up}"
-	if KeyWait(ThisHotkey, "T" String(Interval)) {  ; 短按
-		prev := getPrev()  ; 获取光标前一个内容（※ 不能放在if语句之前，否则可能会导致 KeyWait检测有问题！）
-		commit := smartChoice(')', '）', prev)
-		SendText commit
-		if Tip and commit = '）' and not (AI and WinActive("ahk_group CN"))
-			showTip("后", 1)
-		if isPair(prev, commit)  ; 如果 （在不是自动配对的情况下）前一个标点和本次输入的标点是配对标点，则光标回到配对标点中间
-			Send "{Left}"
-	}
-	else {  ; 长按
-		prev := getPrev()
-		if prev = '('
-			SendText ')'
-		else
-			Send ThisHotkey  ; 交给输入法处理
-	}
-	; reKeyState "LShift"
-}
+(:: smartType('(', '（')
+):: smartType(')', '）')
 _:: {  ; （连按键）
 	; Send "{Blind}{- up}{LShift up}"
 	SendText smartType('_', '——')
@@ -677,210 +753,20 @@ _:: {  ; （连按键）
 	smartType(':', '：')  ; 长按输入中文标点
 	; reKeyState "LShift"  ; 可自动重复
 }
-":: {
-	; Send "{Blind}{' up}{LShift up}"
-	if KeyWait('"', "T" String(Interval)) {  ; 短按
-		prev := getPrev()  ; （※ 不能放在if语句之前，否则可能会导致 KeyWait检测有问题！）
-		; 如果应该输入英文
-		if not (AI and WinActive("ahk_group CN")) and isPrevEN(prev) {
-			SendText '"'
-			if not WinActive("ahk_group AutoPair") and (prev = ' ' or prev ~= '`a)\R$' or prev = '`t' or prev = '') and shouldPair('"') {  ; 如果 应该自动配对，则……
-				SendText '"'
-				Send "{Left}"
-			}
-			else if prev = '"'  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，则光标回到配对标点中间
-				Send "{Left}"
-		}
-		else {  ; 如果应该输入中文
-			Send '"'
-			commit := getPrev()
-			if commit = '“' {
-				if Tip
-					showTip("前", 1)
-				if shouldPair('“') {  ; 如果 应该自动配对，则……
-					if Tip
-						showTip("配对", 1)
-					Send '"{Left}'
-				}
-			}
-			else {
-				if Tip
-					showTip("后", 1)
-				if prev = '“'  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，则光标回到配对标点中间
-					Send "{Left}"
-			}
-		}
-	}
-	else {  ; 长按
-		prev := getPrev()
-		if not (AI and WinActive("ahk_group CN")) and (prev = '"' or prev = ' ' or prev ~= '`a)\R$' or prev = '`t' or prev = '')
-			SendText '"'
-		else
-			Send ThisHotkey  ; 交给输入法处理
-	}
-	; reKeyState "LShift"  ; 可自动重复
-}
+":: smartType('"', '“')
 /:: smartType(ThisHotkey)
 =:: SendText ThisHotkey  ; （连按键）
-<:: {
-	; Send "{Blind}{, up}{LShift up}"
-	if KeyWait(ThisHotkey, "T" String(Interval)) {  ; 短按
-		; 如果应该输入英文
-		if not (AI and WinActive("ahk_group CN")) and isPrevEN()
-			SendText "<"
-		else {
-			SendText "《"
-			if shouldPair() {
-				SendText "》"
-				Send "{Left}"
-			}
-		}
-	}
-	else  ; 长按
-		Send ThisHotkey  ; 交给输入法处理
-	; reKeyState "LShift"  ; 可自动重复
-}
->:: {
-	; Send "{Blind}{. up}{LShift up}"
-	if KeyWait(ThisHotkey, "T" String(Interval)) {  ; 短按
-		prev := getPrev()
-		commit := smartChoice('>', '》', prev)
-		SendText commit
-		if commit = '》' and isPair(prev, commit)  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，则光标回到配对标点中间
-			Send "{Left}"
-	}
-	else  ; 长按
-		Send ThisHotkey  ; 交给输入法处理
-	; reKeyState "LShift"  ; 可自动重复
-}
+<:: smartType('<', '《')
+>:: smartType('>', '》')
 `;:: smartType(';', '；')
 -:: SendText ThisHotkey  ; （连按键）
-{:: {
-	; Send "{Blind}{[ up}{LShift up}"
-	if KeyWait(ThisHotkey, "T" String(Interval)) {  ; 短按
-		if not (AI and WinActive("ahk_group CN")) and isPrevEN() {
-			SendText "{"
-			if not WinActive("ahk_group AutoPair") and shouldPair() {
-				SendText "}"
-				Send "{Left}"
-			}
-		}
-		else {
-			SendText "「"
-			if shouldPair() {
-				SendText "」"
-				Send "{Left}"
-			}
-		}
-	}
-	else  ; 长按
-		Send "{{}"  ; 交给输入法处理
-	; reKeyState "LShift"
-}
-}:: {
-	; Send "{Blind}{] up}{LShift up}"
-	if KeyWait(ThisHotkey, "T" String(Interval)) {  ; 短按
-		prev := getPrev()  ; 获取光标前一个内容（※ 不能放在if语句之前，否则可能会导致 KeyWait检测有问题！）
-		commit := smartChoice('}', '」', prev)
-		SendText commit
-		if isPair(prev, commit)  ; 如果 （在不是自动配对的情况下）前一个标点和本次输入的标点是配对标点，则光标回到配对标点中间
-			Send "{Left}"
-	}
-	else {  ; 长按
-		prev := getPrev()
-		if prev = '{'
-			SendText '}'
-		else
-		Send "{}}"  ; 交给输入法处理
-	}
-	; reKeyState "LShift"
-}
-':: {
-	if KeyWait('"', "T" String(Interval)) {  ; 短按
-		prev := getPrev()  ; 获取光标前一个内容（※ 不能放在if语句之前，否则可能会导致 KeyWait检测有问题！）
-		if not (AI and WinActive("ahk_group CN")) and isPrevEN(prev) {
-			SendText "'"
-			if not WinActive("ahk_group AutoPair") and (prev = ' ' or prev ~= '`a)\R$' or prev = '`t' or prev = '') and shouldPair(ThisHotkey) {  ; 如果 应该自动配对，则……
-				SendText "'"
-				Send "{Left}"
-			}
-			else if prev = "'"  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，则光标回到成对标点中间
-				Send "{Left}"
-		}
-		else {
-			Send "'"
-			commit := getPrev()
-			if commit = "‘" {
-				if Tip
-					showTip("前", 1)
-				if shouldPair('‘') {  ; 如果 应该自动配对，则……
-					if Tip
-						showTip("配对", 1)
-					Send "'{Left}"
-				}
-			}
-			else {
-				if Tip
-					showTip("后", 1)
-				if prev = '‘'  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，则光标回到配对标点中间
-					Send "{Left}"
-			}
-		}
-	}
-	else {  ; 长按
-		prev := getPrev()
-		if not (AI and WinActive("ahk_group CN")) and (prev = "'" or prev = ' ' or prev ~= '`a)\R$' or prev = '`t' or prev = '')  ; 为了编程时方便连按而设置
-			SendText "'"
-		else
-			Send ThisHotkey  ; 交给输入法处理
-	}
-}
+{:: smartType('{', '「')
+}:: smartType('}', '」')
+':: smartType("'", '‘')
 *:: SendText ThisHotkey  ; （连按键）
 #:: SendText ThisHotkey  ; （连按键）
-[:: {  ; ※ 为Markdown优化，英文优先，和“{”键逻辑不同！
-	if KeyWait(ThisHotkey, "T" String(Interval)) {  ; 短按
-		; 如果不是（中文语境应用程序优化开关打开 并且 当前程序是中文语境软件）
-		if not (AI and WinActive("ahk_group CN")) {
-			SendText "["  ; 为Markdown优化，英、中文都直接上屏[’
-			if not WinActive("ahk_group AutoPair") and shouldPair() {
-				SendText "]"
-				Send "{Left}"
-			}
-		}
-		else {  ; 否则（中文语境应用程序优化开关打开 并且 当前程序是中文语境软件）
-			SendText "【"
-			if shouldPair() {
-				SendText "】"
-				Send "{Left}"
-			}
-		}
-	}
-	else  ; 长按
-		Send ThisHotkey  ; 交给输入法处理
-}
-]:: {
-	if KeyWait(ThisHotkey, "T" String(Interval)) {  ; 短按
-		prev := getPrev()  ; 获取光标前一个内容（※ 不能放在if语句之前，否则可能会导致 KeyWait检测有问题！）
-		; 如果不是（前一个字符是'【' 或者 中文语境应用程序优化开关打开 并且 当前程序是中文语境软件）
-		if not (prev = '【' or AI and WinActive("ahk_group CN")) {
-			SendText "]"
-			if prev = '['  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，则光标回到配对标点中间
-				Send "{Left}"
-		}
-		else {
-			SendText "】"
-			if prev = '【'  ; 如果 （在不是自动配对的情况下）前一个字符和本次输入的标点是配对标点，则光标回到配对标点中间
-				Send "{Left}"
-		}
-	}
-	else {  ; 长按
-		prev := getPrev()
-		if prev = '['
-			SendText ']'
-		else
-			Send ThisHotkey  ; 交给输入法处理
-	}
-}
+[:: smartType('[', '【')
+]:: smartType(']', '】')
 `:: smartType(ThisHotkey)
 +:: SendText ThisHotkey  ; （连按键）
 &:: smartType(ThisHotkey)
@@ -917,7 +803,7 @@ $:: {
 }
 
 ; 如果*不是*（存在输入法候选窗口 或 当前软件是 不适用须要排除的应用程序组 或 文件管理器且活动控件*不是*输入框）
-#HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "i)Edit"))  ; or hasMS_IMEWindow()
+#HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not InStr(ControlGetClassNN(ControlGetFocus("A")), "edit")))  ; or hasMS_IMEWindow()
 ; 英/中常用标点变换，处理有配对标点符号时按情况变换单个或者成对标点。
 ~LShift up:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
 	if HolyShift and A_PriorKey = "LShift"
