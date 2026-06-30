@@ -1,7 +1,7 @@
 /*
  * 说明：存放FinalD项目的各种功能开关（全局变量）及其初始状态，还有自定义快捷键设置。
  * 版本：v10.21（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
- * 更新：2026/6/15
+ * 更新：2026/6/29
  * 重大更新说明：
  * v10.x：将BetterCN开关升级为AI智慧模式开关，v8.72.208 ~ 待定
  * v9.x：适配所有热键线程默认变为关键线程。适配主程序版本 v7.70.198 ~ v7.70.205
@@ -33,11 +33,11 @@ global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 			msg .= "✔"
 		else
 			msg .= "❌"
-		msg .= "，右Shift+左Win 智慧模式"
+		msg .= "，右Shift+左Win "
 		if AI
-			msg .= "✔"
+			msg .= "切换到 操控模式"
 		else
-			msg .= "❌"
+			msg .= "切换到 智慧模式"
 		msg .= "`n左Ctrl+左Win（表格）兼容模式"
 		if Smart
 			msg .= "❌"
@@ -62,11 +62,11 @@ global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 			msg .= "✔"
 		else
 			msg .= "❌"
-		msg .= "`n智慧模式 "
+		msg .= "`n当前是 "
 		if AI
-			msg .= "✔"
+			msg .= "智慧模式"
 		else
-			msg .= "❌"
+			msg .= "操控模式"
 		msg .= "`n（表格）兼容模式 "
 		if Smart
 			msg .= "❌"
@@ -83,7 +83,7 @@ global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 #SuspendExempt False
 
 ; 如果*不是*（存在输入法候选窗口 或 当前软件是 不适用须要排除的应用程序组 或 文件管理器且活动控件*不是*输入框）
-#HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not ControlGetClassNN(ControlGetFocus("A")) ~= "i)Edit"))  ; or hasMS_IMEWindow()
+#HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not InStr(ControlGetClassNN(ControlGetFocus("A")), "edit")))  ; or hasMS_IMEWindow()
 <#LShift up:: {  ; 左Win+左Shift 将光标前面的希腊字母变换为对应的英文字母；数字变换为上下标数字形式。
 	if A_PriorKey = "LShift"
 		driftToENG(getPrev())
@@ -105,14 +105,14 @@ smartLetter(key, fn) {
 	else {  ; 长按
 		Critical "Off"  ; 将此线程修改为非关键线程，以便接下来提高线程优先级时可以丢弃未处理的排队按键
 		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的排队按键
-		if not WinExist("ahk_group IME") {  ; 如果没有输入法候选窗口，则……
-			while GetKeyState(key, "P") {  ; 当按键未释放
+		if not WinExist("ahk_group IME") {  ; 如果没有输入法候选窗口
+			while GetKeyState(key, "P") {  ; 当按键未释放时重复……
 				Send fn  ; 发送设定的功能
 				Sleep 1000 * Interval  ; 等待重复按键时间间隔
 			}
 		}
-		else {  ; 有输入法候选窗口，则……
-			while GetKeyState(key, "P") {  ; 当按键未释放
+		else {  ; 有输入法候选窗口
+			while GetKeyState(key, "P") {  ; 当按键未释放时重复……
 				if GetKeyState("Shift", "P")  ; 如果按下了Shift键
 					Send "{Blind}" key  ; 发送按键的大写形式
 				else
@@ -150,7 +150,7 @@ getPrevWord_X() {
 		temp := SubStr(A_Clipboard, -A_Index)  ; 从最后1个字符逐个增量向前检测
 		if temp ~= "^[a-zA-Z0-9_]+$"  ; 如果 是英文字符串
 			prevWord := temp
-		else  ; 否则，（检测到非英文字符）
+		else  ; 检测到非英文字符
 			break  ; 停止检测
 	}
 	A_Clipboard := clipCache, clipCache := ''  ; 恢复原来的剪贴板内容
