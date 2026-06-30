@@ -193,44 +193,44 @@ getPrevWord_X() {
 	global Smart
 	if Smart {
 		Smart := false
-		MsgBox "终点插件（表格）兼容模式 已开启。`n即 聪明标点和自动配对功能 已关闭！", "终点 输入法插件", "Icon! T5"
+		MsgBox "（表格）兼容模式 已开启。`n即 聪明标点和自动配对功能 已关闭！", "终点 输入法插件", "Icon! T5"
 	}
 	else {
 		Smart := true
-		MsgBox "终点插件 表格兼容模式 已关闭。`n即 聪明标点和自动配对功能 已开启。", "终点 输入法插件", "Iconi T5"
+		MsgBox "（表格）兼容模式 已关闭。`n即 聪明标点和自动配对功能 已开启。", "终点 输入法插件", "Iconi T5"
 	}
 }
 >^LWin:: {  ; 右Ctrl+左Win 开/关 中文标点提示功能。
 	global Tip
 	if Tip {
 		Tip := false
-		MsgBox "终点插件 中文标点提示 已关闭。", "终点 输入法插件", "Iconi T2"
+		MsgBox "中文标点提示 已关闭。", "终点 输入法插件", "Iconi T2"
 	}
 	else {
 		Tip := true
-		MsgBox "终点插件 中文标点提示 已开启。", "终点 输入法插件", "Iconi T2"
+		MsgBox "中文标点提示 已开启。", "终点 输入法插件", "Iconi T2"
 	}
 }
 <+LWin:: {  ; 左Shift+左Win 开/关 字母方向键功能。
 	global Arrow
 	if Arrow {
 		Arrow := false
-		MsgBox "终点插件 字母方向键功能 已关闭。", "终点 输入法插件", "Iconi T2"
+		MsgBox "字母方向键功能 已关闭。", "终点 输入法插件", "Iconi T2"
 	}
 	else {
 		Arrow := true
-		MsgBox "终点插件 字母方向键功能 已开启。", "终点 输入法插件", "Iconi T2"
+		MsgBox "字母方向键功能 已开启。", "终点 输入法插件", "Iconi T2"
 	}
 }
 >+LWin:: {  ; 右Shift+左Win 开/关 中文语境应用程序优化功能。
 	global AI
 	if AI {
 		AI := false
-		MsgBox "终点插件 在所有应用程序上的体验一致。", "终点 输入法插件", "Iconi T2"
+		MsgBox "操控模式开启，在所有应用程序上的体验一致。", "终点 输入法插件", "Iconi T2"
 	}
 	else {
 		AI := true
-		MsgBox "终点插件 针对中文语境应用程序优化。", "终点 输入法插件", "Iconi T2"
+		MsgBox "智慧模式开启，针对中文语境应用程序优化。", "终点 输入法插件", "Iconi T2"
 	}
 }
 +Pause:: {  ; 通常用于在调试时让程序继续运行。
