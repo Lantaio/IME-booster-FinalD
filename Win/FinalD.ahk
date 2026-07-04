@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/7/1
+ * 更新：2026/7/2
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -17,7 +17,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v8.74.222`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v8.74.224`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 global Prev := ''  ; 光标前1个内容
 
@@ -136,30 +136,10 @@ driftPair(origin, target) {
 	if Tip and InStr("（“‘［｛〈", target)
 		showTip("前", 1)
 	Send "{Del}"
-	if Smart and hasPair(origin) {
-		Send "{Del}{Text}!"
+	if Smart and hasPair(origin) {  ; 如果（表格）兼容模式没有开启 并且 原来的前标点有对应的后标点
+		Send "{Del}{Text}!"  ; 删除原来的后标点
 		Send "{Left}"
-		switch target {
-			case '(': SendText ')'
-			case '（': SendText '）'
-			case '"': SendText '"'
-			case '“': SendText '”'
-			case "'": SendText "'"
-			case '‘': SendText '’'
-			case '{': SendText '}'
-			case '「': SendText '」'
-			case '『': SendText '』'
-			case '〘': SendText '〙'
-			case '｛': SendText '｝'
-			case '[': SendText ']'
-			case '【': SendText '】'
-			case '〖': SendText '〗'
-			case '〔': SendText '〕'
-			case '［': SendText '］'
-			case '<': SendText '>'
-			case '《': SendText '》'
-			case '〈': SendText '〉'
-		}
+		SendText getPair(target)  ; 输出新的后标点
 		if Tip and InStr("（“‘［｛〈", target)
 			showTip("配对", 1)
 		Send "{Del}{Left}"
@@ -321,15 +301,25 @@ driftToGRC(char) {
  */
 getPair(front) {
 	switch front {
-		case '(': return ')'
-		case '（': return '）'
-		case '"': return '"'
-		case "'": return "'"
-		case '{': return '}'
-		case '「': return '」'
-		case '[': return ']'
-		case '【': return '】'
-		case '《': return '》'
+			case '(': return ')'
+			case '（': return '）'
+			case '"': return '"'
+			case '“': return '”'
+			case "'": return "'"
+			case '‘': return '’'
+			case '{': return '}'
+			case '「': return '」'
+			case '『': return '』'
+			case '〘': return '〙'
+			case '｛': return '｝'
+			case '[': return ']'
+			case '【': return '】'
+			case '〖': return '〗'
+			case '〔': return '〕'
+			case '［': return '］'
+			case '<': return '>'
+			case '《': return '》'
+			case '〈': return '〉'
 	}
 }
 
@@ -354,27 +344,8 @@ hasPair(front) {
  *   true / false
  */
 isPair(front, back) {
-	switch front {
-		case '(': return back = ')'
-		case '（': return back = '）'
-		case '"': return back = '"'
-		case '“': return back = '”'
-		case "'": return back = "'"
-		case '‘': return back = '’'
-		case '{': return back = '}'
-		case '「': return back = '」'
-		case '『': return back = '』'
-		case '〘': return back = '〙'
-		case '｛': return back = '｝'
-		case '[': return back = ']'
-		case '【': return back = '】'
-		case '〖': return back = '〗'
-		case '〔': return back = '〕'
-		case '［': return back = '］'
-		case '<': return back = '>'
-		case '《': return back = '》'
-		case '〈': return back = '〉'
-	}
+	if getPair(front) = back
+		return true
 	return false
 }
 
