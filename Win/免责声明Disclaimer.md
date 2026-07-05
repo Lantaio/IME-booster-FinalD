@@ -38,4 +38,4 @@
 
 1. 本声明的订立、效力、解释及争议解决均适用**中华人民共和国法律**。
 2. 如本声明的任何条款被认定为无效或不可执行，不影响其他条款的效力。
-3. 开发者保留随时修改本声明的权利，修改后的声明将通过**[项目网址](https://github.com/Lantaio/IME-booster-FinalD)以及软件中附带的“免责声明Disclaimer.md”文件**发布。
+3. 开发者保留随时修改本声明的权利，修改后的声明将通过 **[项目网址](https://github.com/Lantaio/IME-booster-FinalD)以及软件中附带的“免责声明Disclaimer.md”文件**发布。
