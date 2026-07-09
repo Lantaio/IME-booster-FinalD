@@ -1,23 +1,25 @@
 /*
  * 说明：存放FinalD项目的各种功能开关（全局变量）及其初始状态，还有自定义快捷键设置。
- * 版本：v10.21（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
- * 更新：2026/6/29
+ * 版本：v11.22（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
+ * 更新：2026/7/9
  * 重大更新说明：
- * v10.x：将BetterCN开关升级为AI智慧模式开关，v8.72.208 ~ 待定
- * v9.x：适配所有热键线程默认变为关键线程。适配主程序版本 v7.70.198 ~ v7.70.205
- * v8.x：为全键盘漂移的2个快捷键添加触发条件。适配主程序版本 v7.69.195
- * v7.x：将getWordBeforeI_X函数从主程序移动到此程序。适配主程序版本 v7.69.194
- * v6.x：将此项目所有ahk脚本程序的编码方式统一更改为UTF-8 with BOM格式。只需将你自己的Shortcut.ahk文件的编码格式修改为此编码格式并保存即可。适配主程序版本 v7.68.190 ~ v7.69.193
- * v5.x：将字母方向键功能从主程序移动到此，并添加了触发条件。适配主程序版本 v6.68.187 ~ v7.68.189
- * v4.x：增加全局变量Interval方便调整连按间隔时间。适配主程序版本 v5.67.180 ~ v6.68.186
- * v3.x：将部分和自定义设置有关的全局变量从主程序移动到此程序；将原来全键盘漂移功能替换为字母方向键功能。适配主程序版本 v5.66.178
- * v2.x：因对代码进行重构，将getQ1Word_X函数改名为getWordBeforeI_X；最后添加 左Win+左Shift 和 左Win+右Shift 热键功能。适配主程序版本 v5.63.169 ~ v5.65.176
- * v1.x：将各个快捷键功能从FinalD.ahk分离出来的首个版本。适配主程序版本 v5.61.162 ~ v5.62.167
+ * v11.x：增加Rime全局变量来区分Rime/非Rime输入法。适配主程序版本 v8.74.225 ~ 待定
+ * v10.x：将BetterCN开关升级为AI智慧模式开关。适配 v8.72.208 ~ v8.74.224
+ * v9.x：适配所有热键线程默认变为关键线程。适配 v7.70.198 ~ v7.70.205
+ * v8.x：为全键盘漂移的2个快捷键添加触发条件。适配 v7.69.195
+ * v7.x：将getWordBeforeI_X函数从主程序移动到此程序。适配 v7.69.194
+ * v6.x：将此项目所有ahk脚本程序的编码方式统一更改为UTF-8 with BOM格式。只需将你自己的Shortcut.ahk文件的编码格式修改为此编码格式并保存即可。适配 v7.68.190 ~ v7.69.193
+ * v5.x：将字母方向键功能从主程序移动到此，并添加了触发条件。适配 v6.68.187 ~ v7.68.189
+ * v4.x：增加全局变量Interval方便调整连按间隔时间。适配 v5.67.180 ~ v6.68.186
+ * v3.x：将部分和自定义设置有关的全局变量从主程序移动到此程序；将原来全键盘漂移功能替换为字母方向键功能。适配 v5.66.178
+ * v2.x：因对代码进行重构，将getQ1Word_X函数改名为getWordBeforeI_X；最后添加 左Win+左Shift 和 左Win+右Shift 热键功能。适配 v5.63.169 ~ v5.65.176
+ * v1.x：将各个快捷键功能从FinalD.ahk分离出来的首个版本。适配 v5.61.162 ~ v5.62.167
  */
 global Arrow := true  ; 字母方向键 功能开关 的默认状态
-global AI := false  ; 智慧/操控模式 功能切换 的默认状态
+global AI := false  ; 智慧模式/操控模式 切换 的默认状态
 ; global Debug := false  ; 调试程序的总开关 的默认状态
 global Interval := 0.2  ; 重复按键的间隔时间，以秒为单位
+global Rime := true  ; Rime输入法/非Rime输入法 切换 的默认状态
 global Smart := true  ; 聪明中/英标点输入和自动配对 功能开关 的默认状态（表格兼容模式）
 global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 
@@ -28,6 +30,11 @@ global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 		msg .= "　　　　左Win+. 启用/停用 此插件，当前 已停用⛔"
 	else {
 		msg .= "　　　　左Win+. 启用/停用 此插件，当前 已启用🚀"
+		msg .= "`n（妙按）左Win+. Rime/非Rime 适配，当前适配 "
+		if Rime
+			msg .= "Rime输入法"
+		else
+			msg .= "非Rime输入法"
 		msg .= "`n左Shift+左Win 字母方向键"
 		if Arrow
 			msg .= "✔"
@@ -52,33 +59,48 @@ global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 	MsgBox msg, "关于 终点 输入法插件", "Iconi"
 }
 <#.:: {  ; 左Win+. 启用/停用 此程序。
-	Suspend
-	if A_IsSuspended
-		MsgBox "终点 输入法插件 全部功能 已停用⛔", "终点 输入法插件", "Iconx T1"
-	else {
-		msg := "终点 输入法插件 已启用🚀`n`n左Win+Alt+. 查看各项功能的状态：`n"
-		msg .= "`n字母方向键 "
-		if Arrow
-			msg .= "✔"
-		else
-			msg .= "❌"
-		msg .= "`n当前是 "
-		if AI
-			msg .= "智慧模式"
-		else
-			msg .= "操控模式"
-		msg .= "`n（表格）兼容模式 "
-		if Smart
-			msg .= "❌"
-		else
-			msg .= "✔"
-		msg .= "`n中文标点提示 "
-		if tip
-			msg .= "✔"
-		else
-			msg .= "❌"
-		MsgBox msg, "终点 输入法插件", "Iconi T3"
-	}
+	if KeyWait('.', "T" String(Interval)) {  ; ### 短按
+		global Rime
+		Suspend
+		if A_IsSuspended
+			MsgBox "终点 输入法插件 全部功能 已停用⛔", "终点 输入法插件", "Iconx T1"
+		else {
+			msg := "终点 输入法插件 已启用🚀`n`n左Win+Alt+. 查看各项功能的状态：`n"
+			msg .= "`n当前适配："
+			if Rime
+				msg .= "Rime输入法"
+			else
+				msg .= "非Rime输入法"
+			msg .= "`n字母方向键 "
+			if Arrow
+				msg .= "✔"
+			else
+				msg .= "❌"
+			msg .= "`n当前是："
+			if AI
+				msg .= "智慧模式"
+			else
+				msg .= "操控模式"
+			msg .= "`n（表格）兼容模式 "
+			if Smart
+				msg .= "❌"
+			else
+				msg .= "✔"
+			msg .= "`n中文标点提示 "
+			if tip
+				msg .= "✔"
+			else
+				msg .= "❌"
+			MsgBox msg, "终点 输入法插件", "Iconi T3"
+		}
+	} else
+		if Rime {
+			Rime := false
+			MsgBox "适配 非Rime输入法。", "终点 输入法插件", "Iconi T1"
+		} else {
+			Rime := true
+			MsgBox "适配 Rime输入法。", "终点 输入法插件", "Iconi T1"
+		}
 }
 #SuspendExempt False
 
@@ -110,8 +132,7 @@ smartLetter(key, fn) {
 				Send fn  ; 发送设定的功能
 				Sleep 1000 * Interval  ; 等待重复按键时间间隔
 			}
-		}
-		else {  ; 有输入法候选窗口
+		} else {  ; 有输入法候选窗口
 			while GetKeyState(key, "P") {  ; 当按键未释放时重复……
 				if GetKeyState("Shift", "P")  ; 如果按下了Shift键
 					Send "{Blind}" key  ; 发送按键的大写形式
@@ -194,8 +215,7 @@ getPrevWord_X() {
 	if Smart {
 		Smart := false
 		MsgBox "（表格）兼容模式 已开启。`n即 聪明标点和自动配对功能 已关闭！", "终点 输入法插件", "Icon! T5"
-	}
-	else {
+	} else {
 		Smart := true
 		MsgBox "（表格）兼容模式 已关闭。`n即 聪明标点和自动配对功能 已开启。", "终点 输入法插件", "Iconi T5"
 	}
@@ -205,8 +225,7 @@ getPrevWord_X() {
 	if Tip {
 		Tip := false
 		MsgBox "中文标点提示 已关闭。", "终点 输入法插件", "Iconi T2"
-	}
-	else {
+	} else {
 		Tip := true
 		MsgBox "中文标点提示 已开启。", "终点 输入法插件", "Iconi T2"
 	}
@@ -216,8 +235,7 @@ getPrevWord_X() {
 	if Arrow {
 		Arrow := false
 		MsgBox "字母方向键功能 已关闭。", "终点 输入法插件", "Iconi T2"
-	}
-	else {
+	} else {
 		Arrow := true
 		MsgBox "字母方向键功能 已开启。", "终点 输入法插件", "Iconi T2"
 	}
@@ -227,8 +245,7 @@ getPrevWord_X() {
 	if AI {
 		AI := false
 		MsgBox "操控模式开启，在所有应用程序上的体验一致。", "终点 输入法插件", "Iconi T2"
-	}
-	else {
+	} else {
 		AI := true
 		MsgBox "智慧模式开启，针对中文语境应用程序优化。", "终点 输入法插件", "Iconi T2"
 	}
