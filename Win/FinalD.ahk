@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/7/2
+ * 更新：2026/7/9
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -15,9 +15,9 @@ CoordMode "Mouse", "Screen"  ; 设置MouseGetPos函数的坐标模式为相对�
 CoordMode "ToolTip", "Screen"  ; 设置ToolTip函数的坐标模式为相对于屏幕
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（※ 此模式默认区分大小写）
 ; KeyHistory 60
-; OnError handleError  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
+; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v8.74.224`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v8.74.225`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 global Prev := ''  ; 光标前1个内容
 
@@ -301,25 +301,25 @@ driftToGRC(char) {
  */
 getPair(front) {
 	switch front {
-			case '(': return ')'
-			case '（': return '）'
-			case '"': return '"'
-			case '“': return '”'
-			case "'": return "'"
-			case '‘': return '’'
-			case '{': return '}'
-			case '「': return '」'
-			case '『': return '』'
-			case '〘': return '〙'
-			case '｛': return '｝'
-			case '[': return ']'
-			case '【': return '】'
-			case '〖': return '〗'
-			case '〔': return '〕'
-			case '［': return '］'
-			case '<': return '>'
-			case '《': return '》'
-			case '〈': return '〉'
+		case '(': return ')'
+		case '（': return '）'
+		case '"': return '"'
+		case '“': return '”'
+		case "'": return "'"
+		case '‘': return '’'
+		case '{': return '}'
+		case '「': return '」'
+		case '『': return '』'
+		case '〘': return '〙'
+		case '｛': return '｝'
+		case '[': return ']'
+		case '【': return '】'
+		case '〖': return '〗'
+		case '〔': return '〕'
+		case '［': return '］'
+		case '<': return '>'
+		case '《': return '》'
+		case '〈': return '〉'
 	}
 }
 
@@ -350,18 +350,6 @@ isPair(front, back) {
 }
 
 /*
- * 恢复按键正确的逻辑状态（和物理状态一致）
- * 参数：
- *   key (string) 按键名称
- */
-reKeyState(key) {
-	if GetKeyState(key, "P") {
-		Send "{" key " down}"
-		; Sleep 50
-	}
-}
-
-/*
  * 检测光标前的内容是否在西文字符集中
  * 返回值：
  *   true / false
@@ -377,6 +365,18 @@ isPrevEN() {
 		return true
 	else
 		return false
+}
+
+/*
+ * 恢复按键正确的逻辑状态（和物理状态一致）
+ * 参数：
+ *   key (string) 按键名称
+ */
+reKeyState(key) {
+	if GetKeyState(key, "P") {
+		Send "{" key " down}"
+		; Sleep 50
+	}
 }
 
 /*
@@ -486,8 +486,7 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 				SendText getPair(en)  ; 输入对应的后标点
 				Send "{Left}"  ; 光标回到配对标点中间
 			}
-		}
-		else {  ; 应该输入中文标点
+		} else {  ; 应该输入中文标点
 			switch cn {
 				case '“', '‘':
 					Send en  ; ⚠注意此处是交给输入法处理
@@ -500,8 +499,7 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 								showTip("配对", 1)
 							Send en "{Left}"  ; ⚠再次交给输入法处理
 						}
-					}
-					else  ; 刚输入的是中文引号后标点
+					} else  ; 刚输入的是中文引号后标点
 						if Tip
 							showTip("后", 1)
 				case '（', '【', '「', '《':
@@ -524,8 +522,7 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 					SendText cn
 			}
 		}
-	}
-	else {  ; 妙按 和 长按
+	} else {  ; 妙按 和 长按
 		Critical "Off"
 		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的按键
 		; ### 妙按
@@ -539,8 +536,7 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 					if en = '.' or en = "~"  ; or en = ',' or en = ':'
 						Send("{BS}{Text}" cn)  ; (※ 必须删除上一步输入的标点，因为中文输入法在数字后可能会输入英文标点)
 				}
-			}
-			else {  ; 本来应该输入中文标点，变成输入英文标点
+			} else {  ; 本来应该输入中文标点，变成输入英文标点
 				if en != '"' and en != "'"
 					(en = '!' or en = '^' or en = '{' or en = '}') ? Send("{" en "}") : Send(en)  ; 先交给输入法处理（Rime输入法时妙按弹出候选窗口）
 				else
@@ -548,16 +544,14 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 				Sleep 100
 				if en != '"' and en != "'" and not WinExist("ahk_group IME")
 					(en = '^' or en = '_') ? Send("{BS 2}{Text}" en) : Send("{BS}{Text}" en)
-			}
-		else {  ; 操控模式
+		} else {  ; 操控模式
 			if choice = en  ; 本来应该输入英文标点，变成输入中文标点
 				if InStr("/^$|", en) {  ; 如果是Rime功能触发键
 					en = '^' ? Send("{" en "}") : Send(en)  ; 交给输入法处理
 					Sleep 100
 					if en != '/' and not WinExist("ahk_group IME")
 						en = '^' ? Send("{BS 2}{Text}……") : Send("{BS}{Text}" cn)
-				}
-				else {  ; 不是Rime功能触发键
+				} else {  ; 不是Rime功能触发键
 					switch cn {
 						case '“', "‘":
 							Send en  ; ⚠注意此处是交给输入法处理
@@ -587,8 +581,7 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 					Sleep 100
 					if en != '/' and not WinExist("ahk_group IME")
 						en = '^' ? Send("{BS 2}{Text}^") : Send("{BS}{Text}" en)
-				}
-				else  ; 否则（不是Rime功能触发键）
+				} else  ; 否则（不是Rime功能触发键）
 					SendText en
 		}
 		Sleep 1000 * Interval
@@ -598,8 +591,7 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 				if (en = '^' or en = '_') and not WinExist("ahk_group IME")  ; 如果妙按输入的是“……”或“——”，并且没有输入法候选窗口（有则表示未上屏）
 					Send "{BS}"  ; 多输入1个退格键
 				Send "{BS}{Text}" en  ; 删除妙按输入的中文标点，并输入1个英文标点
-			}
-			else {  ; 如果应该输入中文
+			} else {  ; 如果应该输入中文
 				Send "{BS}"  ; 删除妙按时输入的英文标点（或者关闭输入法候选窗口）（※ 此操作统一不同中文输入法的行为）
 				switch cn {
 					case '“', '‘':
@@ -625,8 +617,7 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 				}
 			}
 			Sleep 1000 * Interval
-		}
-		else {  ; 妙按后没有长按
+		} else {  ; 妙按后没有长按
 			if choice = en and InStr("“‘（【「《", cn) and shouldPair(cn) {  ; 如果妙按时输入中文前标点 并且 应该输入配对的后标点
 				if (commit = '“' or commit = '‘') {  ;
 					Send en  ; ⚠注意此处是交给输入法处理
@@ -640,8 +631,7 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 						showTip("配对", 1)
 					Send "{Left}"
 				}
-			}
-			else if choice = cn  ; 否则 如果妙按时输入英文前标点
+			} else if choice = cn  ; 否则 如果妙按时输入英文前标点
 				if (InStr("([{", en) or ((en = '"' or en = "'") and (Prev = ' ' or Prev ~= '`a)\R$' or Prev = '`t' or Prev = ''))) and not WinActive("ahk_group AutoPair") and shouldPair(en) {  ; 如果是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
 					SendText getPair(en)  ; 输入对应的后标点
 					Send "{Left}"  ; 光标回到配对标点中间
@@ -669,7 +659,7 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
  * 返回值：
  *   1 抑制默认错误对话框和任何剩余的错误回调
  */
-handleError(ex, mode) {
+errorHandler(ex, mode) {
 	return true
 }
 
@@ -679,7 +669,6 @@ handleError(ex, mode) {
  *   thisHotkey (string) 触发的热键名称
  */
 keyHandler(thisHotkey) {
-	; key := SubStr(thisHotkey, -1)  ; 提取热键的最后1个键名
 	Send "{Blind}" thisHotkey  ;
 }
 
@@ -688,7 +677,7 @@ keyHandler(thisHotkey) {
  * 参数：
  *   thisHotkey (string) 触发的热键名称
  */
-xkeyhandler(thisHotkey) {
+xkeyHandler(thisHotkey) {
 	Send "{Blind}{" thisHotkey "}"
 }
 
