@@ -1,7 +1,7 @@
 /*
  * 说明：存放FinalD项目的各种功能开关（全局变量）及其初始状态，还有自定义快捷键设置。
- * 版本：v11.22（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
- * 更新：2026/7/9
+ * 版本：v11.23（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
+ * 更新：2026/7/14
  * 重大更新说明：
  * v11.x：增加Rime全局变量来区分Rime/非Rime输入法。适配主程序版本 v8.74.225 ~ 待定
  * v10.x：将BetterCN开关升级为AI智慧模式开关。适配 v8.72.208 ~ v8.74.224
@@ -125,14 +125,14 @@ smartLetter(key, fn) {
 	if KeyWait(key, "T" String(Interval))  ; 短按
 			Send "{Blind}" key  ; 根据Shift键是否按下发送按键的相应大小写
 	else {  ; 长按
-		Critical "Off"  ; 将此线程修改为非关键线程，以便接下来提高线程优先级时可以丢弃未处理的排队按键
 		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的排队按键
-		if not WinExist("ahk_group IME") {  ; 如果没有输入法候选窗口
+		Critical "Off"  ; 将此线程修改为非关键线程，配合上一行代码，使未处理的排队按键会被丢弃
+		if not WinExist("ahk_group IME")  ; 如果没有输入法候选窗口
 			while GetKeyState(key, "P") {  ; 当按键未释放时重复……
 				Send fn  ; 发送设定的功能
 				Sleep 1000 * Interval  ; 等待重复按键时间间隔
 			}
-		} else {  ; 有输入法候选窗口
+		else  ; 有输入法候选窗口
 			while GetKeyState(key, "P") {  ; 当按键未释放时重复……
 				if GetKeyState("Shift", "P")  ; 如果按下了Shift键
 					Send "{Blind}" key  ; 发送按键的大写形式
@@ -140,7 +140,6 @@ smartLetter(key, fn) {
 					Send fn  ; 发送设定的功能
 				Sleep 1000 * Interval  ; 等待重复按键时间间隔
 			}
-		}
 	}
 }
 
