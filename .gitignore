@@ -1,6 +1,4 @@
 ## 不同步到远程仓库的目录列表
-.github/
-.vscode/
 backup/
 test/
 MySettings/

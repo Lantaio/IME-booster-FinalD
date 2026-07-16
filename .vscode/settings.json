@@ -1,0 +1,11 @@
+{
+	"AHK++.v2.file": {
+		"compileBaseFile": "",
+		"helpPath": "C:/Program Files/AutoHotkey/v2/AutoHotkey.chm",
+		"maxScanDepth": 3,
+		"templateSnippetName": "AhkTemplateV2"
+	},
+	"AutoHotkey2.WorkingDirs": [
+		"Win"
+	]
+}
