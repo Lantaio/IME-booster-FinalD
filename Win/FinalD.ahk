@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/7/26
+ * 更新：2026/7/27
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v8.75.233`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v8.75.234`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 global Commit := ''  ; 刚上屏的标点
 global Prev := ''  ; 光标前1个内容
