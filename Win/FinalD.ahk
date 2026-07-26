@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v8.74.232`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v8.75.233`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 global Commit := ''  ; 刚上屏的标点
 global Prev := ''  ; 光标前1个内容
@@ -283,9 +283,7 @@ getPrev() {
 		; Sleep 20  ; 暂停一下以等待光标完成向右移动
 		if WinActive("ahk_group Slow")  ; 如果是反应慢的应用，增加暂停时间
 			Sleep 20
-	}
-	; 否则，如果当前软件是Word或PowerPoint
-	else if clip = '' and WinActive(" - Word$") {
+	} else if clip = '' and WinActive(" - Word$") {  ; 否则，如果当前软件是Word或PowerPoint
 		A_Clipboard := ''  ; 清空剪贴板
 		Send "+{Left}"  ; 选取当前光标前一个内容
 		; Sleep 20  ; 暂停一下以等待反应慢的程序完成选取
@@ -429,12 +427,11 @@ sendCN(en, cn) {
 		case '“', '‘':
 			Send en  ; ※ 交给输入法处理
 			global Commit := getPrev()
-			if Commit = '“' or Commit = '‘'  ; 如果 刚输入的是中文引号前标点
+			if Commit = '“' or Commit = '‘' {  ; 如果 刚输入的是中文引号前标点
 				if Tip
 					showTip("前", 1)
-			else  ; 否则 刚输入的是中文引号后标点
-				if Tip
-					showTip("后", 1)
+			} else if Tip  ; 否则 刚输入的是中文引号后标点
+				showTip("后", 1)
 		case '（', '）', '【', '】', '「', '」', '《', '》':
 			if Tip
 				if cn = '（'
@@ -499,7 +496,7 @@ smartChoice(en, cn) {
 	if en = cn
 		return en
 	global Prev := getPrev()
-	if AI  ; 智慧模式
+	if AI {  ; 智慧模式
 		; 如果*不是* 当前程序是中文语境软件 并且 前一个内容是西文
 		if not WinActive("ahk_group CN") and isPrevEN()
 			Return en
@@ -508,12 +505,13 @@ smartChoice(en, cn) {
 			Return en
 		else  ; 否则，应是中文标点
 			Return cn
-	else  ; 操控模式
+	} else {  ; 操控模式
 		; 如果*不是* （（前一个内容是换行符 或 空）并且 当前程序是中文语境软件） 并且 前一个内容是西文
 		if not ((Prev ~= '`a)\R$' or Prev = '') and WinActive("ahk_group CN")) and isPrevEN()
 			Return en
 		else  ; 否则，应是中文标点
 			Return cn
+	}
 }
 /*
  * 根据按键方式和是否有提供 中文标点参数 来输入中/英标点符号
@@ -528,47 +526,48 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 	if not isSet(cn)
 		cn := en
 	if KeyWait(en, "T" String(Interval)) {  ; ### 短按
-		if en = cn {  ; 如果英文标点和中文标点相同，直接输出
+		if en = cn  ; 如果英文标点和中文标点相同，直接输出
 			SendText en
-			return
-		}
-		choice := smartChoice(en, cn)  ; （⚠ 由于getPrev函数的执行时间可能会超过0.5秒，因此不能放在if语句之前，否则不能正确检测是短按还是长按）
-		if choice = en {  ; 如果 应该输入英文标点
-			SendText en
-			autoPairEN(en)  ; 自动配对英文标点
-		} else {  ; 应该输入中文标点
-			sendCN(en, cn)
-			autoPairCN(en, cn)  ; 自动配对中文标点
+		else {  ; 中文英文标点和中文标点不同
+			choice := smartChoice(en, cn)  ; （⚠ 由于getPrev函数的执行时间可能会超过0.5秒，因此不能放在if语句之前，否则不能正确检测是短按还是长按）
+			if choice = en {  ; 如果 应该输入英文标点
+				SendText en
+				autoPairEN(en)  ; 自动配对英文标点
+			} else {  ; 应该输入中文标点
+				sendCN(en, cn)
+				autoPairCN(en, cn)  ; 自动配对中文标点
+			}
 		}
 	} else {  ; 妙按 和 长按
 		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的按键
 		Critical "Off"
 		; ### 妙按
 		choice := smartChoice(en, cn)
-		if Rime  ; 如果是Rime输入法
-			if choice = en  ; 本来应该输入英文标点，变成输入中文标点
+		if Rime {  ; 如果是Rime输入法
+			if choice = en {  ; 本来应该输入英文标点，变成输入中文标点
 				if InStr("/&|@%^$", en)  ; 如果是Rime功能触发键
 					en = '^' ? Send("{" en "}") : Send(en)  ; 交给输入法处理
 				else  ; 不是Rime功能触发键
 					sendCN(en, cn)  ; （※ 后面#1再作配对处理）
-			else  ; 本来应该输入中文标点，变成输入英文标点
+			} else {  ; 本来应该输入中文标点，变成输入英文标点
 				if InStr("/&|@%^$", en)  ; 如果是Rime功能触发键
 					en = '^' ? Send("{" en "}") : Send(en)  ; 交给输入法处理
 				else  ; 否则（不是Rime功能触发键）
 					SendText en  ; （※ 后面#1再作配对处理）
-		else  ; 非Rime输入法
+			}
+		} else {  ; 非Rime输入法
 			if en = cn  ; 如果英文标点和中文标点相同，直接输出
 				SendText en
 			else if choice = en  ; 本来应该输入英文标点，变成输入中文标点
 				sendCN(en, cn)
 			else  ; 本来应该输入中文标点，变成输入英文标点
 				SendText en
+		}
 		Sleep 1000 * Interval
 		; ### 长按的第1次输入
 		if GetKeyState(en, "P") {  ; 如果按键未弹起
 			if en = cn {  ; 如果英文标点和中文标点相同，直接输出
-				Send "{BS}"
-				SendText en
+				Send "{BS}{Text}" en
 			} else if choice = en {  ; 如果应该输入英文标点
 				if (en = '^' or en = '_') and not WinExist("ahk_group IME")  ; 如果妙按输入的是“……”或“——”，并且没有输入法候选窗口（有则表示未上屏）
 					Send "{BS}"  ; 多输入1个退格键
@@ -923,7 +922,7 @@ Space:: Send "{Blind}{" thisHotkey "}"
 ~+WheelDown::
 ~+WheelUp::  ; 以上为Shift键+任何鼠标键
 ~*Shift:: {  ; 防止仅按下 Shift键+任何鼠标键 或 其它的修饰键+Shift键 时，最后释放Shift键会触发漂移的问题。
-	Thread "Priority", 1  ; 须要提高此线程的优先级，丢弃长按产生的重复Shift按键事件，否则如果最后释放Shift键，会触发Shift热键使HolyShift变成true
+	Thread "Priority", 1  ; 须要提高此线程的优先级，丢弃长按产生的重复Shift按键事件，否则如果最后释放Shift键，可能会因为连按触发Shift热键使HolyShift变成true
 	Critical "Off"
 	global HolyShift := false
 	if GetKeyState("Ctrl", "P") or GetKeyState("Alt", "P")
