@@ -10,6 +10,7 @@
 #SingleInstance  ; 只允许运行1个实例
 #UseHook  ; 使用键盘钩子，相当于在每个热键前面使用$前缀，以避免Send函数触发它自己
 Critical "On"  ; 将所有线程默认设置为关键线程（不可中断），使短按按键可以按顺序执行，并缓存未处理的按键
+ProcessSetPriority "High"  ; 将此程序的进程优先级设置为高
 CoordMode "Caret", "Screen"  ; 设置CaretGetPos函数的坐标模式为相对于屏幕
 CoordMode "Mouse", "Screen"  ; 设置MouseGetPos函数的坐标模式为相对于屏幕
 CoordMode "ToolTip", "Screen"  ; 设置ToolTip函数的坐标模式为相对于屏幕
@@ -17,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v8.74.228`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v8.74.231`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 global Commit := ''  ; 刚上屏的标点
 global Prev := ''  ; 光标前1个内容
@@ -264,8 +265,10 @@ driftToGRC(char) {
  */
 getPrev() {
 	clipCache := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪贴板内容，清空剪贴板
-	Send "+{Left}^c"  ; 选取当前光标前一个字符并复制
-	ClipWait 0.7, 1  ; 等待剪贴板更新
+	Send "+{Left}"  ; 选取当前光标前一个内容
+	; Sleep 20  ; 暂停一下以等待反应慢的程序完成选取
+	Send "^c"  ; 复制所选内容
+	ClipWait 0.5, 1  ; 等待剪贴板更新
 	; 获取剪贴板中的字符（一般是光标前一个字符），计算它的长度
 	clip := A_Clipboard, clipLen := StrLen(clip)
 /*	if Debug {
@@ -275,13 +278,19 @@ getPrev() {
 	}
 */
 	; 如果复制的字符长度为1 或 是回车換行符（行首）或 是emoji
-	if clipLen = 1 or clip ~= '`a)^\R$' or IsEmoji(clip)  ; chrLen > 1 and chrLen < 6 and not c1ip ~= '`a)\R$'
+	if clipLen = 1 or clip ~= '`a)^\R$' or IsEmoji(clip) {
 		Send "{Right}"  ; 光标回到原来的位置
+		; Sleep 20  ; 暂停一下以等待光标完成向右移动
+		if WinActive("ahk_group Slow")  ; 如果是反应慢的应用，增加暂停时间
+			Sleep 20
+	}
 	; 否则，如果当前软件是Word或PowerPoint
 	else if clip = '' and WinActive(" - Word$") {
 		A_Clipboard := ''  ; 清空剪贴板
-		Send "+{Left}^c"  ; 选取当前光标前一个字符并复制
-		ClipWait 0.4, 1  ; 等待剪贴板更新
+		Send "+{Left}"  ; 选取当前光标前一个内容
+		; Sleep 20  ; 暂停一下以等待反应慢的程序完成选取
+		Send "^c"  ; 复制所选内容
+		ClipWait 0.3, 1  ; 等待剪贴板更新
 		; 获取剪贴板中的字符，即光标前2个字符
 		clip2 := A_Clipboard
 /*		if Debug {
@@ -290,13 +299,13 @@ getPrev() {
 			Pause
 		}
 */
-		if not clip2 = ''
+		if not clip2 = '' {
 			Send "{Right}"  ; 光标回到原来的位置
+			; Sleep 20  ; 暂停一下以等待光标完成向右移动
+		}
 	}
 	; 恢复原来的剪贴板内容
 	A_Clipboard := clipCache, clipCache := ''
-	if WinActive("ahk_group Slow")  ; 如果是反应慢的应用，暂停一下以等待光标完成向右移动
-		Sleep 50
 	return clip
 }
 /*
@@ -306,8 +315,10 @@ getPrev() {
  */
 getNext() {
 	clipCache := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪贴板内容，清空剪贴板
-	Send "+{Right}^c"  ; 选取当前光标后一个字符并复制
-	ClipWait 0.4, 1  ; 等待剪贴板更新
+	Send "+{Right}"  ; 选取当前光标后一个字符
+	; Sleep 20  ; 暂停一下以等待反应慢的程序完成选取
+	Send "^c"  ; 复制所选内容
+	ClipWait 0.3, 1  ; 等待剪贴板更新
 	; 获取剪贴板中的字符，即光标后一个字符，计算它的长度，然后恢复原来的剪贴板内容
 	clip := A_Clipboard, clipLen := StrLen(clip), A_Clipboard := clipCache, clipCache := ''
 /*	if Debug {
@@ -317,10 +328,12 @@ getNext() {
 	}
 */
 	; 如果复制的字符长度为1 或 是回车換行符（行末）或 是emoji
-	if clipLen = 1 or clip ~= '`a)^\R$' or IsEmoji(clip)  ;chrLen > 1 and chrLen < 6 and not c1ip ~= '`a)\R$'
+	if clipLen = 1 or clip ~= '`a)^\R$' or IsEmoji(clip) {
 		Send "{Left}"  ; 光标回到原来的位置
-	if WinActive("ahk_group Slow")  ; 如果是反应慢的软件，暂停一下以等待光标完成向左移动
-		Sleep 50
+		; Sleep 20  ; 暂停一下以等待光标完成向左移动
+		if WinActive("ahk_group Slow")  ; 如果是反应慢的软件，增加暂停时间
+			Sleep 20
+	}
 	return clip
 }
 /*
@@ -660,7 +673,10 @@ _:: {  ; （连按键）
 	smartType(':', '：')  ; 长按输入中文标点
 	; reKeyState "LShift"  ; 可自动重复
 }
-":: smartType('"', '“')
+":: {
+	Send "{Blind}{' up}{LShift up}"
+	smartType('"', '“')
+}
 /:: smartType(ThisHotkey)
 =:: SendText ThisHotkey  ; （连按键）
 <:: smartType('<', '《')
