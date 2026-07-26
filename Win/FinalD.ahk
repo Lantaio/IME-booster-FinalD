@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/7/9
+ * 更新：2026/7/26
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v8.74.231`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v8.74.232`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 global Commit := ''  ; 刚上屏的标点
 global Prev := ''  ; 光标前1个内容
@@ -498,6 +498,7 @@ shouldPair(front) {
 smartChoice(en, cn) {
 	if en = cn
 		return en
+	global Prev := getPrev()
 	if AI  ; 智慧模式
 		; 如果*不是* 当前程序是中文语境软件 并且 前一个内容是西文
 		if not WinActive("ahk_group CN") and isPrevEN()
@@ -527,8 +528,11 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 	if not isSet(cn)
 		cn := en
 	if KeyWait(en, "T" String(Interval)) {  ; ### 短按
-		global Prev := getPrev()  ; （⚠ 由于getPrev函数的执行时间可能会超过0.5秒，因此不能放在if语句之前，否则不能正确检测是短按还是长按）
-		choice := smartChoice(en, cn)
+		if en = cn {  ; 如果英文标点和中文标点相同，直接输出
+			SendText en
+			return
+		}
+		choice := smartChoice(en, cn)  ; （⚠ 由于getPrev函数的执行时间可能会超过0.5秒，因此不能放在if语句之前，否则不能正确检测是短按还是长按）
 		if choice = en {  ; 如果 应该输入英文标点
 			SendText en
 			autoPairEN(en)  ; 自动配对英文标点
@@ -540,7 +544,6 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的按键
 		Critical "Off"
 		; ### 妙按
-		global Prev := getPrev()
 		choice := smartChoice(en, cn)
 		if Rime  ; 如果是Rime输入法
 			if choice = en  ; 本来应该输入英文标点，变成输入中文标点
@@ -554,14 +557,19 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 				else  ; 否则（不是Rime功能触发键）
 					SendText en  ; （※ 后面#1再作配对处理）
 		else  ; 非Rime输入法
-			if choice = en  ; 本来应该输入英文标点，变成输入中文标点
+			if en = cn  ; 如果英文标点和中文标点相同，直接输出
+				SendText en
+			else if choice = en  ; 本来应该输入英文标点，变成输入中文标点
 				sendCN(en, cn)
 			else  ; 本来应该输入中文标点，变成输入英文标点
 				SendText en
 		Sleep 1000 * Interval
 		; ### 长按的第1次输入
 		if GetKeyState(en, "P") {  ; 如果按键未弹起
-			if choice = en {  ; 如果应该输入英文标点
+			if en = cn {  ; 如果英文标点和中文标点相同，直接输出
+				Send "{BS}"
+				SendText en
+			} else if choice = en {  ; 如果应该输入英文标点
 				if (en = '^' or en = '_') and not WinExist("ahk_group IME")  ; 如果妙按输入的是“……”或“——”，并且没有输入法候选窗口（有则表示未上屏）
 					Send "{BS}"  ; 多输入1个退格键
 				Send "{BS}{Text}" en  ; 删除妙按输入的中文标点（或者关闭输入法候选窗口），并输入1个英文标点（※ 此操作统一不同中文输入法的行为）
@@ -571,7 +579,9 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 			}
 			Sleep 1000 * Interval
 		} else {  ; ### 妙按后没有长按（#1）
-			if choice = en  ; ⚠ 如果妙按时输入中文
+			if en = cn  ; 如果英文标点和中文标点相同，直接返回（⚠ 此处假设中英文相同标点不存在配对标点）
+				return
+			else if choice = en  ; ⚠ 如果妙按时输入中文
 				autoPairCN(en, cn)  ; 自动配对中文标点
 			else  ; 否则 如果妙按时输入英文
 				autoPairEN(en)  ; 自动配对英文标点
