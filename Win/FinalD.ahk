@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v8.75.234`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v8.75.235`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 global Commit := ''  ; 刚上屏的标点
 global Prev := ''  ; 光标前1个内容

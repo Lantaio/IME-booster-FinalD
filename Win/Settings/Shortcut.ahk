@@ -1,6 +1,6 @@
 /*
  * 说明：存放FinalD项目的各种功能开关（全局变量）及其初始状态，还有自定义快捷键设置。
- * 版本：v11.24（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
+ * 版本：v11.25（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
  * 更新：2026/7/27
  * 重大更新说明：
  * v11.x：增加Rime全局变量来区分Rime/非Rime输入法，并实现自动检测。适配主程序版本 v8.74.225 ~ 待定
@@ -110,14 +110,13 @@ checkIME()  ; 程序初始化阶段检测当前输入法
 				msg .= "❌"
 			MsgBox msg, "终点 输入法插件", "Iconi T3"
 		}
-	} else
-		if Rime {
-			Rime := false
-			MsgBox "适配 非Rime输入法。", "终点 输入法插件", "Iconi T1"
-		} else {
-			Rime := true
-			MsgBox "适配 Rime输入法。", "终点 输入法插件", "Iconi T1"
-		}
+	} else {
+		checkIME()
+		if Rime
+			MsgBox "当前适配 Rime输入法。", "终点 输入法插件", "Iconi T1"
+		else
+			MsgBox "当前适配 非Rime输入法。", "终点 输入法插件", "Iconi T1"
+	}
 }
 #SuspendExempt False
 
@@ -266,7 +265,7 @@ getPrevWord_X() {
 		MsgBox "智慧模式开启，针对中文语境应用程序优化。", "终点 输入法插件", "Iconi T2"
 	}
 }
-~#Space up:: {  ; Win+Space 切换
+~#Space up:: {  ; Win+Space 切换适配Rime/非Rime输入法
 	if A_PriorKey = "Space"
 		checkIME()
 }
