@@ -30,6 +30,34 @@ global Prev := ''  ; 光标前1个内容
 #Include "MySettings\AppGroup.ahk"  ; 引入用户自定义的程序组信息
 #Include "MySettings\Shortcut.ahk"  ; 引入用户自定义的快捷键信息
 /*
+ * 基本的按键处理函数，直接将按键发送给系统处理
+ * 参数：
+ *   thisHotkey (string) 触发的热键名称
+ */
+keySender(thisHotkey) {
+	Send "{Blind}" thisHotkey
+}
+/*
+ * 基本的特殊按键处理函数，直接将按键发送给系统处理
+ * 参数：
+ *   thisHotkey (string) 触发的热键名称
+ */
+xkeySender(thisHotkey) {
+	Send "{Blind}{" thisHotkey "}"
+}
+; ~~~~~~ Optional Hotkeys Begin ~~~~~~
+; 这部分热键为非必须热键，如果和你使用的其它AHK脚本有冲突，可以将这部分代码注释或删除。但这将失去按键按顺序执行的功能，当输入太快时顺序可能会出现错乱。
+nums := "0123456789"
+Loop Parse, nums  ;添加数字热键，使按键可以按顺序执行
+	Hotkey A_LoopField, keySender
+letters := "abcdefghijklmnopqrstuvwxyz"
+Loop Parse, letters  ;添加小写字母热键，使按键可以按顺序执行
+	Hotkey A_LoopField, keySender
+Loop Parse, letters  ;添加大写字母热键，使按键可以按顺序执行
+	Hotkey '+' A_LoopField, keySender
+; ~~~~~~ Optional Hotkeys End ~~~~~~
+
+/*
  * 根据所提供的 英文按键参数（用于输入引号）和 中文标点参数 输入对应的中文后标点
  * 参数：
  *   en (string) 英文按键 对应英文标点符号
@@ -637,34 +665,6 @@ showTip(info, sec) {
 errorHandler(ex, mode) {
 	return true
 }
-/*
- * 基本的按键处理函数，直接将按键发送给系统处理
- * 参数：
- *   thisHotkey (string) 触发的热键名称
- */
-keySender(thisHotkey) {
-	Send "{Blind}" thisHotkey
-}
-/*
- * 基本的特殊按键处理函数，直接将按键发送给系统处理
- * 参数：
- *   thisHotkey (string) 触发的热键名称
- */
-xkeySender(thisHotkey) {
-	Send "{Blind}{" thisHotkey "}"
-}
-
-; ~~~~~~ Optional Hotkeys Begin ~~~~~~
-; 这部分热键为非必须热键，如果和你使用的其它AHK脚本有冲突，可以将这部分代码注释或删除。但这将失去按键按顺序执行的功能，当输入太快时顺序可能会出现错乱。
-nums := "0123456789"
-Loop Parse, nums  ;添加数字热键，使按键可以按顺序执行
-	Hotkey A_LoopField, keySender
-letters := "abcdefghijklmnopqrstuvwxyz"
-Loop Parse, letters  ;添加小写字母热键，使按键可以按顺序执行
-	Hotkey A_LoopField, keySender
-Loop Parse, letters  ;添加大写字母热键，使按键可以按顺序执行
-	Hotkey '+' A_LoopField, keySender
-; ~~~~~~ Optional Hotkeys End ~~~~~~
 
 ; 如果 聪明标点开关打开，并且不是（存在输入法候选窗口 或 当前软件是 不支持聪明标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组） 并且 在中文输入状态。
 #HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) and IsCNInputMode()
