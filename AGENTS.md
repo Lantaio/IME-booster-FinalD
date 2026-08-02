@@ -1,10 +1,10 @@
 # AGENTS
 
 ## 项目概述
-这是一个基于 AutoHotkey v2 的 Windows 脚本项目。项目核心代码位于 `Win/FinalD.ahk`，并引用了 `Win/Lib/` 目录下的辅助库。用户可配置项存放在 `Win/MySettings/`，模板和默认配置在 `Win/Settings/`。
+这是一个运行在 Windows 系统的用 AutoHotkey v2 脚本语言编写的项目。项目核心代码位于 `Win/FinalD.ahk`，并引用了 `Win/Lib/` 目录下的辅助库。用户可配置项存放在 `Win/MySettings/`，默认用户配置模板在 `Win/Settings/`。
 
 ## 关键事实
-- 只支持 Windows + AutoHotkey v2.0.26 及以上版本。
+- 只支持 Windows系统和AutoHotkey v2.0.26 及以上版本。
 - 此项目使用 AutoHotkey v2 版脚本语言。
 - 所有`.ahk`文件必须保存为 UTF-8 with BOM 编码，尤其是 `Win/FinalD.ahk`、`Win/MySettings/*.ahk` 和 `Win/Settings/*.ahk`。
 - `Win/FinalD.ahk` 通过 `#Include "MySettings\AppGroup.ahk"` 和 `#Include "MySettings\Shortcut.ahk"` 加载自定义配置。
