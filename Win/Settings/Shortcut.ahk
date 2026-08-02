@@ -1,7 +1,7 @@
 /*
  * 说明：存放FinalD项目的各种功能开关（全局变量）及其初始状态，还有自定义快捷键设置。
  * 版本：v11.25（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新。修订号为不影响功能的修改，可以不管。）
- * 更新：2026/7/27
+ * 更新：2026/8/2
  * 重大更新说明：
  * v11.x：增加Rime全局变量来区分Rime/非Rime输入法，并实现自动检测。适配主程序版本 v8.74.225 ~ 待定
  * v10.x：将BetterCN开关升级为AI智慧模式开关。适配 v8.72.208 ~ v8.74.224
@@ -16,7 +16,7 @@
  * v1.x：将各个快捷键功能从FinalD.ahk分离出来的首个版本。适配 v5.61.162 ~ v5.62.167
  */
 global Arrow := true  ; 字母方向键 功能开关 的默认状态
-global AI := true  ; 智慧模式/操控模式 切换 的默认状态
+global AI := false   ; 智慧模式/操控模式 切换 的默认状态
 ; global Debug := false  ; 调试程序的总开关 的默认状态
 global Interval := 0.2  ; 重复按键的间隔时间，以秒为单位
 global Rime := false  ; Rime输入法/非Rime输入法 切换 的默认状态
@@ -79,7 +79,7 @@ checkIME()  ; 程序初始化阶段检测当前输入法
 		global Rime
 		Suspend
 		if A_IsSuspended
-			MsgBox "终点 输入法插件 全部功能 已停用⛔", "终点 输入法插件", "Iconx T1"
+			MsgBox "终点 输入法插件 全部功能 已停用⛔", "终点 输入法插件", "Iconx T2"
 		else {
 			checkIME()
 			msg := "终点 输入法插件 已启用🚀`n`n左Win+Alt+. 查看各项功能的状态：`n"
@@ -113,9 +113,9 @@ checkIME()  ; 程序初始化阶段检测当前输入法
 	} else {
 		checkIME()
 		if Rime
-			MsgBox "当前适配 Rime输入法。", "终点 输入法插件", "Iconi T1"
+			MsgBox "当前适配 Rime输入法。", "终点 输入法插件", "Iconi T2"
 		else
-			MsgBox "当前适配 非Rime输入法。", "终点 输入法插件", "Iconi T1"
+			MsgBox "当前适配 非Rime输入法。", "终点 输入法插件", "Iconi T2"
 	}
 }
 #SuspendExempt False
