@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/7/27
+ * 更新：2026/8/3
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v8.75.235`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v8.75.236`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 global Commit := ''  ; 刚上屏的标点
 global Prev := ''  ; 光标前1个内容
@@ -58,40 +58,43 @@ Loop Parse, letters  ;添加大写字母热键，使按键可以按顺序执行
 ; ~~~~~~ Optional Hotkeys End ~~~~~~
 
 /*
- * 根据所提供的 英文按键参数（用于输入引号）和 中文标点参数 输入对应的中文后标点
+ * 根据所提供的 front（前标点）参数 输入对应的后标点
  * 参数：
- *   en (string) 英文按键 对应英文标点符号
- *   cn (string) 中文标点
+ *   front (string) 前标点
  */
-autoPairCN(en, cn) {
-	switch cn {
+autoPair(front) {
+	switch front {
+		case '(', '[', '{':
+			if not WinActive("ahk_group AutoPair") and shouldPair(front) {  ; 如果 是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
+				if Tip
+					showTip("Pair", 1)
+				SendText getPair(front)  ; 输入对应的后标点
+				Send "{Left}"  ; 光标回到配对标点中间
+			}
+		case '"', "'":
+			if not WinActive("ahk_group AutoPair") and (Prev = ' ' or Prev ~= '`a)\R$' or Prev = '`t' or Prev = '') and shouldPair(front) {  ; 如果 是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
+				if Tip
+					showTip("Pair", 1)
+				SendText getPair(front)  ; 输入对应的后标点
+				Send "{Left}"  ; 光标回到配对标点中间
+			}
 		case '“', '‘':
 			if Commit = '“' or Commit = '‘'  ; 如果 刚输入的是中文引号前标点
 				if shouldPair(Commit) {  ; 如果 应该自动配对，则……
 					if Tip
 						showTip("配对", 1)
-					Send en "{Left}"  ; ⚠ 交给输入法处理
+					if Commit = '“'
+						Send "`"{Left}"  ; ※ 交给输入法处理
+					else
+						Send "'{Left}"  ; ※ 交给输入法处理
 				}
 		case '（', '【', '「', '《':
-			if shouldPair(cn) {
-				if Tip and cn = '（'
+			if shouldPair(front) {
+				if Tip and front = '（'
 					showTip("配对", 1)
-				SendText getPair(cn)
+				SendText getPair(front)
 				Send "{Left}"
 			}
-	}
-}
-/*
- * 根据所提供的 英文标点参数 输入对应的英文后标点
- * 参数：
- *   en (string) 英文标点
- */
-autoPairEN(en) {
-	if (InStr("([{", en) or ((en = '"' or en = "'") and (Prev = ' ' or Prev ~= '`a)\R$' or Prev = '`t' or Prev = ''))) and not WinActive("ahk_group AutoPair") and shouldPair(en) {  ; 如果 是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
-		if Tip and InStr("(`"'", en)
-			showTip("Pair", 1)
-		SendText getPair(en)  ; 输入对应的后标点
-		Send "{Left}"  ; 光标回到配对标点中间
 	}
 }
 /*
@@ -445,15 +448,17 @@ reKeyState(key) {
 	}
 }
 /*
- * 根据提供的 英文按键参数（用于输入引号）和 中文标点参数 来上屏中文标点
+ * 将提供的 punct（标点）参数 输出到屏幕
  * 参数：
- *   en (string) 英文按键 对应英文标点符号
- *   cn (string) 中文标点
+ *   punct (string) 标点
  */
-sendCN(en, cn) {
-	switch cn {
+output(punct) {
+	switch punct {
 		case '“', '‘':
-			Send en  ; ※ 交给输入法处理
+			if punct = '“'
+				Send '"'  ; ※ 交给输入法处理
+			else
+				Send "'"  ; ※ 交给输入法处理
 			global Commit := getPrev()
 			if Commit = '“' or Commit = '‘' {  ; 如果 刚输入的是中文引号前标点
 				if Tip
@@ -462,26 +467,18 @@ sendCN(en, cn) {
 				showTip("后", 1)
 		case '（', '）', '【', '】', '「', '」', '《', '》':
 			if Tip
-				if cn = '（'
+				if punct = '（'
 					showTip("前", 1)
-				else if cn = '）'
+				else if punct = '）'
 					showTip("后", 1)
-			SendText cn
-		default:  ; 其他中文单标点
-			if Tip and InStr("，：；？！｜～", cn)
+			SendText punct
+		default:  ; 其他中、英文单标点
+			if Tip and InStr("(`"'[{", punct)
+				showTip("En", 1)
+			if Tip and InStr("，：；？！｜～", punct)
 				showTip("中", 1)
-			SendText cn
+			SendText punct
 	}
-}
-/*
- * 根据提供的英文按键来上屏英文标点，并在适当情况下自动配对
- * 参数：
- *   en (string) 英文按键 对应英文标点符号
- */
-sendEN(en) {
-	SendText en
-	if Tip and InStr("(`"'", en)
-		showTip("En", 1)
 }
 /*
  * 通过所提供的 前标点参数 和检测光标后的内容来判断是否应该输入配对的后标点符号
@@ -500,7 +497,7 @@ shouldPair(front) {
 	; 如果后一个字符是空字符 或 空格 或 换行符
 	if next = '' or next = ' ' or next ~= '`a)\R$'
 		return true
-	; 如果给定前标点 并且 前标点是‘"’、‘'’、‘“’或‘‘’
+	; 如果前标点是‘"’、‘'’、‘“’或‘‘’
 	if InStr("`"'“‘", front)
 		return false
 	if InStr("(`"'[{（“‘【「《", front) and isPair(front, next)  ; 如果前标点和后一个字符是配对标点
@@ -556,14 +553,14 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 	if KeyWait(en, "T" String(Interval)) {  ; ### 短按
 		if en = cn  ; 如果英文标点和中文标点相同，直接输出
 			SendText en
-		else {  ; 中文英文标点和中文标点不同
+		else {  ; 英文标点和中文标点不同
 			choice := smartChoice(en, cn)  ; （⚠ 由于getPrev函数的执行时间可能会超过0.5秒，因此不能放在if语句之前，否则不能正确检测是短按还是长按）
 			if choice = en {  ; 如果 应该输入英文标点
 				SendText en
-				autoPairEN(en)  ; 自动配对英文标点
+				autoPair(en)  ; 自动配对英文标点
 			} else {  ; 应该输入中文标点
-				sendCN(en, cn)
-				autoPairCN(en, cn)  ; 自动配对中文标点
+				output(cn)
+				autoPair(cn)  ; 自动配对中文标点
 			}
 		}
 	} else {  ; 妙按 和 长按
@@ -576,7 +573,7 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 				if InStr("/&|@%^$", en)  ; 如果是Rime功能触发键
 					en = '^' ? Send("{" en "}") : Send(en)  ; 交给输入法处理
 				else  ; 不是Rime功能触发键
-					sendCN(en, cn)  ; （※ 后面#1再作配对处理）
+					output(cn)  ; （※ 后面#1再作配对处理）
 			} else {  ; 本来应该输入中文标点，变成输入英文标点
 				if InStr("/&|@%^$", en)  ; 如果是Rime功能触发键
 					en = '^' ? Send("{" en "}") : Send(en)  ; 交给输入法处理
@@ -587,7 +584,7 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 			if en = cn  ; 如果英文标点和中文标点相同，直接输出
 				SendText en
 			else if choice = en  ; 本来应该输入英文标点，变成输入中文标点
-				sendCN(en, cn)
+				output(cn)
 			else  ; 本来应该输入中文标点，变成输入英文标点
 				SendText en
 		}
@@ -602,16 +599,16 @@ smartType(en, cn?) {  ; （※ Send函数中[^+!#]标点须用{}包裹。）
 				Send "{BS}{Text}" en  ; 删除妙按输入的中文标点（或者关闭输入法候选窗口），并输入1个英文标点（※ 此操作统一不同中文输入法的行为）
 			} else {  ; 如果应该输入中文
 				Send "{BS}"  ; 删除妙按时输入的英文标点（或者关闭输入法候选窗口）（※ 此操作统一不同中文输入法的行为）
-				sendCN(en, cn)
+				output(cn)
 			}
 			Sleep 1000 * Interval
 		} else {  ; ### 妙按后没有长按（#1）
 			if en = cn  ; 如果英文标点和中文标点相同，直接返回（⚠ 此处假设中英文相同标点不存在配对标点）
 				return
 			else if choice = en  ; ⚠ 如果妙按时输入中文
-				autoPairCN(en, cn)  ; 自动配对中文标点
+				autoPair(cn)  ; 自动配对中文标点
 			else  ; 否则 如果妙按时输入英文
-				autoPairEN(en)  ; 自动配对英文标点
+				autoPair(en)  ; 自动配对英文标点
 			return
 		}
 		; ### 长按的后续输入
