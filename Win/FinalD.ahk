@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/8/3
+ * 更新：2026/8/8
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v8.75.236`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v8.75.239`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 global Commit := ''  ; 刚上屏的标点
 global Prev := ''  ; 光标前1个内容
@@ -116,37 +116,32 @@ drift(origin, list*) {
 		i += 1  ; 定位列表中所找到的标点符号的下1个标点符号
 	if origin = '…' or origin = '—'  ; 如果原来的标点是‘……’或‘——’
 		Send "{BS}"  ; 多输入1个退格键
-	Send "{BS}{Text}" list[i]  ; 漂移标点符号
-	if Tip
-		switch list[i] {
-			case '，', '：', '；', '？', '！', '｜', '～', '＄', '／', '＼', '〈': showTip("中", 1)
-			case '］', '｝', '〉': showTip("后", 1)
-		}
-}
-/*
- * 转换有配对标点的标点
- * 参数：
- *   origin (string) 将要被转换的标点
- *   list (string) 转换成的目标标点
- */
-driftPair(origin, list) {
-	if Tip and InStr("“‘（［｛〈", list)
-		showTip("前", 1)
-	if Smart and hasPair(origin) {  ; 如果原来的前标点有配对的后标点
-		Send "{Del}"  ; 先删除后标点
-		Send "{BS}{Text}!"  ; 删除原来的前标点，并输入感叹号防止软件自动配对
-		Send "{Left}{Text}" list  ; 光标归位，输入新标点
-		newPair := getPair(list)  ; 获取新标点的配对标点（如果有的话）
+	if Smart and hasPair(origin) {  ; 如果（表格）兼容模式*没有*开启 并且 原来的前标点有配对的后标点
+		Send "{Del}{Text}!"  ; 先删除后标点，并输入感叹号防止软件过度自动化
+		Send "{Left}{BS}"  ; 光标归位，删除原来的前标点，
+		SendText list[i]  ; 输入新标点
+		newPair := getPair(list[i])  ; 获取新标点的配对标点（如果有的话）
 		if newPair {  ; 如果有配对标点
 			if Tip and InStr("”’）］｝〉", newPair)
 				showTip("配对", 1)
 			SendText newPair  ; 输入配对标点
-			Send "{Del}{Left}"  ; 删除之前用于防止软件自动配对的感叹号，光标回到配对标点中间
+			Send "{Del}{Left}"  ; 删除之前用于防止软件过度自动化的感叹号，光标回到配对标点中间
 		} else {
-			Send "{Del}"  ; 删除之前用于防止软件自动配对的感叹号
+			Send "{Del}"  ; 删除之前用于防止软件过度自动化的感叹号
 		}
 	} else {  ; 否则（原来的前标点没有配对的后标点）
-		Send "{BS}{Text}" list
+		if Tip
+			switch list[i] {
+				case '，', '：', '；', '？', '！', '｜', '～', '＄', '／', '＼': showTip("中", 1)
+				case '“', '‘', '（', '［', '｛', '〈': showTip("前", 1)
+				case '”', '’', '）', '］', '｝', '〉': showTip("后", 1)
+			}
+		if InStr("`"')]}", list[i]) {	; 如果新标点是英文后标点
+			SendText "!"  ; 输入感叹号防止软件过度自动化
+			Send "{Left}{BS}{Text}" list[i]  ; 光标归位，漂移标点符号
+			Send "{Del}"  ; 删除之前用于防止软件过度自动化的感叹号
+		} else
+			Send "{BS}{Text}" list[i]  ; 漂移标点符号
 	}
 }
 /*
@@ -748,59 +743,45 @@ $:: {
 ~LShift up:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
 	if HolyShift and A_PriorKey = "LShift"
 		switch origin := getPrev() {  ; 获取光标前一个内容（将要被变换的标点）
-			case '。', '.', '℃', '°', '℉': drift(origin, '。', '.')
+			case '.', '。', '℃', '°', '℉': drift(origin, '。', '.')
 
-			case '，', ',', '∈', '⊆', '⊂': drift(origin, '，', ',')
+			case ',', '，', '∈', '⊆', '⊂': drift(origin, '，', ',')
 
-			case '(', '〔', '〘': driftPair(origin, '（')
-			case '（': driftPair('（', '(')
+			case '(', '（', '〔', '〘': drift(origin, '（', '(')
 
-			case ')', '〕', '〙': Send "{BS}{Text}）"
-				if Tip
-					showTip("后", 1)
-			case '）': SendText("!"), Send("{Left}{BS}{Text})"), Send("{Del}")
+			case ')', '）', '〕', '〙': drift(origin, '）', ')')
 
 			case '_', '—', '∪', '∩': drift(origin, '_', '——')
 
 			case '：', ':', '∵', '∴', '∷': drift(origin, '：', ':')
 
-			case '"': driftPair('"', '“')
-			case '“': driftPair('“', '"')
-			case '”': SendText("!"), Send("{Left}{BS}{Text}`""), Send("{Del}")
+			case '"', '“', '”': drift(origin, '"', '“')
 
 			case '/', '÷', '／', '≠', '√': drift(origin, '/', '÷')
 
 			case '=', '≈', '⇒', '⇔', '≡', '≌': drift(origin, '=', '≈')
 
-			case '<', '〈': driftPair(origin, '《')
-			case '《': driftPair('《', '<')
-			case '≤', '«', '‹': Send "{BS}{Text}《"
+			case '<', '《', '〈', '≤', '«', '‹': drift(origin, '《', '<')
 
-			case '》', '>', '〉', '≥', '»', '›': drift(origin, '》', '>')
+			case '>', '》', '〉', '≥', '»', '›': drift(origin, '》', '>')
 
-			case '；', ';', '☐', '☑', '☒': drift(origin, '；', ';')
+			case ';', '；', '☐', '☑', '☒': drift(origin, '；', ';')
 
 			case '-', '¬', '∨', '∧': drift(origin, '-', '¬')
 
-			case '{', '『', '｛': driftPair(origin, '「')
-			case '「': driftPair('「', '{')
+			case '{', '「', '『', '｛': drift(origin, '「', '{')
 
-			case '}', '』', '｝': Send "{BS}{Text}」"
-			case '」': SendText("!"), Send("{Left}{BS}{Text}}"), Send("{Del}")
+			case '}', '」', '』', '｝': drift(origin, '」', '}')
 
-			case "'": driftPair("'", '‘')
-			case "‘": driftPair('‘', "'")
-			case "’": SendText("!"), Send("{Left}{BS}{Text}'"), Send("{Del}")
+			case "'", "‘", "’": drift(origin, "'", '‘')
 
 			case '*', '×', '·', '＊', '∏': drift(origin, '*', '×')
 
 			case '#', '■', '◆', '◇', '□': drift(origin, '#', '■')
 
-			case '[': driftPair('[', '【')
-			case '【', '〖', '［': driftPair(origin, '[')
+			case '[', '【', '〖', '［': drift(origin, '【', '[')
 
-			case ']': Send "{BS}{Text}】"
-			case '】', '〗', '］': SendText("!"), Send("{Left}{BS}{Text}]"), Send("{Del}")
+			case ']', '】', '〗', '］': drift(origin, '】', ']')
 
 			case '``', 'π', 'α', 'β', 'γ', 'λ', 'μ': drift(origin, '``', 'π')
 
@@ -831,12 +812,11 @@ $:: {
 ~RShift up:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
 	if HolyShift and A_PriorKey = "RShift"
 		switch origin := getPrev() {  ; 获取光标前一个内容（将要被变换的标点）
-			case '。', '.', '℃', '°', '℉': drift(origin, '℃', '°', '℉')
+			case '.', '。', '℃', '°', '℉': drift(origin, '℃', '°', '℉')
 
-			case '，', ',', '∈', '⊆', '⊂': drift(origin, '∈', '⊆', '⊂')
+			case ',', '，', '∈', '⊆', '⊂': drift(origin, '∈', '⊆', '⊂')
 
-			case '(', '（', '〘': driftPair(origin, '〔')
-			case '〔': driftPair('〔', '〘')
+			case '(', '（', '〔', '〘': drift(origin, '〔', '〘')
 
 			case ')', '）', '〕', '〙': drift(origin, '〕', '〙')
 
@@ -856,9 +836,7 @@ $:: {
 
 			case '=', '≈', '⇒', '⇔', '≡', '≌': drift(origin, '⇒', '⇔', '≡', '≌')
 
-			case '<', '《': driftPair(origin, '〈')
-			case '〈': driftPair('〈', '≤')
-			case '≤', '«', '‹': drift(origin, '〈', '≤', '«', '‹')
+			case '<', '《', '〈', '≤', '«', '‹': drift(origin, '〈', '≤', '«', '‹')
 
 			case '》', '>', '〉', '≥', '»', '›': drift(origin, '〉', '≥', '»', '›')
 
@@ -866,8 +844,7 @@ $:: {
 
 			case '-', '¬', '∨', '∧': drift(origin, '∨', '∧')
 
-			case '{', '「', '｛': driftPair(origin, '『')
-			case '『': driftPair('『', '｛')
+			case '{', '「', '『', '｛': drift(origin, '『', '｛')
 
 			case '}', '」', '』', '｝': drift(origin, '』', '｝')
 
@@ -883,8 +860,7 @@ $:: {
 
 			case '#', '■', '◆', '◇', '□': drift(origin, '◆', '◇', '□')
 
-			case '[', '【', '［': driftPair(origin, '〖')
-			case '〖': driftPair('〖', '［')
+			case '[', '【', '〖', '［': drift(origin, '〖', '［')
 
 			case ']', '】', '〗', '］': drift(origin, '〗', '］')
 
