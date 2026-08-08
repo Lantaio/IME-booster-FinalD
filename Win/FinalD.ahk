@@ -101,24 +101,24 @@ autoPair(front) {
  * 标点符号循环漂移
  * 参数：
  *   origin (string) 将要被转换的标点符号
- *   pList* (string array)(可变) 标点符号循环漂移列表（数组）
+ *   list* (string array)(可变) 标点符号循环漂移列表（数组）
  */
-drift(origin, pList*) {
+drift(origin, list*) {
 	i := 0
-	loop pList.length
-		if origin = pList[A_Index] {  ; 如果将要被转换的标点符号在漂移列表中
+	loop list.length
+		if origin = list[A_Index] {  ; 如果将要被转换的标点符号在漂移列表中
 			i := A_Index
 			break
 		}
-	if i = 0 or i = pList.length  ; 如果在漂移列表中不存在这个标点符号 或者 是列表中最后1个标点符号
+	if i = 0 or i = list.length  ; 如果在漂移列表中不存在这个标点符号 或者 是列表中最后1个标点符号
 		i := 1  ; 定位列表中第1个标点符号
 	else
 		i += 1  ; 定位列表中所找到的标点符号的下1个标点符号
 	if origin = '…' or origin = '—'  ; 如果原来的标点是‘……’或‘——’
 		Send "{BS}"  ; 多输入1个退格键
-	Send "{BS}{Text}" pList[i]  ; 漂移标点符号
+	Send "{BS}{Text}" list[i]  ; 漂移标点符号
 	if Tip
-		switch pList[i] {
+		switch list[i] {
 			case '，', '：', '；', '？', '！', '｜', '～', '＄', '／', '＼', '〈': showTip("中", 1)
 			case '］', '｝', '〉': showTip("后", 1)
 		}
@@ -127,24 +127,26 @@ drift(origin, pList*) {
  * 转换有配对标点的标点
  * 参数：
  *   origin (string) 将要被转换的标点
- *   target (string) 转换成的目标标点
+ *   list (string) 转换成的目标标点
  */
-driftPair(origin, target) {
-	SendText "!"
-	Send "{Left}{BS}"
-	SendText target
-	if Tip and InStr("（“‘［｛〈", target)
+driftPair(origin, list) {
+	if Tip and InStr("“‘（［｛〈", list)
 		showTip("前", 1)
-	Send "{Del}"
-	if Smart and hasPair(origin) {  ; 如果（表格）兼容模式没有开启 并且 原来的前标点有对应的后标点
-		Send "{Del}{Text}!"  ; 删除原来的后标点
-		Send "{Left}"
-		SendText getPair(target)  ; 输出新的后标点
-		if Tip and InStr("（“‘［｛〈", target)
-			showTip("配对", 1)
-		Send "{Del}{Left}"
-		if target = '≤'
-			Send "{Right}"
+	if Smart and hasPair(origin) {  ; 如果原来的前标点有配对的后标点
+		Send "{Del}"  ; 先删除后标点
+		Send "{BS}{Text}!"  ; 删除原来的前标点，并输入感叹号防止软件自动配对
+		Send "{Left}{Text}" list  ; 光标归位，输入新标点
+		newPair := getPair(list)  ; 获取新标点的配对标点（如果有的话）
+		if newPair {  ; 如果有配对标点
+			if Tip and InStr("”’）］｝〉", newPair)
+				showTip("配对", 1)
+			SendText newPair  ; 输入配对标点
+			Send "{Del}{Left}"  ; 删除之前用于防止软件自动配对的感叹号，光标回到配对标点中间
+		} else {
+			Send "{Del}"  ; 删除之前用于防止软件自动配对的感叹号
+		}
+	} else {  ; 否则（原来的前标点没有配对的后标点）
+		Send "{BS}{Text}" list
 	}
 }
 /*
@@ -366,11 +368,11 @@ getNext() {
 	return clip
 }
 /*
- * 根据提供的前标点返回对应的后标点。
+ * 获取 front前标点参数 对应的后标点，如果不存在配对标点，则返回空字符。
  * 参数：
  *   front (string) 前标点
  * 返回值：
- *   (string) 对应的后标点
+ *   (string) front标点对应的后标点 或 空字符
  */
 getPair(front) {
 	switch front {
@@ -394,6 +396,7 @@ getPair(front) {
 		case '《': return '》'
 		case '〈': return '〉'
 	}
+	return ''
 }
 /*
  * 检测front标点是否有配对的后标点
@@ -667,17 +670,22 @@ errorHandler(ex, mode) {
 #HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) and IsCNInputMode()
 .:: smartType('.', '。')
 ,:: smartType(',', '，')
-(:: smartType('(', '（')
-):: smartType(')', '）')
+(:: {
+	; Send "{Blind}{9 up}{LShift up}"
+	smartType('(', '（')
+	; reKeyState "LShift"  ; 恢复Shift键的物理状态
+}
+):: {
+	; Send "{Blind}{0 up}{LShift up}"
+	smartType(')', '）')
+}
 _:: {  ; （连按键）
 	; Send "{Blind}{- up}{LShift up}"
-	SendText smartType('_', '——')
-	; reKeyState "LShift"  ; 可自动重复
+	smartType('_', '——')
 }
 ::: {
 	; Send "{Blind}{; up}{LShift up}"
 	smartType(':', '：')  ; 长按输入中文标点
-	; reKeyState "LShift"  ; 可自动重复
 }
 ":: {
 	Send "{Blind}{' up}{LShift up}"
@@ -698,7 +706,10 @@ _:: {  ; （连按键）
 ]:: smartType(']', '】')
 `:: smartType(ThisHotkey)
 +:: SendText ThisHotkey  ; （连按键）
-&:: smartType(ThisHotkey)
+&:: {
+	; Send "{Blind}{7 up}{LShift up}"
+	smartType(ThisHotkey)
+}
 ?:: {
 	; Send "{Blind}{/ up}{LShift up}"
 	smartType('?', '？')
