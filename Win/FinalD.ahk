@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/8/8
+ * 更新：2026/8/10
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v8.75.239`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v9.77.245`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 global Commit := ''  ; 刚上屏的标点
 global Prev := ''  ; 光标前1个内容
@@ -116,7 +116,7 @@ drift(origin, list*) {
 		i += 1  ; 定位列表中所找到的标点符号的下1个标点符号
 	if origin = '…' or origin = '—'  ; 如果原来的标点是‘……’或‘——’
 		Send "{BS}"  ; 多输入1个退格键
-	if Smart and hasPair(origin) {  ; 如果（表格）兼容模式*没有*开启 并且 原来的前标点有配对的后标点
+	if Smart and hasPair(origin) {  ; 如果（表格）兼容模式*没有*开启 并且 原来的标点有配对的后标点
 		Send "{Del}{Text}!"  ; 先删除后标点，并输入感叹号防止软件过度自动化
 		Send "{Left}{BS}"  ; 光标归位，删除原来的前标点，
 		SendText list[i]  ; 输入新标点
@@ -129,7 +129,7 @@ drift(origin, list*) {
 		} else {
 			Send "{Del}"  ; 删除之前用于防止软件过度自动化的感叹号
 		}
-	} else {  ; 否则（原来的前标点没有配对的后标点）
+	} else {  ; 否则（原来的标点没有配对的后标点）
 		if Tip
 			switch list[i] {
 				case '，', '：', '；', '？', '！', '｜', '～', '＄', '／', '＼': showTip("中", 1)
@@ -737,93 +737,136 @@ $:: {
 	smartType('$', '￥')
 }
 
+/*
+ * 解析YAML中的单值字符串，去除外层引号。
+ * 参数：
+ *   value (string) 需要处理的字符串
+ * 返回值：
+ *   (string) 去除引号后的原始字符内容
+ * 说明：
+ *   YAML中键和值通常写成 '。' 或 "." 这样的形式；
+ *   这里需要把外层的单/双引号去掉，避免后续把实际符号当作带引号文本处理。
+ */
+parseYAMLScalar(value) {
+	value := Trim(value)  ; 去掉行首行尾空白，否则像 "  '。'  " 这种格式也能正常处理
+	if value = ''  ; 空字符串直接返回，避免后面索引出错
+		return ''
+	if (SubStr(value, 1, 1) = "'" and SubStr(value, -1) = "'") or (SubStr(value, 1, 1) = '"' and SubStr(value, -1) = '"')
+		return SubStr(value, 2, StrLen(value) - 2)  ; 去掉外层的一对引号，保留真实标点字符本身
+	return value  ; 如果本来就不是带引号的值，就直接返回原始内容
+}
+
+/*
+ * 读取并解析 Symbol.yaml 中的左/右Shift漂移配置。
+ * 参数：无
+ * 返回值：
+ *   (Map) 结构类似：
+ *       {
+ *           "LShift": Map(".", ["。", "."]),
+ *           "RShift": Map(".", ["℃", "°", "℉"])
+ *       }
+ * 说明：
+ *   该函数会在脚本首次运行时缓存配置，避免每次按下Shift都重复读取文件。
+ *   它会逐行扫描 YAML，识别 LShift/RShift 章节和其后面的键值列表，
+ *   然后将每个键映射到一个字符串数组，用于真正的标点漂移循环。
+ */
+getSymbolMap() {
+	static symbolMap := ''  ; 缓存配置，避免每次按下Shift都重复读文件，减小开销并保持一致
+	if symbolMap != ''  ; 如果已经加载过一次，就直接返回缓存结果
+		return symbolMap
+	symbolMap := Map("LShift", Map(), "RShift", Map())  ; 初始化两套映射：左右Shift分别保存各自的漂移列表
+	filePath := A_ScriptDir "\MySettings\Symbol.yaml"  ; 这里直接读取脚本目录下的用户配置文件
+	if !FileExist(filePath)  ; 如果文件不存在，就返回空配置，不影响其它功能
+		return symbolMap
+	text := FileRead(filePath)  ; 把 YAML 全部读成字符串
+	if text = ''  ; 空文件直接返回空配置
+		return symbolMap
+	section := ''  ; 当前处于哪个分组：LShift / RShift
+	for line in StrSplit(text, "`n", "`r") {  ; 逐行扫描，兼容 Windows 的 CRLF 和 LF 两种换行方式
+		line := Trim(line)  ; 去掉首尾空白，方便判断注释和章节头
+		if line = '' or RegExMatch(line, '^\s*#')  ; 跳过空行和注释行
+			continue
+		if RegExMatch(line, '^(LShift|RShift)\s*:\s*$', &m) {  ; 识别 "LShift:" / "RShift:" 章节头
+			section := m[1]  ; 切换到当前章节
+			continue
+		}
+		if section = '' || !InStr(line, ':') || !InStr(line, '[') || !InStr(line, ']')  ; 只处理当前分组下的键值列表
+			continue
+		keyText := Trim(SubStr(line, 1, InStr(line, ':') - 1))  ; 取出键名，例如 "." 或 "?"
+		listText := Trim(SubStr(line, InStr(line, '[') + 1, InStr(line, ']') - InStr(line, '[') - 1))  ; 取出列表内容，例如 "'。', '.'"
+		key := parseYAMLScalar(keyText)  ; 去掉键名周围引号，得到真实符号
+		list := []  ; 这个键对应的漂移顺序列表
+		if listText != '' {  ; 如果列表不是空的才继续解析
+			for item in StrSplit(listText, ',') {  ; 按逗号拆分列表项
+				value := parseYAMLScalar(Trim(item))  ; 每一项也去掉引号形成真实字符
+				if value != ''  ; 跳过空项，避免把空字符串写进列表
+					list.Push(value)
+			}
+		}
+		symbolMap[section].Set(key, list)  ; 把 "键 -> 列表" 保存进对应的 Map 中
+	}
+	return symbolMap  ; 返回整个配置对象，供后续查表使用
+}
+
+/*
+ * 根据 触发的热键（hotkey:LShift/RShift）和 所提供的标点符号（symbol）返回此触发热键映射表中此标点符号对应的漂移列表。
+ * 参数：
+ *   hotkey (string) 触发的热键，可为 "LShift" 或 "RShift"
+ *   symbol (string) 用于在映射表中查找的标点符号
+ * 返回值：
+ *   (array) 对应的漂移列表，例如 [ '。', '.' ] 或 [ '℃', '°', '℉' ]
+ * 说明：
+ *   关键点在于：symbol 不是按键本身，而是当前光标前的实际字符。
+ *   所以不能直接用 symbol 去索引 YAML 的键名；需要先在所有 Shift 配置里
+ *   搜索哪个按键列表包含这个字符，再根据触发的 Shift 方向选择对应的同键列表。
+ *   例如 symbol='℉' 时：
+ *   - 先在 LShift 和 RShift 两张表中搜索包含 '℉' 的列表，发现是 '.' 的列表
+ *   - 若触发的是 LShift up，则用 LShift['.'] 这个列表做循环漂移
+ *   - 若触发的是 RShift up，则用 RShift['.'] 这个列表做循环漂移
+ *   外层的 drift(origin, list*) 会按所选列表顺序循环切换。
+ */
+getSymbolList(hotkey, symbol) {
+	symbolMap := getSymbolMap()  ; 获取标点符号自定制配置表
+	if !symbolMap.Has("LShift") || !symbolMap.Has("RShift")  ; 若两张表都不存在，则直接返回空数组
+		return []
+	matchedKey := ''  ; 记录 symbol 所在的键名，例如 '.'
+	for _, section in ["LShift", "RShift"] {  ; 先在左右两张表中找出包含 symbol 的键名
+		for key, list in symbolMap[section] {
+			if key = symbol {
+				matchedKey := key
+				break 2
+			}
+			for item in list {
+				if item = symbol {
+					matchedKey := key
+					break 2
+				}
+			}
+		}
+	}
+	if matchedKey = ''  ; 如果两张表都没找到，就返回空数组
+		return []
+	if symbolMap.Has(hotkey) && symbolMap[hotkey].Has(matchedKey)  ; 只返回当前触发 Shift 方向下的同键列表
+		return symbolMap[hotkey][matchedKey]
+	return []  ; 若当前方向不存在该键，则直接忽略，不做漂移
+}
+
 ; 如果*不是*（存在输入法候选窗口 或 当前软件是 不适用须要排除的应用程序组 或 文件管理器且活动控件*不是*输入框）
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not InStr(ControlGetClassNN(ControlGetFocus("A")), "edit")))  ; or hasMS_IMEWindow()
 ; 英/中常用标点变换，处理有配对标点符号时按情况变换单个或者成对标点。
 ~LShift up:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
-	if HolyShift and A_PriorKey = "LShift"
-		switch origin := getPrev() {  ; 获取光标前一个内容（将要被变换的标点）
-			case '.', '。', '℃', '°', '℉': drift(origin, '。', '.')
-
-			case ',', '，', '∈', '⊆', '⊂': drift(origin, '，', ',')
-
-			case '(', '（', '〔', '〘': drift(origin, '（', '(')
-
-			case ')', '）', '〕', '〙': drift(origin, '）', ')')
-
-			case '_', '—', '∪', '∩': drift(origin, '_', '——')
-
-			case '：', ':', '∵', '∴', '∷': drift(origin, '：', ':')
-
-			case '"', '“', '”': drift(origin, '"', '“')
-
-			case '/', '÷', '／', '≠', '√': drift(origin, '/', '÷')
-
-			case '=', '≈', '⇒', '⇔', '≡', '≌': drift(origin, '=', '≈')
-
-			case '<', '《', '〈', '≤', '«', '‹': drift(origin, '《', '<')
-
-			case '>', '》', '〉', '≥', '»', '›': drift(origin, '》', '>')
-
-			case ';', '；', '☐', '☑', '☒': drift(origin, '；', ';')
-
-			case '-', '¬', '∨', '∧': drift(origin, '-', '¬')
-
-			case '{', '「', '『', '｛': drift(origin, '「', '{')
-
-			case '}', '」', '』', '｝': drift(origin, '」', '}')
-
-			case "'", "‘", "’": drift(origin, "'", '‘')
-
-			case '*', '×', '·', '＊', '∏': drift(origin, '*', '×')
-
-			case '#', '■', '◆', '◇', '□': drift(origin, '#', '■')
-
-			case '[', '【', '〖', '［': drift(origin, '【', '[')
-
-			case ']', '】', '〗', '］': drift(origin, '】', ']')
-
-			case '``', 'π', 'α', 'β', 'γ', 'λ', 'μ': drift(origin, '``', 'π')
-
-			case '+', '±', '∑', '∫', '∮': drift(origin, '+', '±')
-
-			case '&', '※', '§', '∞', '∝': drift(origin, '&', '※')
-
-			case '？', '?', '✔', '❌', '✘', '⭕': drift(origin, '？', '?')
-
-			case '！', '!', '▲', '⚠', '△': drift(origin, '！', '!')
-
-			case '\', '、', '→', '↔', '←', '＼': drift(origin, '\', '、')
-
-			case '｜', '|', '↑', '↕', '↓', '‖': drift(origin, '｜', '|')
-
-			case '@', '©', '●', '®', '™', '○': drift(origin, '@', '©')
-
-			case '%', '‰', '★', '☆', '✪': drift(origin, '%', '‰')
-
-			case '^', '…', '⌘', '⌥', '⇧', '↩': drift(origin, '^', '……')
-
-			case '~', '～', 'Δ', 'Ω', 'Θ', 'Λ', 'Φ': drift(origin, '~', '～')
-
-			case '$', '￥', '＄', '¥', '€', '£', '¢', '¤': drift(origin, '$', '￥')
-		}
+	if HolyShift and A_PriorKey = "LShift" {
+		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
+		list := getSymbolList("LShift", origin)
+		if list.Length
+			drift(origin, list*)
+	}
 }
 ; 扩展标点变换。处理有配对标点符号时可快速变换单个或者成对标点。
 ~RShift up:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
-	if HolyShift and A_PriorKey = "RShift"
-		switch origin := getPrev() {  ; 获取光标前一个内容（将要被变换的标点）
-			case '.', '。', '℃', '°', '℉': drift(origin, '℃', '°', '℉')
-
-			case ',', '，', '∈', '⊆', '⊂': drift(origin, '∈', '⊆', '⊂')
-
-			case '(', '（', '〔', '〘': drift(origin, '〔', '〘')
-
-			case ')', '）', '〕', '〙': drift(origin, '〕', '〙')
-
-			case '_', '—', '∪', '∩': drift(origin, '∪', '∩')
-
-			case '：', ':', '∵', '∴', '∷': drift(origin, '∵', '∴', '∷')
-
+	if HolyShift and A_PriorKey = "RShift" {
+		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
+		switch origin {
 			case '"': Send "{Left}{Del}{Text}“"
 				if Tip
 					showTip("前", 1)
@@ -831,23 +874,6 @@ $:: {
 				if Tip
 					showTip("后", 1)
 			case '”': SendText("!"), Send('{Left}{BS}{Text}"'), Send("{Del}")
-
-			case '/', '÷', '／', '≠', '√': drift(origin, '／', '≠', '√')
-
-			case '=', '≈', '⇒', '⇔', '≡', '≌': drift(origin, '⇒', '⇔', '≡', '≌')
-
-			case '<', '《', '〈', '≤', '«', '‹': drift(origin, '〈', '≤', '«', '‹')
-
-			case '》', '>', '〉', '≥', '»', '›': drift(origin, '〉', '≥', '»', '›')
-
-			case '；', ';', '☐', '☑', '☒': drift(origin, '☐', '☑', '☒')
-
-			case '-', '¬', '∨', '∧': drift(origin, '∨', '∧')
-
-			case '{', '「', '『', '｛': drift(origin, '『', '｛')
-
-			case '}', '」', '』', '｝': drift(origin, '』', '｝')
-
 			case "'": Send "{Left}{Del}{Text}‘"
 				if Tip
 					showTip("前", 1)
@@ -855,39 +881,12 @@ $:: {
 				if Tip
 					showTip("后", 1)
 			case "’": SendText("!"), Send("{Left}{BS}{Text}'"), Send("{Del}")
-
-			case '*', '×', '·', '＊', '∏': drift(origin, '·', '＊', '∏')
-
-			case '#', '■', '◆', '◇', '□': drift(origin, '◆', '◇', '□')
-
-			case '[', '【', '〖', '［': drift(origin, '〖', '［')
-
-			case ']', '】', '〗', '］': drift(origin, '〗', '］')
-
-			case '``', 'π', 'α', 'β', 'γ', 'λ', 'μ': drift(origin, 'α', 'β', 'γ', 'λ', 'μ')
-
-			case '+', '±', '∑', '∫', '∮': drift(origin, '∑', '∫', '∮')
-
-			case '&', '※', '§', '∞', '∝': drift(origin, '§', '∞', '∝')
-
-			case '？', '?', '✔', '❌', '✘', '⭕': drift(origin, '✔', '❌', '✘', '⭕')
-
-			case '！', '!', '▲', '⚠', '△': drift(origin, '▲', '⚠', '△')
-
-			case '\', '、', '→', '↔', '←', '＼': drift(origin, '→', '↔', '←', '＼')
-
-			case '｜', '|', '↑', '↕', '↓', '‖': drift(origin, '↑', '↕', '↓', '‖')
-
-			case '@', '©', '●', '®', '™', '○': drift(origin, '●', '®', '™', '○')
-
-			case '%', '‰', '★', '☆', '✪': drift(origin, '★', '☆', '✪')
-
-			case '^', '…', '⌘', '⌥', '⇧', '↩': drift(origin, '⌘', '⌥', '⇧', '↩')
-
-			case '~', '～', 'Δ', 'Ω', 'Θ', 'Λ', 'Φ': drift(origin, 'Δ', 'Ω', 'Θ', 'Λ', 'Φ')
-
-			case '$', '￥', '＄', '¥', '€', '£', '¢', '¤': drift(origin, '＄', '¥', '€', '£', '¢', '¤')
+			default:
+				list := getSymbolList("RShift", origin)
+				if list.Length
+					drift(origin, list*)
 		}
+	}
 }
 
 #HotIf
