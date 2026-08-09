@@ -7,7 +7,7 @@
 - 入口文件：Win/FinalD.ahk
 - 依赖/库：脚本通过 `#Include` 引入 `Win/Lib/` 下的模块。
 - 版本要求：必须使用 AutoHotkey >= v2.0.26。
-- 文件编码：所有可执行 `.ahk` 文件应保存为 UTF-8 with BOM。
+- 文件编码：所有文件使用UNIX(LF)换行符。所有可执行 `.ahk` 文件应保存为 UTF-8 with BOM，并使用UNIX(LF)换行符。
 
 运行与验证（手动）
 - 直接双击或用 AutoHotkey 运行 `Win/FinalD.ahk` 来启动脚本。

@@ -6,6 +6,7 @@
 ## 关键事实
 - 只支持 Windows系统和AutoHotkey v2.0.26 及以上版本。
 - 此项目使用 AutoHotkey v2 版脚本语言。
+- 所有文件使用UNIX(LF)换行符。
 - 所有`.ahk`文件必须保存为 UTF-8 with BOM 编码，尤其是 `Win/FinalD.ahk`、`Win/MySettings/*.ahk` 和 `Win/Settings/*.ahk`。
 - `Win/FinalD.ahk` 通过 `#Include "MySettings\AppGroup.ahk"` 和 `#Include "MySettings\Shortcut.ahk"` 加载自定义配置。
 - `Win/Settings/` 是默认配置模板，`Win/MySettings/` 是实际运行时的用户自定义配置。
