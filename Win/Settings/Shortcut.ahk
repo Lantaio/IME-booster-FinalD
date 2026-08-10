@@ -76,11 +76,11 @@ checkIME()  ; 程序初始化阶段检测当前输入法
 }
 <#.:: {  ; 左Win+.
 	if KeyWait('.', "T" String(Interval)) {  ; ### ✨️短按，启用/停用 此程序
-		global Rime  ; ✨️
 		Suspend
 		if A_IsSuspended
 			MsgBox "终点 输入法插件 全部功能 已停用⛔", "终点 输入法插件", "Iconx T2"
 		else {
+			checkIME()  ; ✨️每次从休眠中恢复启用此插件时检测正在使用的输入法
 			msg := "终点 输入法插件 已启用🚀`n`n左Win+Alt+. 查看各项功能的状态：`n"
 			msg .= "`n当前适配："
 			if Rime  ; ✨️
