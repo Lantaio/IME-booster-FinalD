@@ -736,7 +736,6 @@ $:: {
 	; Send "{Blind}{4 up}{RShift up}"
 	smartType('$', '￥')
 }
-
 /*
  * 解析YAML中的单值字符串，去除外层引号。
  * 参数：
@@ -755,7 +754,6 @@ parseYAMLScalar(value) {
 		return SubStr(value, 2, StrLen(value) - 2)  ; 去掉外层的一对引号，保留真实标点字符本身
 	return value  ; 如果本来就不是带引号的值，就直接返回原始内容
 }
-
 /*
  * 读取并解析 Symbol.yaml 中的左/右Shift漂移配置。
  * 参数：无
@@ -778,7 +776,7 @@ getSymbolMap() {
 	filePath := A_ScriptDir "\MySettings\Symbol.yaml"  ; 这里直接读取脚本目录下的用户配置文件
 	if !FileExist(filePath)  ; 如果文件不存在，就返回空配置，不影响其它功能
 		return symbolMap
-	text := FileRead(filePath)  ; 把 YAML 全部读成字符串
+	text := FileRead(filePath, "UTF-8")  ; 把 YAML 全部读成字符串
 	if text = ''  ; 空文件直接返回空配置
 		return symbolMap
 	section := ''  ; 当前处于哪个分组：LShift / RShift
@@ -799,7 +797,7 @@ getSymbolMap() {
 		if listText != '' {  ; 如果列表不是空的才继续解析
 			for item in StrSplit(listText, ',') {  ; 按逗号拆分列表项
 				value := parseYAMLScalar(Trim(item))  ; 每一项也去掉引号形成真实字符
-				if value != ''  ; 跳过空项，避免把空字符串写进列表
+				if value != "''" && value != '""'  ; 跳过空项，避免把空字符串写进列表
 					list.Push(value)
 			}
 		}
@@ -807,23 +805,21 @@ getSymbolMap() {
 	}
 	return symbolMap  ; 返回整个配置对象，供后续查表使用
 }
-
-/*
- * 根据 触发的热键（hotkey:LShift/RShift）和 所提供的标点符号（symbol）返回此触发热键映射表中此标点符号对应的漂移列表。
- * 参数：
- *   hotkey (string) 触发的热键，可为 "LShift" 或 "RShift"
- *   symbol (string) 用于在映射表中查找的标点符号
- * 返回值：
- *   (array) 对应的漂移列表，例如 [ '。', '.' ] 或 [ '℃', '°', '℉' ]
- * 说明：
- *   关键点在于：symbol 不是按键本身，而是当前光标前的实际字符。
+/**
+ * @function getSymbolList
+ * @description 根据 所触发的热键（hotkey:LShift/RShift）和 所提供的标点符号（symbol）返回hotkey热键的映射表中symbol标点符号所在的键的值列表。
+ * @param {string} hotkey - 所触发的热键（LShift 或 RShift）
+ * @param {string} symbol - 要在映射表中查找的标点符号
+ * @return {array} hotkey热键的映射表中symbol标点符号所在的键的值列表，例如 [ '。', '.' ] 或 [ '℃', '°', '℉' ]
+ * @abstract 关键点在于：symbol 不是按键本身，而是当前光标前的实际字符。
  *   所以不能直接用 symbol 去索引 YAML 的键名；需要先在所有 Shift 配置里
  *   搜索哪个按键列表包含这个字符，再根据触发的 Shift 方向选择对应的同键列表。
- *   例如 symbol='℉' 时：
+ * @example
+ * 例如 symbol='℉' 时：
  *   - 先在 LShift 和 RShift 两张表中搜索包含 '℉' 的列表，发现是 '.' 的列表
- *   - 若触发的是 LShift up，则用 LShift['.'] 这个列表做循环漂移
- *   - 若触发的是 RShift up，则用 RShift['.'] 这个列表做循环漂移
- *   外层的 drift(origin, list*) 会按所选列表顺序循环切换。
+ *   - 若触发的是 LShift up，则返回 LShift['.'] 的值
+ *   - 若触发的是 RShift up，则返回 RShift['.'] 的值
+ *   外层的 drift(origin, list*) 会按所选值（数组）顺序循环切换。
  */
 getSymbolList(hotkey, symbol) {
 	symbolMap := getSymbolMap()  ; 获取标点符号自定制配置表
