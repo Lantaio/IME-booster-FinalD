@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/8/10
+ * 更新：2026/8/16
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v9.77.245`n　　　 © 2024~2026"  ; 此程序的版本号
+global Version := "v9.77.247`n　　　 © 2024~2026"  ; 此程序的版本号
 global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 global Commit := ''  ; 刚上屏的标点
 global Prev := ''  ; 光标前1个内容
@@ -27,6 +27,7 @@ global Prev := ''  ; 光标前1个内容
 ; #Include <Debugger>  ; 和调试有关的函数
 #Include <IME>  ; 和输入法有关的函数
 #Include <Selection>  ; 和选择有关的函数
+; #Include <YAML>  ; 处理YAML数据文件的类
 #Include "MySettings\AppGroup.ahk"  ; 引入用户自定义的程序组信息
 #Include "MySettings\Shortcut.ahk"  ; 引入用户自定义的快捷键信息
 /*
@@ -114,19 +115,18 @@ drift(origin, list*) {
 		i := 1  ; 定位列表中第1个标点符号
 	else
 		i += 1  ; 定位列表中所找到的标点符号的下1个标点符号
-	if origin = '…' or origin = '—'  ; 如果原来的标点是‘……’或‘——’
+	if origin = '……' or origin = '——'  ; 如果原来的标点是‘……’或‘——’
 		Send "{BS}"  ; 多输入1个退格键
 	if Smart and hasPair(origin) {  ; 如果（表格）兼容模式*没有*开启 并且 原来的标点有配对的后标点
 		Send "{Del}{Text}!"  ; 先删除后标点，并输入感叹号防止软件过度自动化
-		Send "{Left}{BS}"  ; 光标归位，删除原来的前标点，
-		SendText list[i]  ; 输入新标点
-		newPair := getPair(list[i])  ; 获取新标点的配对标点（如果有的话）
-		if newPair {  ; 如果有配对标点
+		Send "{Left}{BS}{Text}" list[i]  ; 光标归位，删除原来的前标点，输入漂移标点
+		newPair := getPair(list[i])  ; 获取漂移标点的配对标点（如果有的话）
+		if newPair {  ; 如果新标点有配对标点
 			if Tip and InStr("”’）］｝〉", newPair)
 				showTip("配对", 1)
 			SendText newPair  ; 输入配对标点
 			Send "{Del}{Left}"  ; 删除之前用于防止软件过度自动化的感叹号，光标回到配对标点中间
-		} else {
+		} else {  ; 否则（新标点没有配对标点）
 			Send "{Del}"  ; 删除之前用于防止软件过度自动化的感叹号
 		}
 	} else {  ; 否则（原来的标点没有配对的后标点）
@@ -140,7 +140,7 @@ drift(origin, list*) {
 			SendText "!"  ; 输入感叹号防止软件过度自动化
 			Send "{Left}{BS}{Text}" list[i]  ; 光标归位，漂移标点符号
 			Send "{Del}"  ; 删除之前用于防止软件过度自动化的感叹号
-		} else
+		} else  ; 否则（新标点不是英文后标点，可能是中英文标点符号，甚至是扩展符号）
 			Send "{BS}{Text}" list[i]  ; 漂移标点符号
 	}
 }
@@ -287,15 +287,15 @@ driftToGRC(char) {
 	}
 }
 /*
- * 借助剪贴板获取光标前一个内容（字符）
+ * 借助剪贴板获取光标前的内容（字符）
  * 返回值：
- *   clip (string) 通过 Shift+← 键选取的光标前一个内容（字符）
+ *   clip (string) 通过 Shift+← 键选取的光标前的内容（字符）
  */
 getPrev() {
 	clipCache := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪贴板内容，清空剪贴板
-	Send "+{Left}"  ; 选取当前光标前一个内容
+	Send "+{Left}^c"  ; 选取并复制当前光标前一个内容
 	; Sleep 20  ; 暂停一下以等待反应慢的程序完成选取
-	Send "^c"  ; 复制所选内容
+	; Send "^c"  ; 复制所选内容
 	ClipWait 0.5, 1  ; 等待剪贴板更新
 	; 获取剪贴板中的字符（一般是光标前一个字符），计算它的长度
 	clip := A_Clipboard, clipLen := StrLen(clip)
@@ -313,9 +313,9 @@ getPrev() {
 			Sleep 20
 	} else if clip = '' and WinActive(" - Word$") {  ; 否则，如果当前软件是Word或PowerPoint
 		A_Clipboard := ''  ; 清空剪贴板
-		Send "+{Left}"  ; 选取当前光标前一个内容
+		Send "+{Left}^c"  ; 选取并复制光标前2个内容
 		; Sleep 20  ; 暂停一下以等待反应慢的程序完成选取
-		Send "^c"  ; 复制所选内容
+		; Send "^c"  ; 复制所选内容
 		ClipWait 0.3, 1  ; 等待剪贴板更新
 		; 获取剪贴板中的字符，即光标前2个字符
 		clip2 := A_Clipboard
@@ -332,6 +332,10 @@ getPrev() {
 	}
 	; 恢复原来的剪贴板内容
 	A_Clipboard := clipCache, clipCache := ''
+	if clip = '…'
+		clip := '……'
+	else if clip = '—'
+		clip := '——'
 	return clip
 }
 /*
@@ -341,9 +345,9 @@ getPrev() {
  */
 getNext() {
 	clipCache := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪贴板内容，清空剪贴板
-	Send "+{Right}"  ; 选取当前光标后一个字符
+	Send "+{Right}^c"  ; 选取并复制当前光标后一个字符
 	; Sleep 20  ; 暂停一下以等待反应慢的程序完成选取
-	Send "^c"  ; 复制所选内容
+	; Send "^c"  ; 复制所选内容
 	ClipWait 0.3, 1  ; 等待剪贴板更新
 	; 获取剪贴板中的字符，即光标后一个字符，计算它的长度，然后恢复原来的剪贴板内容
 	clip := A_Clipboard, clipLen := StrLen(clip), A_Clipboard := clipCache, clipCache := ''
@@ -779,6 +783,7 @@ getSymbolMap() {
 	text := FileRead(filePath, "UTF-8")  ; 把 YAML 全部读成字符串
 	if text = ''  ; 空文件直接返回空配置
 		return symbolMap
+	; symbolMap := YAML.parse(text)  ; 解析 YAML 文本为 Map 对象
 	section := ''  ; 当前处于哪个分组：LShift / RShift
 	for line in StrSplit(text, "`n", "`r") {  ; 逐行扫描，兼容 Windows 的 CRLF 和 LF 两种换行方式
 		line := Trim(line)  ; 去掉首尾空白，方便判断注释和章节头
@@ -790,14 +795,14 @@ getSymbolMap() {
 		}
 		if section = '' || !InStr(line, ':') || !InStr(line, '[') || !InStr(line, ']')  ; 只处理当前分组下的键值列表
 			continue
-		keyText := Trim(SubStr(line, 1, InStr(line, ':') - 1))  ; 取出键名，例如 "." 或 "?"
-		listText := Trim(SubStr(line, InStr(line, '[') + 1, InStr(line, ']') - InStr(line, '[') - 1))  ; 取出列表内容，例如 "'。', '.'"
+		keyText := Trim(SubStr(line, 1, InStr(line, ': ') - 1))  ; 取出键名，例如 "." 或 "?"
+		listText := Trim(SubStr(line, InStr(line, '[ ') + 1, InStr(line, ' ]') - InStr(line, '[ ') - 1))  ; 取出列表内容，例如 "'。', '.'"
 		key := parseYAMLScalar(keyText)  ; 去掉键名周围引号，得到真实符号
 		list := []  ; 这个键对应的漂移顺序列表
 		if listText != '' {  ; 如果列表不是空的才继续解析
-			for item in StrSplit(listText, ',') {  ; 按逗号拆分列表项
+			for item in StrSplit(listText, ', ') {  ; 按逗号拆分列表项
 				value := parseYAMLScalar(Trim(item))  ; 每一项也去掉引号形成真实字符
-				if value != "''" && value != '""'  ; 跳过空项，避免把空字符串写进列表
+				if value != ''  ; 跳过空项，避免把空字符串写进列表
 					list.Push(value)
 			}
 		}
@@ -808,17 +813,17 @@ getSymbolMap() {
 /**
  * @function getSymbolList
  * @description 根据 所触发的热键（hotkey:LShift/RShift）和 所提供的标点符号（symbol）返回hotkey热键的映射表中symbol标点符号所在的键的值列表。
- * @param {string} hotkey - 所触发的热键（LShift 或 RShift）
- * @param {string} symbol - 要在映射表中查找的标点符号
- * @return {array} hotkey热键的映射表中symbol标点符号所在的键的值列表，例如 [ '。', '.' ] 或 [ '℃', '°', '℉' ]
+ * @param {('LShift'|'RShift')} hotkey - 所触发的热键
+ * @param {(string)} symbol - 要在映射表中查找的标点符号
+ * @return {(array)} hotkey热键的映射表中symbol标点符号所在的键的值列表，例如 [ '。', '.' ] 或 [ '℃', '°', '℉' ]
  * @abstract 关键点在于：symbol 不是按键本身，而是当前光标前的实际字符。
  *   所以不能直接用 symbol 去索引 YAML 的键名；需要先在所有 Shift 配置里
  *   搜索哪个按键列表包含这个字符，再根据触发的 Shift 方向选择对应的同键列表。
  * @example
- * 例如 symbol='℉' 时：
- *   - 先在 LShift 和 RShift 两张表中搜索包含 '℉' 的列表，发现是 '.' 的列表
- *   - 若触发的是 LShift up，则返回 LShift['.'] 的值
- *   - 若触发的是 RShift up，则返回 RShift['.'] 的值
+ * 例如 symbol='℃' 时：
+ *   - 先在 LShift 和 RShift 两张表中搜索包含 '℃' 的列表，发现是 '.' 的列表
+ *   - 若触发的是 LShift up，则返回 LShift['.'] 的值列表
+ *   - 若触发的是 RShift up，则返回 RShift['.'] 的值列表
  *   外层的 drift(origin, list*) 会按所选值（数组）顺序循环切换。
  */
 getSymbolList(hotkey, symbol) {
