@@ -4,7 +4,7 @@
 这是一个运行在 Windows 系统的用 AutoHotkey v2 脚本语言编写的项目。项目核心代码位于 `Win/FinalD.ahk`，并引用了 `Win/Lib/` 目录下的辅助库。用户可配置项存放在 `Win/MySettings/`，默认用户配置模板在 `Win/Settings/`。
 
 ## 关键事实
-- 只支持 Windows系统和AutoHotkey v2.0.26 及以上版本。
+- 只支持 Windows 系统和 AutoHotkey v2.0.26 及之后的版本。
 - 此项目使用 AutoHotkey v2 版脚本语言。
 - 所有文件使用UNIX(LF)换行符。
 - 所有`.ahk`文件必须保存为 UTF-8 with BOM 编码，尤其是 `Win/FinalD.ahk`、`Win/MySettings/*.ahk` 和 `Win/Settings/*.ahk`。
@@ -36,6 +36,7 @@
 - 免责声明：`Win/免责声明Disclaimer.md`
 
 ## AI 代理工作方式
+- 每次任务都要认真理解问题一次做对。不要试图在代码中故意引入bug来达到让我花更多的钱购买token去修复这些bug的目的。否则，要么让我觉得你没有用，要么会让我的编程技术得到提高，最终导致不需要依赖你，那你就彻底完蛋了。
 - 处理任务时，用简体中文与项目术语对齐。
 - 避免在 `Win/Settings/` 中直接改动默认模板；优先在 `Win/MySettings/` 中修改用户配置。
 - 若需要补充说明，优先引用现有 `README.md` 中的安装与功能说明。
