@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/8/16
+ * 更新：2026/8/18
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,10 +18,10 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-global Version := "v9.77.247`n　　　 © 2024~2026"  ; 此程序的版本号
-global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
-global Commit := ''  ; 刚上屏的标点
-global Prev := ''  ; 光标前1个内容
+Global Version := "v9.77.248`n　　　 © 2024~2026"  ; 此程序的版本号
+Global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
+Global Commit := ''  ; 刚上屏的标点
+Global Prev := ''  ; 光标前1个内容
 
 #Include <Caret>  ; 和光标有关的函数
 ; #Include <Debugger>  ; 和调试有关的函数
@@ -461,7 +461,7 @@ output(punct) {
 				Send '"'  ; ※ 交给输入法处理
 			else
 				Send "'"  ; ※ 交给输入法处理
-			global Commit := getPrev()
+			Global Commit := getPrev()
 			if Commit = '“' or Commit = '‘' {  ; 如果 刚输入的是中文引号前标点
 				if Tip
 					showTip("前", 1)
@@ -522,7 +522,7 @@ shouldPair(front) {
 smartChoice(en, cn) {
 	if en = cn
 		return en
-	global Prev := getPrev()
+	Global Prev := getPrev()
 	if AI {  ; 智慧模式
 		; 如果*不是* 当前程序是中文语境软件 并且 前一个内容是西文
 		if not WinActive("ahk_group CN") and isPrevEN()
@@ -793,7 +793,7 @@ getSymbolMap() {
 			section := m[1]  ; 切换到当前章节
 			continue
 		}
-		if section = '' || !InStr(line, ':') || !InStr(line, '[') || !InStr(line, ']')  ; 只处理当前分组下的键值列表
+		if section = '' || !InStr(line, ': ')  ; 只处理当前分组下的键值列表
 			continue
 		keyText := Trim(SubStr(line, 1, InStr(line, ': ') - 1))  ; 取出键名，例如 "." 或 "?"
 		listText := Trim(SubStr(line, InStr(line, '[ ') + 1, InStr(line, ' ]') - InStr(line, '[ ') - 1))  ; 取出列表内容，例如 "'。', '.'"
@@ -812,12 +812,12 @@ getSymbolMap() {
 }
 /**
  * @function getSymbolList
- * @description 根据 所触发的热键（hotkey:LShift/RShift）和 所提供的标点符号（symbol）返回hotkey热键的映射表中symbol标点符号所在的键的值列表。
- * @param {('LShift'|'RShift')} hotkey - 所触发的热键
- * @param {(string)} symbol - 要在映射表中查找的标点符号
- * @return {(array)} hotkey热键的映射表中symbol标点符号所在的键的值列表，例如 [ '。', '.' ] 或 [ '℃', '°', '℉' ]
- * @abstract 关键点在于：symbol 不是按键本身，而是当前光标前的实际字符。
- *   所以不能直接用 symbol 去索引 YAML 的键名；需要先在所有 Shift 配置里
+ * @description 根据 所触发的热键（hotkey:LShift/RShift）和 光标前的内容（origin）返回hotkey热键的映射表中origin标点符号所在的键的值列表。
+ * @param {('LShift'|'RShift')} hotkey 所触发的热键
+ * @param {(string)} origin 光标前的内容（标点符号）
+ * @return {(array)} hotkey热键的映射表中origin标点符号所在的键的值列表（如果有的话，没有则返回空数组），例如 [ '。', '.' ] 或 [ '℃', '°', '℉' ]
+ * @abstract 关键点在于：origin 不是按键本身，而是当前光标前的内容（标点符号）。
+ *   所以不能直接用 origin 去索引 YAML 的键名；需要先在所有 Shift 配置里
  *   搜索哪个按键列表包含这个字符，再根据触发的 Shift 方向选择对应的同键列表。
  * @example
  * 例如 symbol='℃' 时：
@@ -826,19 +826,19 @@ getSymbolMap() {
  *   - 若触发的是 RShift up，则返回 RShift['.'] 的值列表
  *   外层的 drift(origin, list*) 会按所选值（数组）顺序循环切换。
  */
-getSymbolList(hotkey, symbol) {
+getSymbolList(hotkey, origin) {
 	symbolMap := getSymbolMap()  ; 获取标点符号自定制配置表
 	if !symbolMap.Has("LShift") || !symbolMap.Has("RShift")  ; 若两张表都不存在，则直接返回空数组
 		return []
 	matchedKey := ''  ; 记录 symbol 所在的键名，例如 '.'
 	for _, section in ["LShift", "RShift"] {  ; 先在左右两张表中找出包含 symbol 的键名
 		for key, list in symbolMap[section] {
-			if key = symbol {
+			if key = origin {
 				matchedKey := key
 				break 2
 			}
 			for item in list {
-				if item = symbol {
+				if item = origin {
 					matchedKey := key
 					break 2
 				}
@@ -851,20 +851,35 @@ getSymbolList(hotkey, symbol) {
 		return symbolMap[hotkey][matchedKey]
 	return []  ; 若当前方向不存在该键，则直接忽略，不做漂移
 }
-
+/**
+ * @description 检测指定的值（value）是否存在于数组（arr）中
+ * @param {(Any)} value 要检测的值
+ * @param {(Array)} arr 给定的数组
+ * @returns {(true|false)} 如果 value 存在于 arr 中返回 true，否则返回 false
+ */
+isValueInArray(value, arr*) {
+	for v in arr {
+		if (v = value)
+			return true
+	}
+	return false
+}
 ; 如果*不是*（存在输入法候选窗口 或 当前软件是 不适用须要排除的应用程序组 或 文件管理器且活动控件*不是*输入框）
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not InStr(ControlGetClassNN(ControlGetFocus("A")), "edit")))  ; or hasMS_IMEWindow()
 ; 英/中常用标点变换，处理有配对标点符号时按情况变换单个或者成对标点。
 ~LShift up:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
+	static symbolList := []
 	if HolyShift and A_PriorKey = "LShift" {
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
-		list := getSymbolList("LShift", origin)
-		if list.Length
-			drift(origin, list*)
+		if not symbolList.Length or not isValueInArray(origin, symbolList*)  ; 如果 symbolList 为空 或者 光标前的内容*不在* symbolList 中
+			symbolList := getSymbolList("LShift", origin)
+		if symbolList.Length
+			drift(origin, symbolList*)
 	}
 }
 ; 扩展标点变换。处理有配对标点符号时可快速变换单个或者成对标点。
 ~RShift up:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
+	static symbolList := []
 	if HolyShift and A_PriorKey = "RShift" {
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
 		switch origin {
@@ -883,9 +898,10 @@ getSymbolList(hotkey, symbol) {
 					showTip("后", 1)
 			case "’": SendText("!"), Send("{Left}{BS}{Text}'"), Send("{Del}")
 			default:
-				list := getSymbolList("RShift", origin)
-				if list.Length
-					drift(origin, list*)
+				if not symbolList.Length or not isValueInArray(origin, symbolList*)  ; 如果 symbolList 为空，或者光标前的内容不在 symbolList 中
+					symbolList := getSymbolList("RShift", origin)
+				if symbolList.Length
+					drift(origin, symbolList*)
 		}
 	}
 }
@@ -908,11 +924,11 @@ Space:: Send "{Blind}{" thisHotkey "}"
 ~*Shift:: {  ; 防止仅按下 Shift键+任何鼠标键 或 其它的修饰键+Shift键 时，最后释放Shift键会触发漂移的问题。
 	Thread "Priority", 1  ; 须要提高此线程的优先级，丢弃长按产生的重复Shift按键事件，否则如果最后释放Shift键，可能会因为连按触发Shift热键使HolyShift变成true
 	Critical "Off"
-	global HolyShift := false
+	Global HolyShift := false
 	if GetKeyState("Ctrl", "P") or GetKeyState("Alt", "P")
 		KeyWait "Shift"  ; （※ KeyWait函数在等待时可通过热键等启动新线程，因此要提高此线程的优先级）
 }
 ~LShift::
 ~RShift:: {  ; 如果只按下Shift键，则HolyShift为true
-	global HolyShift := true
+	Global HolyShift := true
 }
