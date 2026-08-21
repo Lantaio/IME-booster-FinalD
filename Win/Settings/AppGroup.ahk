@@ -18,7 +18,7 @@
 ; 以下为 有自动配对标点功能的编程软件组 定义。（在这些应用程序中禁止此程序自动配对英文标点功能）
 GroupAdd "AutoPair", "ahk_class A)Notepad\+\+$"
 GroupAdd "AutoPair", "ahk_class A)SunAwtFrame$"  ; JetBrains系列IDE
-GroupAdd "AutoPair", "ahk_exe \\Code\.exe$"  ; VSCode
+; GroupAdd "AutoPair", "ahk_exe \\Code\.exe$"  ; VSCode太傻，建议注释此行，使用此插件的自动配对功能
 GroupAdd "AutoPair", "ahk_exe \\sublime_text\.exe$"
 
 ; 以下为 中文语境应用程序组 定义。（不建议将用于写Markdown的程序添加到此。）
