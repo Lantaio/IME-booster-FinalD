@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/8/18
+ * 更新：2026/8/22
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,10 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-Global Version := "v9.77.248`n　　　 © 2024~2026"  ; 此程序的版本号
-Global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
-Global Commit := ''  ; 刚上屏的标点
-Global Prev := ''  ; 光标前1个内容
+Global Version := "v9.79.256`n　　　 © 2024~2026"  ; 此程序的版本号
 
 #Include <Caret>  ; 和光标有关的函数
 ; #Include <Debugger>  ; 和调试有关的函数
@@ -30,6 +27,19 @@ Global Prev := ''  ; 光标前1个内容
 ; #Include <YAML>  ; 处理YAML数据文件的类
 #Include "MySettings\AppGroup.ahk"  ; 引入用户自定义的程序组信息
 #Include "MySettings\Shortcut.ahk"  ; 引入用户自定义的快捷键信息
+
+/*
+ * 错误处理函数
+ * 参数：
+ *   ex (object) 错误对象
+ *   mode 错误的模式
+ * 返回值：
+ *   1 抑制默认错误对话框和任何剩余的错误回调
+ */
+errorHandler(ex, mode) {
+	return true
+}
+
 /*
  * 基本的按键处理函数，直接将按键发送给系统处理
  * 参数：
@@ -58,6 +68,8 @@ Loop Parse, letters  ;添加大写字母热键，使按键可以按顺序执行
 	Hotkey '+' A_LoopField, keySender
 ; ~~~~~~ Optional Hotkeys End ~~~~~~
 
+Global Commit := ''  ; 刚上屏的标点
+Global Prev := ''  ; 光标前1个内容
 /*
  * 根据所提供的 front（前标点）参数 输入对应的后标点
  * 参数：
@@ -96,194 +108,6 @@ autoPair(front) {
 				SendText getPair(front)
 				Send "{Left}"
 			}
-	}
-}
-/*
- * 标点符号循环漂移
- * 参数：
- *   origin (string) 将要被转换的标点符号
- *   list* (string array)(可变) 标点符号循环漂移列表（数组）
- */
-drift(origin, list*) {
-	i := 0
-	loop list.length
-		if origin = list[A_Index] {  ; 如果将要被转换的标点符号在漂移列表中
-			i := A_Index
-			break
-		}
-	if i = 0 or i = list.length  ; 如果在漂移列表中不存在这个标点符号 或者 是列表中最后1个标点符号
-		i := 1  ; 定位列表中第1个标点符号
-	else
-		i += 1  ; 定位列表中所找到的标点符号的下1个标点符号
-	if origin = '……' or origin = '——'  ; 如果原来的标点是‘……’或‘——’
-		Send "{BS}"  ; 多输入1个退格键
-	if Smart and hasPair(origin) {  ; 如果（表格）兼容模式*没有*开启 并且 原来的标点有配对的后标点
-		Send "{Del}{Text}!"  ; 先删除后标点，并输入感叹号防止软件过度自动化
-		Send "{Left}{BS}{Text}" list[i]  ; 光标归位，删除原来的前标点，输入漂移标点
-		newPair := getPair(list[i])  ; 获取漂移标点的配对标点（如果有的话）
-		if newPair {  ; 如果新标点有配对标点
-			if Tip and InStr("”’）］｝〉", newPair)
-				showTip("配对", 1)
-			SendText newPair  ; 输入配对标点
-			Send "{Del}{Left}"  ; 删除之前用于防止软件过度自动化的感叹号，光标回到配对标点中间
-		} else {  ; 否则（新标点没有配对标点）
-			Send "{Del}"  ; 删除之前用于防止软件过度自动化的感叹号
-		}
-	} else {  ; 否则（原来的标点没有配对的后标点）
-		if Tip
-			switch list[i] {
-				case '，', '：', '；', '？', '！', '｜', '～', '＄', '／', '＼': showTip("中", 1)
-				case '“', '‘', '（', '［', '｛', '〈': showTip("前", 1)
-				case '”', '’', '）', '］', '｝', '〉': showTip("后", 1)
-			}
-		if InStr("`"')]}", list[i]) {	; 如果新标点是英文后标点
-			SendText "!"  ; 输入感叹号防止软件过度自动化
-			Send "{Left}{BS}{Text}" list[i]  ; 光标归位，漂移标点符号
-			Send "{Del}"  ; 删除之前用于防止软件过度自动化的感叹号
-		} else  ; 否则（新标点不是英文后标点，可能是中英文标点符号，甚至是扩展符号）
-			Send "{BS}{Text}" list[i]  ; 漂移标点符号
-	}
-}
-/*
- * 检测传入的字符是不是希腊字母，如果是则将其变换为对应的英文字母；或 如果是数字，将其变换为上下标数字形式
- * 参数：
- *   char (string) 待检测的字符
- */
-driftToENG(char) {
-	switch char {
-		; 小写希腊字母变换为小写英文字母
-		case 'α': Send "{BS}{Text}a"
-		case 'β': Send "{BS}{Text}b"
-		case 'ψ': Send "{BS}{Text}c"
-		case 'δ': Send "{BS}{Text}d"
-		case 'φ': Send "{BS}{Text}f"
-		case 'ε': Send "{BS}{Text}e"
-		case 'γ': Send "{BS}{Text}g"
-		case 'η': Send "{BS}{Text}h"
-		case 'ι': Send "{BS}{Text}i"
-		case 'ξ': Send "{BS}{Text}j"
-		case 'κ': Send "{BS}{Text}k"
-		case 'λ': Send "{BS}{Text}l"
-		case 'μ': Send "{BS}{Text}m"
-		case 'ν': Send "{BS}{Text}n"
-		case 'ο': Send "{BS}{Text}o"
-		case 'π': Send "{BS}{Text}p"
-		case 'ρ': Send "{BS}{Text}r"
-		case 'σ': Send "{BS}{Text}s"
-		case 'τ': Send "{BS}{Text}t"
-		case 'θ': Send "{BS}{Text}u"
-		case 'ω': Send "{BS}{Text}v"
-		case 'ς': Send "{BS}{Text}w"
-		case 'χ': Send "{BS}{Text}x"
-		case 'υ': Send "{BS}{Text}y"
-		case 'ζ': Send "{BS}{Text}z"
-		; 大写希腊字母变换为大写英文字母
-		case 'Α': Send "{BS}{Text}A"
-		case 'Β': Send "{BS}{Text}B"
-		case 'Ψ': Send "{BS}{Text}C"
-		case 'Δ': Send "{BS}{Text}D"
-		case 'Ε': Send "{BS}{Text}E"
-		case 'Φ': Send "{BS}{Text}F"
-		case 'Γ': Send "{BS}{Text}G"
-		case 'Η': Send "{BS}{Text}H"
-		case 'Ι': Send "{BS}{Text}I"
-		case 'Ξ': Send "{BS}{Text}J"
-		case 'Κ': Send "{BS}{Text}K"
-		case 'Λ': Send "{BS}{Text}L"
-		case 'Μ': Send "{BS}{Text}M"
-		case 'Ν': Send "{BS}{Text}N"
-		case 'Ο': Send "{BS}{Text}O"
-		case 'Π': Send "{BS}{Text}P"
-		case 'Ρ': Send "{BS}{Text}R"
-		case 'Σ': Send "{BS}{Text}S"
-		case 'Τ': Send "{BS}{Text}T"
-		case 'Θ': Send "{BS}{Text}U"
-		case 'Ω': Send "{BS}{Text}V"
-		case 'Χ': Send "{BS}{Text}X"
-		case 'Υ': Send "{BS}{Text}Y"
-		case 'Ζ': Send "{BS}{Text}Z"
-		; 数字变换为上下标数字形式
-		case '0', '⓪', '₀', '⁰', '⓿': drift(char, '0', '₀', '⁰', '⓪')
-		case '1', 'Ⅰ', 'ⅰ', '➀', '₁', '¹', '➊': drift(char, '1', '₁', '¹', '➀')
-		case '2', 'Ⅱ', 'ⅱ', '➁', '₂', '²', '➋': drift(char, '2', '₂', '²', '➁')
-		case '3', 'Ⅲ', 'ⅲ', '➂', '₃', '³', '➌': drift(char, '3', '₃', '³', '➂')
-		case '4', 'Ⅳ', 'ⅳ', '➃', '₄', '⁴', '➍': drift(char, '4', '₄', '⁴', '➃')
-		case '5', 'Ⅴ', 'ⅴ', '➄', '₅', '⁵', '➎': drift(char, '5', '₅', '⁵', '➄')
-		case '6', 'Ⅵ', 'ⅵ', '➅', '₆', '⁶', '➏': drift(char, '6', '₆', '⁶', '➅')
-		case '7', 'Ⅶ', 'ⅶ', '➆', '₇', '⁷', '➐': drift(char, '7', '₇', '⁷', '➆')
-		case '8', 'Ⅷ', 'ⅷ', '⓼', '₈', '⁸', '➑': drift(char, '8', '₈', '⁸', '⓼')
-		case '9', 'Ⅸ', 'ⅸ', '⓽', '₉', '⁹', '➒': drift(char, '9', '₉', '⁹', '⓽')
-	}
-}
-/*
- * 检测传入的字符是不是英文字母，如果是则将其变换为对应的希腊字母；或 如果是数字，将其变换为对应的罗马数字形式
- * 参数：
- *   char (string) 待检测的字符
- */
-driftToGRC(char) {
-	switch char {
-		; 小写英文字母变换为小写希腊字母
-		case 'a': Send "{BS}{Text}α"
-		case 'b': Send "{BS}{Text}β"
-		case 'c': Send "{BS}{Text}ψ"
-		case 'd': Send "{BS}{Text}δ"
-		case 'e': Send "{BS}{Text}ε"
-		case 'f': Send "{BS}{Text}φ"
-		case 'g': Send "{BS}{Text}γ"
-		case 'h': Send "{BS}{Text}η"
-		case 'i': Send "{BS}{Text}ι"
-		case 'j': Send "{BS}{Text}ξ"
-		case 'k': Send "{BS}{Text}κ"
-		case 'l': Send "{BS}{Text}λ"
-		case 'm': Send "{BS}{Text}μ"
-		case 'n': Send "{BS}{Text}ν"
-		case 'o': Send "{BS}{Text}ο"
-		case 'p': Send "{BS}{Text}π"
-		case 'r': Send "{BS}{Text}ρ"
-		case 's': Send "{BS}{Text}σ"
-		case 't': Send "{BS}{Text}τ"
-		case 'u': Send "{BS}{Text}θ"
-		case 'v': Send "{BS}{Text}ω"
-		case 'w': Send "{BS}{Text}ς"
-		case 'x': Send "{BS}{Text}χ"
-		case 'y': Send "{BS}{Text}υ"
-		case 'z': Send "{BS}{Text}ζ"
-		; 大写英文字母变换为大写希腊字母
-		case 'A': Send "{BS}{Text}Α"
-		case 'B': Send "{BS}{Text}Β"
-		case 'C': Send "{BS}{Text}Ψ"
-		case 'D': Send "{BS}{Text}Δ"
-		case 'E': Send "{BS}{Text}Ε"
-		case 'F': Send "{BS}{Text}Φ"
-		case 'G': Send "{BS}{Text}Γ"
-		case 'H': Send "{BS}{Text}Η"
-		case 'I': Send "{BS}{Text}Ι"
-		case 'J': Send "{BS}{Text}Ξ"
-		case 'K': Send "{BS}{Text}Κ"
-		case 'L': Send "{BS}{Text}Λ"
-		case 'M': Send "{BS}{Text}Μ"
-		case 'N': Send "{BS}{Text}Ν"
-		case 'O': Send "{BS}{Text}Ο"
-		case 'P': Send "{BS}{Text}Π"
-		case 'R': Send "{BS}{Text}Ρ"
-		case 'S': Send "{BS}{Text}Σ"
-		case 'T': Send "{BS}{Text}Τ"
-		case 'U': Send "{BS}{Text}Θ"
-		case 'V': Send "{BS}{Text}Ω"
-		case 'X': Send "{BS}{Text}Χ"
-		case 'Y': Send "{BS}{Text}Υ"
-		case 'Z': Send "{BS}{Text}Ζ"
-		; 数字变换为罗马数字形式
-		case '0', '⓪', '₀', '⁰', '⓿': drift(char, '⓿', '0')
-		case '1', 'Ⅰ', 'ⅰ', '➀', '₁', '¹', '➊': drift(char, 'Ⅰ', 'ⅰ', '➊')
-		case '2', 'Ⅱ', 'ⅱ', '➁', '₂', '²', '➋': drift(char, 'Ⅱ', 'ⅱ', '➋')
-		case '3', 'Ⅲ', 'ⅲ', '➂', '₃', '³', '➌': drift(char, 'Ⅲ', 'ⅲ', '➌')
-		case '4', 'Ⅳ', 'ⅳ', '➃', '₄', '⁴', '➍': drift(char, 'Ⅳ', 'ⅳ', '➍')
-		case '5', 'Ⅴ', 'ⅴ', '➄', '₅', '⁵', '➎': drift(char, 'Ⅴ', 'ⅴ', '➎')
-		case '6', 'Ⅵ', 'ⅵ', '➅', '₆', '⁶', '➏': drift(char, 'Ⅵ', 'ⅵ', '➏')
-		case '7', 'Ⅶ', 'ⅶ', '➆', '₇', '⁷', '➐': drift(char, 'Ⅶ', 'ⅶ', '➐')
-		case '8', 'Ⅷ', 'ⅷ', '⓼', '₈', '⁸', '➑': drift(char, 'Ⅷ', 'ⅷ', '➑')
-		case '9', 'Ⅸ', 'ⅸ', '⓽', '₉', '⁹', '➒': drift(char, 'Ⅸ', 'ⅸ', '➒')
 	}
 }
 /*
@@ -653,18 +477,6 @@ showTip(info, sec) {
 	}
 	SetTimer ToolTip, -sec*1000  ; 负数表示提示信息会在显示sec秒后清除
 }
-/*
- * 错误处理函数
- * 参数：
- *   ex (object) 错误对象
- *   mode 错误的模式
- * 返回值：
- *   1 抑制默认错误对话框和任何剩余的错误回调
- */
-errorHandler(ex, mode) {
-	return true
-}
-
 ; 如果 聪明标点开关打开，并且不是（存在输入法候选窗口 或 当前软件是 不支持聪明标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组） 并且 在中文输入状态。
 #HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude")) and IsCNInputMode()
 .:: smartType('.', '。')
@@ -740,6 +552,56 @@ $:: {
 	; Send "{Blind}{4 up}{RShift up}"
 	smartType('$', '￥')
 }
+
+Global ENG_GRC_MAP := getDriftMap(A_ScriptDir "\MySettings\ENG_GRC.yaml")  ; 获取英文字母↔希腊字母对应关系映射表
+Global NUMBER_MAP := getDriftMap(A_ScriptDir "\MySettings\Number.yaml")  ; 获取数字漂移配置表
+Global SYMBOL_MAP := getDriftMap(A_ScriptDir "\MySettings\Symbol.yaml")  ; 获取标点符号漂移配置表
+/*
+ * 标点符号循环漂移
+ * 参数：
+ *   origin (string) 将要被转换的标点符号
+ *   list* (string array)(可变) 标点符号循环漂移列表（数组）
+ */
+drift(origin, list*) {
+	i := 0
+	loop list.length
+		if origin = list[A_Index] {  ; 如果将要被转换的标点符号在漂移列表中
+			i := A_Index
+			break
+		}
+	if i = 0 or i = list.length  ; 如果在漂移列表中不存在这个标点符号 或者 是列表中最后1个标点符号
+		i := 1  ; 定位列表中第1个标点符号
+	else
+		i += 1  ; 定位列表中所找到的标点符号的下1个标点符号
+	if origin = '……' or origin = '——'  ; 如果原来的标点是‘……’或‘——’
+		Send "{BS}"  ; 多输入1个退格键
+	if Smart and hasPair(origin) {  ; 如果（表格）兼容模式*没有*开启 并且 原来的标点有配对的后标点
+		Send "{Del}{Text}!"  ; 先删除后标点，并输入感叹号防止软件过度自动化
+		Send "{Left}{BS}{Text}" list[i]  ; 光标归位，删除原来的前标点，输入漂移标点
+		newPair := getPair(list[i])  ; 获取漂移标点的配对标点（如果有的话）
+		if newPair {  ; 如果新标点有配对标点
+			if Tip and InStr("”’）］｝〉", newPair)
+				showTip("配对", 1)
+			SendText newPair  ; 输入配对标点
+			Send "{Del}{Left}"  ; 删除之前用于防止软件过度自动化的感叹号，光标回到配对标点中间
+		} else {  ; 否则（新标点没有配对标点）
+			Send "{Del}"  ; 删除之前用于防止软件过度自动化的感叹号
+		}
+	} else {  ; 否则（原来的标点没有配对的后标点）
+		if Tip
+			switch list[i] {
+				case '，', '：', '；', '？', '！', '｜', '～', '＄', '／', '＼': showTip("中", 1)
+				case '“', '‘', '（', '［', '｛', '〈': showTip("前", 1)
+				case '”', '’', '）', '］', '｝', '〉': showTip("后", 1)
+			}
+		if InStr("`"')]}", list[i]) {	; 如果新标点是英文后标点
+			SendText "!"  ; 输入感叹号防止软件过度自动化
+			Send "{Left}{BS}{Text}" list[i]  ; 光标归位，漂移标点符号
+			Send "{Del}"  ; 删除之前用于防止软件过度自动化的感叹号
+		} else  ; 否则（新标点不是英文后标点，可能是中英文标点符号，甚至是扩展符号）
+			Send "{BS}{Text}" list[i]  ; 漂移标点符号
+	}
+}
 /*
  * 解析YAML中的单值字符串，去除外层引号。
  * 参数：
@@ -759,8 +621,9 @@ parseYAMLScalar(value) {
 	return value  ; 如果本来就不是带引号的值，就直接返回原始内容
 }
 /*
- * 读取并解析 Symbol.yaml 中的左/右Shift漂移配置。
- * 参数：无
+ * 读取并反序列化给定的yaml配置文件。
+ * 参数：
+ *   filePath (string) 配置文件路径
  * 返回值：
  *   (Map) 结构类似：
  *       {
@@ -768,36 +631,33 @@ parseYAMLScalar(value) {
  *           "RShift": Map(".", ["℃", "°", "℉"])
  *       }
  * 说明：
- *   该函数会在脚本首次运行时缓存配置，避免每次按下Shift都重复读取文件。
  *   它会逐行扫描 YAML，识别 LShift/RShift 章节和其后面的键值列表，
- *   然后将每个键映射到一个字符串数组，用于真正的标点漂移循环。
+ *   然后将每个键映射到一个字符串数组，用于真正的字符漂移循环。
  */
-getSymbolMap() {
-	static symbolMap := ''  ; 缓存配置，避免每次按下Shift都重复读文件，减小开销并保持一致
-	if symbolMap != ''  ; 如果已经加载过一次，就直接返回缓存结果
-		return symbolMap
-	symbolMap := Map("LShift", Map(), "RShift", Map())  ; 初始化两套映射：左右Shift分别保存各自的漂移列表
-	filePath := A_ScriptDir "\MySettings\Symbol.yaml"  ; 这里直接读取脚本目录下的用户配置文件
+getDriftMap(filePath) {
+	driftMap := Map("LShift", Map(), "RShift", Map())  ; 初始化两套映射：左右Shift分别保存各自的漂移列表
 	if !FileExist(filePath)  ; 如果文件不存在，就返回空配置，不影响其它功能
-		return symbolMap
+		return driftMap
 	text := FileRead(filePath, "UTF-8")  ; 把 YAML 全部读成字符串
-	if text = ''  ; 空文件直接返回空配置
-		return symbolMap
-	; symbolMap := YAML.parse(text)  ; 解析 YAML 文本为 Map 对象
+	; if text = ''  ; 空文件直接返回空配置
+	; 	return driftMap
 	section := ''  ; 当前处于哪个分组：LShift / RShift
 	for line in StrSplit(text, "`n", "`r") {  ; 逐行扫描，兼容 Windows 的 CRLF 和 LF 两种换行方式
 		line := Trim(line)  ; 去掉首尾空白，方便判断注释和章节头
 		if line = '' or RegExMatch(line, '^\s*#')  ; 跳过空行和注释行
 			continue
-		if RegExMatch(line, '^(LShift|RShift)\s*:\s*$', &m) {  ; 识别 "LShift:" / "RShift:" 章节头
+		if RegExMatch(line, '^(LShift|RShift)\s*:', &m) {  ; 识别 "LShift:" / "RShift:" 章节头
 			section := m[1]  ; 切换到当前章节
 			continue
 		}
 		if section = '' || !InStr(line, ': ')  ; 只处理当前分组下的键值列表
 			continue
 		keyText := Trim(SubStr(line, 1, InStr(line, ': ') - 1))  ; 取出键名，例如 "." 或 "?"
-		listText := Trim(SubStr(line, InStr(line, '[ ') + 1, InStr(line, ' ]') - InStr(line, '[ ') - 1))  ; 取出列表内容，例如 "'。', '.'"
 		key := parseYAMLScalar(keyText)  ; 去掉键名周围引号，得到真实符号
+		if !InStr(line, '[ ')
+			listText := Trim(SubStr(line, InStr(line, ': ') + 1, InStr(line, '#') ? InStr(line, '# ') - 1 : StrLen(line)))  ; 如果没有方括号，取出冒号后面至注释（如果有的话）之前的内容作为列表内容
+		else
+			listText := Trim(SubStr(line, InStr(line, '[ ') + 1, InStr(line, ' ]') - InStr(line, '[ ') - 1))  ; 取出列表内容，例如 "'。', '.'"
 		list := []  ; 这个键对应的漂移顺序列表
 		if listText != '' {  ; 如果列表不是空的才继续解析
 			for item in StrSplit(listText, ', ') {  ; 按逗号拆分列表项
@@ -806,16 +666,15 @@ getSymbolMap() {
 					list.Push(value)
 			}
 		}
-		symbolMap[section].Set(key, list)  ; 把 "键 -> 列表" 保存进对应的 Map 中
+		driftMap[section].Set(key, list)  ; 把 "键 -> 列表" 保存进对应的 Map 中
 	}
-	return symbolMap  ; 返回整个配置对象，供后续查表使用
+	return driftMap  ; 返回整个配置对象，供后续查表使用
 }
 /**
- * @function getSymbolList
- * @description 根据 所触发的热键（hotkey:LShift/RShift）和 光标前的内容（origin）返回hotkey热键的映射表中origin标点符号所在的键的值列表。
- * @param {('LShift'|'RShift')} hotkey 所触发的热键
- * @param {(string)} origin 光标前的内容（标点符号）
- * @return {(array)} hotkey热键的映射表中origin标点符号所在的键的值列表（如果有的话，没有则返回空数组），例如 [ '。', '.' ] 或 [ '℃', '°', '℉' ]
+ * @description 根据 所触发的热键（hotkey）和 光标前的内容（origin）返回hotkey热键的配置表中origin标点符号所在的键的值列表。
+ * @param {("LShift"|"RShift"|"<#LShift"|"<#RShift"|">#LShift"|">#RShift")} hotkey 所触发的热键
+ * @param {(String)} origin 光标前的内容（标点符号）
+ * @return {(Array)} hotkey热键的配置表中origin标点符号所在的键的值列表（如果有的话，没有则返回空数组），例如 [ '。', '.' ] 或 [ '℃', '°', '℉' ]
  * @abstract 关键点在于：origin 不是按键本身，而是当前光标前的内容（标点符号）。
  *   所以不能直接用 origin 去索引 YAML 的键名；需要先在所有 Shift 配置里
  *   搜索哪个按键列表包含这个字符，再根据触发的 Shift 方向选择对应的同键列表。
@@ -826,19 +685,31 @@ getSymbolMap() {
  *   - 若触发的是 RShift up，则返回 RShift['.'] 的值列表
  *   外层的 drift(origin, list*) 会按所选值（数组）顺序循环切换。
  */
-getSymbolList(hotkey, origin) {
-	symbolMap := getSymbolMap()  ; 获取标点符号自定制配置表
-	if !symbolMap.Has("LShift") || !symbolMap.Has("RShift")  ; 若两张表都不存在，则直接返回空数组
+getDriftList(hotkey, origin) {
+	driftMap := {}
+	switch hotkey {
+		case "LShift", "RShift":  ; 如果触发的热键是左/右Shift键，使用 Symbol.yaml 的配置表
+			driftMap := SYMBOL_MAP
+		case "<#LShift", "<#RShift":  ; 如果触发的热键是 左Win+左/右Shift键，则使用 Number.yaml 的配置表
+			driftMap := NUMBER_MAP
+			hotkey := SubStr(hotkey, 3)  ; 去掉前面的“<#”，得到“LShift”或“RShift”
+		case ">#LShift", ">#RShift":  ; 如果触发的热键是 右Win+左/右Shift键，则使用 ENG_GRC.yaml 的配置表
+			driftMap := ENG_GRC_MAP
+			hotkey := SubStr(hotkey, 3)  ; 去掉前面的“>#”，得到“LShift”或“RShift”
+		default:
+			return []  ; 如果不是上述热键，直接返回空数组
+	}
+	if !driftMap.Has("LShift") || !driftMap.Has("RShift")  ; 若两张表都不存在，则直接返回空数组
 		return []
-	matchedKey := ''  ; 记录 symbol 所在的键名，例如 '.'
-	for _, section in ["LShift", "RShift"] {  ; 先在左右两张表中找出包含 symbol 的键名
-		for key, list in symbolMap[section] {
-			if key = origin {
+	matchedKey := ''  ; 记录 origin 所在的键名，例如 '.'
+	for _, section in ["LShift", "RShift"] {  ; 先在左右两张表中找出包含 origin 的键名
+		for key, list in driftMap[section] {
+			if key == origin {
 				matchedKey := key
 				break 2
 			}
 			for item in list {
-				if item = origin {
+				if item == origin {
 					matchedKey := key
 					break 2
 				}
@@ -847,12 +718,12 @@ getSymbolList(hotkey, origin) {
 	}
 	if matchedKey = ''  ; 如果两张表都没找到，就返回空数组
 		return []
-	if symbolMap.Has(hotkey) && symbolMap[hotkey].Has(matchedKey)  ; 只返回当前触发 Shift 方向下的同键列表
-		return symbolMap[hotkey][matchedKey]
+	if driftMap.Has(hotkey) && driftMap[hotkey].Has(matchedKey)  ; 只返回当前触发 Shift 方向下的同键列表
+		return driftMap[hotkey][matchedKey]
 	return []  ; 若当前方向不存在该键，则直接忽略，不做漂移
 }
 /**
- * @description 检测指定的值（value）是否存在于数组（arr）中
+ * @description 检测给定的值（value）是否存在于数组（arr）中
  * @param {(Any)} value 要检测的值
  * @param {(Array)} arr 给定的数组
  * @returns {(true|false)} 如果 value 存在于 arr 中返回 true，否则返回 false
@@ -872,7 +743,7 @@ isValueInArray(value, arr*) {
 	if HolyShift and A_PriorKey = "LShift" {
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
 		if not symbolList.Length or not isValueInArray(origin, symbolList*)  ; 如果 symbolList 为空 或者 光标前的内容*不在* symbolList 中
-			symbolList := getSymbolList("LShift", origin)
+			symbolList := getDriftList("LShift", origin)
 		if symbolList.Length
 			drift(origin, symbolList*)
 	}
@@ -898,13 +769,15 @@ isValueInArray(value, arr*) {
 					showTip("后", 1)
 			case "’": SendText("!"), Send("{Left}{BS}{Text}'"), Send("{Del}")
 			default:
-				if not symbolList.Length or not isValueInArray(origin, symbolList*)  ; 如果 symbolList 为空，或者光标前的内容不在 symbolList 中
-					symbolList := getSymbolList("RShift", origin)
+				if not symbolList.Length or not isValueInArray(origin, symbolList*)  ; 如果 symbolList 为空，或者光标前的内容*不在* symbolList 中
+					symbolList := getDriftList("RShift", origin)
 				if symbolList.Length
 					drift(origin, symbolList*)
 		}
 	}
 }
+
+Global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
 
 #HotIf
 ; ~~~~~~ Optional Hotkeys Begin ~~~~~~
