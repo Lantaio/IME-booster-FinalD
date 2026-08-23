@@ -1,9 +1,10 @@
 /*
  * 说明：存放FinalD项目的各种功能开关（全局变量）及其初始状态，还有自定义快捷键设置。
- * 版本：v11.25（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新，或查找文件中有“✨”符号的地方。修订号为不影响功能的修改，可以不管。）
- * 更新：2026/8/8
+ * 版本：v12.27（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新，或查找文件中有“✨”符号的地方。修订号为不影响功能的修改，可以不管。）
+ * 更新：2026/8/21
  * 重大更新说明：
- * v11.x：增加Rime全局变量来区分Rime/非Rime输入法，并实现自动检测。适配主程序版本 v8.74.225 ~ 待定
+ * v12.x: 将字母漂移列表和数字漂移列表放到映射表中，方便自定制。适配主程序版本 v9.79.256 ~ 最新版
+ * v11.x：增加Rime全局变量来区分Rime/非Rime输入法，并实现自动检测。适配主程序版本 v8.74.225 ~ v9.77.248
  * v10.x：将BetterCN开关升级为AI智慧模式开关。适配 v8.72.208 ~ v8.74.224
  * v9.x：适配所有热键线程默认变为关键线程。适配 v7.70.198 ~ v7.70.205
  * v8.x：为全键盘漂移的2个快捷键添加触发条件。适配 v7.69.195
@@ -15,18 +16,18 @@
  * v2.x：因对代码进行重构，将getQ1Word_X函数改名为getWordBeforeI_X；最后添加 左Win+左Shift 和 左Win+右Shift 热键功能。适配 v5.63.169 ~ v5.65.176
  * v1.x：将各个快捷键功能从FinalD.ahk分离出来的首个版本。适配 v5.61.162 ~ v5.62.167
  */
-global Arrow := true  ; 字母方向键 功能开关 的默认状态
-global AI := false   ; 智慧模式/操控模式 切换 的默认状态
-; global Debug := false  ; 调试程序的总开关 的默认状态
-global Interval := 0.2  ; 重复按键的间隔时间，以秒为单位
-global Rime := false  ; ✨️Rime输入法/非Rime输入法 切换 的默认状态
-global Smart := true  ; 聪明中/英标点输入和自动配对 功能开关 的默认状态（表格兼容模式）
-global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
+Global Arrow := true  ; 字母方向键 功能开关 的默认状态
+Global AI := false   ; 智慧模式/操控模式 切换 的默认状态
+; Global Debug := false  ; 调试程序的总开关 的默认状态
+Global Interval := 0.2  ; 重复按键的间隔时间，以秒为单位
+Global Rime := false  ; ✨️Rime输入法/非Rime输入法 切换 的默认状态
+Global Smart := true  ; 聪明中/英标点输入和自动配对 功能开关 的默认状态（表格兼容模式）
+Global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
 /*
  * 检测当前的输入法是否为Rime输入法
  */
 checkIME() {  ; ✨️
-	global Rime
+	Global Rime
 	Sleep 100
 	Send "a"
 	Sleep 100
@@ -121,13 +122,45 @@ checkIME()  ; 程序初始化阶段检测当前输入法
 
 ; 如果*不是*（存在输入法候选窗口 或 当前软件是 不适用须要排除的应用程序组 或 文件管理器且活动控件*不是*输入框）
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not InStr(ControlGetClassNN(ControlGetFocus("A")), "edit")))  ; or hasMS_IMEWindow()
-<#LShift up:: {  ; 左Win+左Shift 将光标前面的希腊字母变换为对应的英文字母；数字变换为上下标数字形式。
+/* 
+ * 数字漂移和字母漂移功能
+ * 如果更改触发快捷键，须要同时修改FinalD.ahk中getDriftList函数的对应快捷键键。
+ */
+<#LShift up:: {  ; ✨️左Win+左Shift 将光标前面的数字变换为上下标数字形式
+	static numberList := []
 	if A_PriorKey = "LShift"
-		driftToENG(getPrev())
+		origin := getPrev()  ; 获取光标前一个内容（将要被变换的字符）
+		if not numberList.Length or not isValueInArray(origin, numberList*)
+			numberList := getDriftList("<#LShift", origin)
+		if numberList.Length
+			drift(origin, numberList*)
 }
-<#RShift up:: {  ; 左Win+右Shift 将光标前面的英文字母变换为对应的希腊字母；数字变换为对应的罗马数字形式。
+<#RShift up:: {  ; ✨️左Win+右Shift 将光标前面的数字变换为对应的罗马数字形式
+	static numberList := []
 	if A_PriorKey = "RShift"
-		driftToGRC(getPrev())
+		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
+		if not numberList.Length or not isValueInArray(origin, numberList*)
+			numberList := getDriftList("<#RShift", origin)
+		if numberList.Length
+			drift(origin, numberList*)
+}
+>#LShift up:: {  ; ✨️右Win+左Shift 将光标前面的希腊字母变换为对应的英文字母
+	static letterList := []
+	if A_PriorKey = "LShift"
+		origin := getPrev()  ; 获取光标前一个内容（将要被变换的字符）
+		if not letterList.Length or not isValueInArray(origin, letterList*)
+			letterList := getDriftList(">#LShift", origin)
+		if letterList.Length
+			drift(origin, letterList*)
+}
+>#RShift up:: {  ; ✨️右Win+右Shift 将光标前面的英文字母变换为对应的希腊字母
+	static letterList := []
+	if A_PriorKey = "RShift"
+		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
+		if not letterList.Length or not isValueInArray(origin, letterList*)
+			letterList := getDriftList(">#RShift", origin)
+		if letterList.Length
+			drift(origin, letterList*)
 }
 
 /*
@@ -138,7 +171,7 @@ checkIME()  ; 程序初始化阶段检测当前输入法
  */
 smartLetter(key, fn) {
 	if KeyWait(key, "T" String(Interval))  ; 短按
-			Send "{Blind}" key  ; 根据Shift键是否按下发送按键的相应大小写
+		Send "{Blind}" key  ; 根据Shift键是否按下发送按键的相应大小写
 	else {  ; 长按
 		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的排队按键
 		Critical "Off"  ; 将此线程修改为非关键线程，配合上一行代码，使未处理的排队按键会被丢弃
@@ -225,7 +258,7 @@ getPrevWord_X() {
 	KeyWait "RShift"
 }
 <^LWin:: {  ; 左Ctrl+左Win 开/关（表格）兼容模式。
-	global Smart
+	Global Smart
 	if Smart {
 		Smart := false
 		MsgBox "（表格）兼容模式 已开启。`n即 聪明标点和自动配对功能 已关闭！", "终点 输入法插件", "Icon! T5"
@@ -235,7 +268,7 @@ getPrevWord_X() {
 	}
 }
 >^LWin:: {  ; 右Ctrl+左Win 开/关 中文标点提示功能。
-	global Tip
+	Global Tip
 	if Tip {
 		Tip := false
 		MsgBox "中文标点提示 已关闭。", "终点 输入法插件", "Iconi T2"
@@ -245,7 +278,7 @@ getPrevWord_X() {
 	}
 }
 <+LWin:: {  ; 左Shift+左Win 开/关 字母方向键功能。
-	global Arrow
+	Global Arrow
 	if Arrow {
 		Arrow := false
 		MsgBox "字母方向键功能 已关闭。", "终点 输入法插件", "Iconi T2"
@@ -255,7 +288,7 @@ getPrevWord_X() {
 	}
 }
 >+LWin:: {  ; 右Shift+左Win 开/关 中文语境应用程序优化功能。
-	global AI
+	Global AI
 	if AI {
 		AI := false
 		MsgBox "操控模式开启，在所有应用程序上的体验一致。", "终点 输入法插件", "Iconi T2"
