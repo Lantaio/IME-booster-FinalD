@@ -4,7 +4,7 @@
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/8/22
+ * 更新：2026/8/25
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-Global Version := "v9.79.256`n　　　 © 2024~2026"  ; 此程序的版本号
+Global Version := "v9.79.260`n　　　 © 2024~2026"  ; 此程序的版本号
 
 #Include <Caret>  ; 和光标有关的函数
 ; #Include <Debugger>  ; 和调试有关的函数
@@ -200,26 +200,26 @@ getNext() {
 getPair(front) {
 	switch front {
 		case '(': return ')'
-		case '（': return '）'
 		case '"': return '"'
-		case '“': return '”'
 		case "'": return "'"
-		case '‘': return '’'
 		case '{': return '}'
+		case '[': return ']'
+		case '<': return '>'
+		case '（': return '）'
+		case '“': return '”'
+		case '‘': return '’'
 		case '「': return '」'
 		case '『': return '』'
-		case '〘': return '〙'
-		case '｛': return '｝'
-		case '[': return ']'
 		case '【': return '】'
 		case '〖': return '〗'
-		case '〔': return '〕'
-		case '［': return '］'
-		case '<': return '>'
 		case '《': return '》'
 		case '〈': return '〉'
+		case '｛': return '｝'
+		case '［': return '］'
+		case '〔': return '〕'
+		case '〘': return '〙'
+		default: return ''
 	}
-	return ''
 }
 /*
  * 检测front标点是否有配对的后标点
@@ -575,7 +575,7 @@ drift(origin, list*) {
 		i += 1  ; 定位列表中所找到的标点符号的下1个标点符号
 	if origin = '……' or origin = '——'  ; 如果原来的标点是‘……’或‘——’
 		Send "{BS}"  ; 多输入1个退格键
-	if Smart and hasPair(origin) {  ; 如果（表格）兼容模式*没有*开启 并且 原来的标点有配对的后标点
+	if Smart and getPair(origin) and hasPair(origin) {  ; 如果（表格）兼容模式*没有*开启 并且 原来的标点是成对标点的前标点 并且 原来的标点有配对的后标点
 		Send "{Del}{Text}!"  ; 先删除后标点，并输入感叹号防止软件过度自动化
 		Send "{Left}{BS}{Text}" list[i]  ; 光标归位，删除原来的前标点，输入漂移标点
 		newPair := getPair(list[i])  ; 获取漂移标点的配对标点（如果有的话）
