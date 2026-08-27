@@ -1,9 +1,9 @@
 /*
  * 说明：存放FinalD项目的各种功能开关（全局变量）及其初始状态，还有自定义快捷键设置。
- * 版本：v12.31（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新，或查找文件中有“✨”符号的地方。修订号为不影响功能的修改，可以不管。）
- * 更新：2026/8/27
+ * 版本：v12.32（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新，或查找文件中有“✨”符号的地方。修订号为不影响功能的修改，可以不管。）
+ * 更新：2026/8/28
  * 重大更新说明：
- * v12.x: 将字母漂移列表和数字漂移列表放到映射表中，方便自定制；优化getPrevWord_X函数。适配主程序版本 v9.79.261 ~ 最新版
+ * v12.x: 将字母漂移列表和数字漂移列表放到映射表中，方便自定制；优化getPrevWord_X函数；修复checkIME函数检测输入法的问题。适配主程序版本 v9.79.261 ~ 最新版
  * v11.x：增加Rime全局变量来区分Rime/非Rime输入法，并实现自动检测。适配主程序版本 v8.74.225 ~ v9.77.248
  * v10.x：将BetterCN开关升级为AI智慧模式开关。适配 v8.72.208 ~ v8.74.224
  * v9.x：适配所有热键线程默认变为关键线程。适配 v7.70.198 ~ v7.70.205
@@ -127,39 +127,43 @@ checkIME()  ; 程序自动执行阶段检测当前所使用的输入法
  */
 <#LShift up:: {  ; ✨️左Win+左Shift 将光标前面的数字变换为上下标数字形式
 	static numberList := []
-	if A_PriorKey = "LShift"
+	if A_PriorKey = "LShift" {
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的字符）
 		if not numberList.Length or not isValueInArray(origin, numberList*)
 			numberList := getDriftList("<#LShift", origin)
 		if numberList.Length
 			drift(origin, numberList*)
+	}
 }
 <#RShift up:: {  ; ✨️左Win+右Shift 将光标前面的数字变换为对应的罗马数字形式
 	static numberList := []
-	if A_PriorKey = "RShift"
+	if A_PriorKey = "RShift" {
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
 		if not numberList.Length or not isValueInArray(origin, numberList*)
 			numberList := getDriftList("<#RShift", origin)
 		if numberList.Length
 			drift(origin, numberList*)
+	}
 }
 >#LShift up:: {  ; ✨️右Win+左Shift 将光标前面的希腊字母变换为对应的英文字母
 	static letterList := []
-	if A_PriorKey = "LShift"
+	if A_PriorKey = "LShift" {
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的字符）
 		if not letterList.Length or not isValueInArray(origin, letterList*)
 			letterList := getDriftList(">#LShift", origin)
 		if letterList.Length
 			drift(origin, letterList*)
+	}
 }
 >#RShift up:: {  ; ✨️右Win+右Shift 将光标前面的英文字母变换为对应的希腊字母
 	static letterList := []
-	if A_PriorKey = "RShift"
+	if A_PriorKey = "RShift" {
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
 		if not letterList.Length or not isValueInArray(origin, letterList*)
 			letterList := getDriftList(">#RShift", origin)
 		if letterList.Length
 			drift(origin, letterList*)
+	}
 }
 
 /**
@@ -294,7 +298,7 @@ getPrevWord_X() {  ; ✨️
 		MsgBox "智慧模式开启，针对中文语境应用程序优化。", , "Iconi T2"
 	}
 }
-~#Space up:: {  ; ✨️Win+Space 切换适配Rime/非Rime输入法
+~#Space up:: {  ; ✨️Win+Space 切换输入法时检测当前所使用的输入法
 	if A_PriorKey = "Space" {
 		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的排队按键
 		Critical "Off"  ; 将此线程修改为非关键线程，配合上一行代码，使未处理的排队按键会被丢弃
@@ -303,7 +307,7 @@ getPrevWord_X() {  ; ✨️
 		else
 			KeyWait	"RWin"
 		Sleep 20  ; 等待输入法切换完成
-		checkIME()
+		checkIME()  ;	检测当前所使用的输入法
 	}
 }
 +Pause:: {  ; 通常用于在调试时让程序继续运行。
