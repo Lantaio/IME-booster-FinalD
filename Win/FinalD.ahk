@@ -1,10 +1,10 @@
 ﻿/*
- * 说明：FinalD/终点 输入法插件，中/英标点及扩展符号智能输入和快速变换程序。
+ * 说明：FinalD/终点 输入法插件——中/英标点及扩展符号智能输入和快速变换程序。
  * 注意：⚠编辑此文件后必须保存为UTF-8 with BOM编码格式！
  * 网址：https://github.com/Lantaio/IME-booster-FinalD
  * 作者：Lantaio Joy
  * 版本：见下面的全局变量Version，或运行此程序后按 左Win+Alt+. 查看。
- * 更新：2026/8/25
+ * 更新：2026/8/26
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,8 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 ; KeyHistory 60
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-Global Version := "v9.79.260`n　　　 © 2024~2026"  ; 此程序的版本号
+Global Version := "v9.79.261`n　　　 © 2024~2026"  ; 此程序的版本号
+A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 
 #Include <Caret>  ; 和光标有关的函数
 ; #Include <Debugger>  ; 和调试有关的函数
