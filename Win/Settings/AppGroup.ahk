@@ -1,7 +1,8 @@
-﻿/*
- * 说明：存放FinalD项目的自定义程序组信息。
- * 版本：v3.7（v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新，或查找文件中有“✨”符号的地方。修订号为不影响功能的修改，可以不管。）
- * 更新：2026/6/11
+﻿/**
+ * @description 存放FinalD项目的自定义程序组信息。
+ * @author Lantaio Joy
+ * @version v3.8 （v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新，或查找文件中有“✨”符号的地方。修订号为不影响功能的修改，可以不管。）
+ * @modified 2026/8/21
  * 重大更新说明：
  * v3.x：添加Win系统打开文件窗口（ahk_class #32770）到文件管理器组。适配主程序版本 v7.70.205 ~ 待定
  * v2.x：将此项目所有ahk脚本程序的编码方式统一更改为UTF-8 with BOM格式。只需将你自己的AppGroup.ahk文件的编码格式修改为此编码格式并保存即可。适配主程序版本 v7.68.190 ~ v7.70.204
@@ -13,12 +14,12 @@
  * https://wyagd001.github.io/v2/docs/misc/RegEx-QuickRef.htm
  */
 
-; ※ ahk_class默认区分大小写（除非正则模式下使用i)选项），匹配任意位置。ahk_exe默认不区分大小写（但正则模式时默认区分大小写），匹配程序名称或完整路径。
+; ⚠ ahk_class默认区分大小写（除非正则模式下使用i)选项），匹配任意位置。ahk_exe默认不区分大小写（但正则模式时默认区分大小写），匹配程序名称或完整路径。
 
 ; 以下为 有自动配对标点功能的编程软件组 定义。（在这些应用程序中禁止此程序自动配对英文标点功能）
 GroupAdd "AutoPair", "ahk_class A)Notepad\+\+$"
 GroupAdd "AutoPair", "ahk_class A)SunAwtFrame$"  ; JetBrains系列IDE
-; GroupAdd "AutoPair", "ahk_exe \\Code\.exe$"  ; VSCode太傻，建议注释此行，使用此插件的自动配对功能
+; GroupAdd "AutoPair", "ahk_exe \\Code\.exe$"  ; ✨️VSCode太傻，建议注释此行，使用此插件的自动配对功能
 GroupAdd "AutoPair", "ahk_exe \\sublime_text\.exe$"
 
 ; 以下为 中文语境应用程序组 定义。（不建议将用于写Markdown的程序添加到此。）
