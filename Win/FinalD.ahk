@@ -4,7 +4,7 @@
  * @see https://github.com/Lantaio/IME-booster-FinalD
  * @author Lantaio Joy
  * @version 见下面的全局变量 Version，或运行此程序后按左 Win+Alt+. 查看。
- * @modified 2026/8/30
+ * @modified 2026/9/4
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -15,10 +15,10 @@ CoordMode "Caret", "Screen"  ; 设置CaretGetPos函数的坐标模式为相对�
 CoordMode "Mouse", "Screen"  ; 设置MouseGetPos函数的坐标模式为相对于屏幕
 CoordMode "ToolTip", "Screen"  ; 设置ToolTip函数的坐标模式为相对于屏幕
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（此模式默认区分大小写）
-; KeyHistory 60
+KeyHistory 100
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-Global Version := "v9.79.265`n　　　 © 2024~2026"  ; 此程序的版本号
+Global Version := "v9.79.266`n　　　 © 2024~2026"  ; 此程序的版本号
 A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 
 #Include <Caret>  ; 和光标有关的函数
@@ -71,8 +71,7 @@ Global Prev := ''  ; 光标前1个内容
  * @description 在合适的情况下输入与给定的标点（`punct`参数）配对的后标点（如果有的话）。
  * @param {String} punct 给定的标点。
  */
-; TODO: 修改函数名为 smartPair
-autoPair(punct) {
+smartPair(punct) {
 	switch punct {
 		case '(', '[', '{':
 			if not WinActive("ahk_group AutoPair") and shouldPair(punct) {  ; 如果 是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
@@ -357,6 +356,7 @@ smartChoice(en, cn) {
  * @param {String} en 按键名称，也是此按键所对应的英文标点。
  * @param {String} [cn] （可选）按键所对应的中文标点。
  */
+; FIXME: 将妙按的输出推迟到检测是否长按之后，以避免有自动配对功能的软件的问题。
 smartType(en, cn?) {  ; （Send函数中[^+!#{}]标点须用{}包裹。）
 	if not isSet(cn)
 		cn := en
@@ -367,10 +367,10 @@ smartType(en, cn?) {  ; （Send函数中[^+!#{}]标点须用{}包裹。）
 			choice := smartChoice(en, cn)  ; （⚠ 由于getPrev函数的执行时间可能会超过0.5秒，因此不能放在if语句之前，否则不能正确检测是短按还是长按）
 			if choice = en {  ; 如果 应该输入英文标点
 				SendText en
-				autoPair(en)  ; 自动配对英文标点
+				smartPair(en)  ; 自动配对英文标点
 			} else {  ; 应该输入中文标点
 				output(cn)
-				autoPair(cn)  ; 自动配对中文标点
+				smartPair(cn)  ; 自动配对中文标点
 			}
 		}
 	} else {  ; 妙按 和 长按
@@ -416,9 +416,9 @@ smartType(en, cn?) {  ; （Send函数中[^+!#{}]标点须用{}包裹。）
 			if en = cn  ; 如果英文标点和中文标点相同，直接返回（⚠ 此处假设中英文相同标点不存在配对标点）
 				return
 			else if choice = en  ; ⚠ 如果妙按时输入中文
-				autoPair(cn)  ; 自动配对中文标点
+				smartPair(cn)  ; 自动配对中文标点
 			else  ; 否则 如果妙按时输入英文
-				autoPair(en)  ; 自动配对英文标点
+				smartPair(en)  ; 自动配对英文标点
 			return
 		}
 		; # 长按的后续输入
@@ -462,21 +462,22 @@ showTip(info, sec) {
 }
 ; 如果 聪明标点开关打开，并且不是（存在输入法候选窗口 或 当前软件是 不支持聪明标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组）  ; 并且 在中文输入状态。
 #HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude"))  ; and IsCNInputMode()
-; TODO: 所有需要按Shift键的标点需进一步处理。
 .:: smartType('.', '。')
 ,:: smartType(',', '，')
 (:: {
-	; Send "{Blind}{9 up}{LShift up}"
+	Send "{Blind}{9 up}{LShift up}"
 	smartType('(', '（')
-	; reKeyState "LShift"  ; 恢复Shift键的物理状态
+	reKeyState "LShift"  ; 恢复Shift键的物理状态
 }
 ):: {
-	; Send "{Blind}{0 up}{LShift up}"
+	Send "{Blind}{0 up}{LShift up}"
 	smartType(')', '）')
+	reKeyState "LShift"  ; 恢复Shift键的物理状态
 }
 _:: {  ; （连按键）
-	; Send "{Blind}{- up}{LShift up}"
+	Send "{Blind}{- up}{LShift up}"
 	smartType('_', '——')
+	reKeyState "LShift"  ; 恢复Shift键的物理状态
 }
 ::: {
 	; Send "{Blind}{; up}{LShift up}"
@@ -485,15 +486,32 @@ _:: {  ; （连按键）
 ":: {
 	Send "{Blind}{' up}{LShift up}"
 	smartType('"', '“')
+	reKeyState "LShift"  ; 恢复Shift键的物理状态
 }
 /:: smartType(ThisHotkey)
 =:: SendText ThisHotkey  ; （连按键）
-<:: smartType('<', '《')
->:: smartType('>', '》')
+<:: {
+	Send "{Blind}{, up}{LShift up}"
+	smartType('<', '《')
+	reKeyState "LShift"  ; 恢复Shift键的物理状态
+}
+>:: {
+	Send "{Blind}{. up}{LShift up}"
+	smartType('>', '》')
+	reKeyState "LShift"  ; 恢复Shift键的物理状态
+}
 `;:: smartType(';', '；')
 -:: SendText ThisHotkey  ; （连按键）
-{:: smartType('{', '「')
-}:: smartType('}', '」')
+{:: {
+	Send "{Blind}{[ up}{LShift up}"
+	smartType('{', '「')
+	reKeyState "LShift"  ; 恢复Shift键的物理状态
+}
+}:: {
+	Send "{Blind}{] up}{LShift up}"
+	smartType('}', '」')
+	reKeyState "LShift"  ; 恢复Shift键的物理状态
+}
 ':: smartType("'", '‘')
 *:: SendText ThisHotkey  ; （连按键）
 #:: SendText ThisHotkey  ; （连按键）
@@ -502,39 +520,50 @@ _:: {  ; （连按键）
 `:: smartType(ThisHotkey)
 +:: SendText ThisHotkey  ; （连按键）
 &:: {
-	; Send "{Blind}{7 up}{LShift up}"
+	Send "{Blind}{7 up}{LShift up}"
 	smartType(ThisHotkey)
+	reKeyState "LShift"  ; 恢复Shift键的物理状态
 }
 ?:: {
-	; Send "{Blind}{/ up}{LShift up}"
+	Send "{Blind}{/ up}{LShift up}"
 	smartType('?', '？')
+	reKeyState "LShift"  ; 恢复Shift键的物理状态
 }
 !:: {
-	; Send "{Blind}{1 up}{RShift up}"
+	Send "{Blind}{1 up}{RShift up}"
 	smartType('!', '！')
+	reKeyState "RShift"  ; 恢复Shift键的物理状态
 }
 \:: smartType('\', '、')
 |:: {
-	; Send "{Blind}{\ up}{LShift up}"
+	Send "{Blind}{\ up}{LShift up}"
 	smartType('|', '｜')
+	reKeyState "LShift"  ; 恢复Shift键的物理状态
 }
 @:: {
+	Send "{Blind}{2 up}{RShift up}"
 	smartType(ThisHotkey)
+	reKeyState "RShift"  ; 恢复Shift键的物理状态
 }
 %:: {
+	Send "{Blind}{5 up}{RShift up}"
 	smartType(ThisHotkey)
+	reKeyState "RShift"  ; 恢复Shift键的物理状态
 }
 ^:: {
-	; Send "{Blind}{6 up}{LShift up}"
+	Send "{Blind}{6 up}{LShift up}"
 	smartType('^', '……')
+	reKeyState "LShift"  ; 恢复Shift键的物理状态
 }
 ~:: {  ; （连按键）
-	; Send "{Blind}{`` up}{RShift up}"
+	Send "{Blind}{`` up}{RShift up}"
 	smartType('~', '～')
+	reKeyState "RShift"  ; 恢复Shift键的物理状态
 }
 $:: {
-	; Send "{Blind}{4 up}{RShift up}"
+	Send "{Blind}{4 up}{RShift up}"
 	smartType('$', '￥')
+	reKeyState "RShift"  ; 恢复Shift键的物理状态
 }
 
 Global ENG_GRC_MAP := getDriftMap(A_ScriptDir "\MySettings\ENG_GRC.yaml")  ; 获取英文字母↔希腊字母对应关系映射表
