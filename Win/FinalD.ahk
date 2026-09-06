@@ -4,7 +4,7 @@
  * @see https://github.com/Lantaio/IME-booster-FinalD
  * @author Lantaio Joy
  * @version 见下面的全局变量 Version，或运行此程序后按左 Win+Alt+. 查看。
- * @modified 2026/9/4
+ * @modified 2026/9/6
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 KeyHistory 100
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-Global Version := "v9.79.266`n　　　 © 2024~2026"  ; 此程序的版本号
+Global Version := "v9.79.267`n　　　 © 2024~2026"  ; 此程序的版本号
 A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 
 #Include <Caret>  ; 和光标有关的函数
@@ -30,6 +30,29 @@ A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 #Include "MySettings\Shortcut.ahk"  ; 引入用户自定义的快捷键信息
 
 /**
+ * 检测当前所使用的输入法是否为 Rime，并更新全局状态。
+ */
+checkIME() {
+	Global Rime
+ 	id := WinExist("A")
+	WinActivate("ahk_class A)Shell_TrayWnd$")  ; 激活任务栏
+	Send "a"
+	Sleep 120  ; 等待输入法候选窗口出现
+	if WinExist("ahk_class A)ATL:") {
+		Rime := true
+		MsgBox "当前适配 Rime输入法。", , "Iconi T2"
+	} else {
+		Rime := false
+		MsgBox "当前适配 非Rime输入法。", , "Iconi T2"
+	}
+	Send "{Esc}"
+	if id and WinExist("ahk_id " id)
+		WinActivate "ahk_id " id  ; 重新激活检测前的活动窗口
+}
+
+checkIME()  ; 程序自动执行阶段检测当前所使用的输入法
+
+/**
  * @description 错误处理函数。
  * @param {Object} ex 错误对象。
  * @param {Integer} mode 错误的模式。
@@ -38,6 +61,46 @@ A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 errorHandler(ex, mode) {
 	return true
 }
+
+/**
+ * 根据按键按下时间决定是发送原键，还是执行长按功能。
+ *
+ * @param {String} key 需要监听的按键名称。
+ * @param {String} fn 长按时执行的功能键序列。
+ */
+actionKey(key, fn) {
+	if KeyWait(key, "T" String(Interval))  ; 短按
+		Send "{Blind}" key  ; 根据Shift键是否按下发送按键的相应大小写
+	else {  ; 长按
+		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的排队按键
+		Critical "Off"  ; 将此线程修改为非关键线程，配合上一行代码，使未处理的排队按键会被丢弃
+		if not WinExist("ahk_group IME")  ; 如果没有输入法候选窗口
+			while GetKeyState(key, "P") {  ; 当按键未释放时重复……
+				Send fn  ; 发送设定的功能
+				Sleep 1000 * Interval  ; 等待重复按键时间间隔
+			}
+		else  ; 有输入法候选窗口
+			while GetKeyState(key, "P") {  ; 当按键未释放时重复……
+				if GetKeyState("Shift", "P")  ; 如果按下了Shift键
+					Send "{Blind}" key  ; 发送按键的大写形式
+				else
+					Send fn  ; 发送设定的功能
+				Sleep 1000 * Interval  ; 等待重复按键时间间隔
+			}
+	}
+}
+; 如果 字母方向键功能打开 并且 不是大写状态打开
+#HotIf Arrow and not GetKeyState("CapsLock", "T")
+i:: actionKey('i', "{Up}")  ; 长按时发送‘↑’
+j:: actionKey('j', "{Left}")  ; 长按时发送‘←’
+k:: actionKey('k', "{Down}")  ; 长按时发送‘↓’
+l:: actionKey('l', "{Right}")  ; 长按时发送‘→’
++i:: actionKey('i', "^{Home}")  ; 长按时发送‘Ctrl+Home’（光标到文件头）
++j:: actionKey('j', "{Home}")  ; 长按时发送‘Home’（光标到行首）
++k:: actionKey('k', "^{End}")  ; 长按时发送‘Ctrl+End’（光标到文件尾）
++l:: actionKey('l', "{End}")  ; 长按时发送‘End’（光标到行尾）
+u:: actionKey('u', "{Esc}")  ; 长按时发送‘Esc’
+o:: actionKey('o', "{Del}")  ; 长按时发送‘Del’
 
 /**
  * @description 基本的热键回调函数，直接将按键发送给系统处理。
@@ -106,16 +169,14 @@ smartPair(punct) {
 			}
 	}
 }
+; FIXME: 需要添加检测光标前的内容是图片的情况。
 /**
  * @description 借助剪贴板获取光标前一个内容（字符）。
  * @returns {String} 如果光标前有内容，返回光标前一个内容（字符），否则返回空字符。
  */
-; FIXME: 需要添加检测光标前的内容是图片的情况。
 getPrev() {
 	clipCache := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪贴板内容，清空剪贴板
 	Send "+{Left}^c"  ; 选取并复制当前光标前一个内容
-	; Sleep 20  ; 暂停一下以等待反应慢的程序完成选取
-	; Send "^c"  ; 复制所选内容
 	ClipWait 0.5, 1  ; 等待剪贴板更新
 	; 获取剪贴板中的字符（一般是光标前一个字符），计算它的长度
 	clip := A_Clipboard, clipLen := StrLen(clip)
@@ -127,15 +188,10 @@ getPrev() {
 */
 	; 如果复制的字符长度为1 或 是回车換行符（行首）或 是emoji
 	if clipLen = 1 or clip ~= '`a)^\R$' or IsEmoji(clip) {
-		Send "{Right}"  ; 光标回到原来的位置
-		; Sleep 20  ; 暂停一下以等待光标完成向右移动
-		if WinActive("ahk_group Slow")  ; 如果是反应慢的应用，增加暂停时间
-			Sleep 20
+		SendEvent "{Right}"  ; ℹ用SendEvent保证光标回到原来的位置再发送后面的按键
 	} else if clip = '' and WinActive(" - Word$") {  ; 否则，如果当前软件是Word或PowerPoint
 		A_Clipboard := ''  ; 清空剪贴板
 		Send "+{Left}^c"  ; 选取并复制光标前2个内容
-		; Sleep 20  ; 暂停一下以等待反应慢的程序完成选取
-		; Send "^c"  ; 复制所选内容
 		ClipWait 0.3, 1  ; 等待剪贴板更新
 		; 获取剪贴板中的字符，即光标前2个字符
 		clip2 := A_Clipboard
@@ -146,16 +202,15 @@ getPrev() {
 		}
 */
 		if not clip2 = '' {
-			Send "{Right}"  ; 光标回到原来的位置
-			; Sleep 20  ; 暂停一下以等待光标完成向右移动
+			SendEvent "{Right}"  ; ℹ用SendEvent保证光标回到原来的位置再发送后面的按键
 		}
 	}
 	; 恢复原来的剪贴板内容
 	A_Clipboard := clipCache, clipCache := ''
-	if clip = '…'
-		clip := '……'
-	else if clip = '—'
-		clip := '——'
+	if clip = '…' or clip = '—'
+		clip := clip . clip
+/* 	else if clip = '—'
+		clip := '——' */
 	return clip
 }
 /**
@@ -165,9 +220,7 @@ getPrev() {
 getNext() {
 	clipCache := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪贴板内容，清空剪贴板
 	Send "+{Right}^c"  ; 选取并复制当前光标后一个字符
-	; Sleep 20  ; 暂停一下以等待反应慢的程序完成选取
-	; Send "^c"  ; 复制所选内容
-	ClipWait 0.3, 1  ; 等待剪贴板更新
+	ClipWait 0.3, 1  ; 等待剪贴板更新（此等待时间应尽量小，因为光标后经常没有内容）
 	; 获取剪贴板中的字符，即光标后一个字符，计算它的长度，然后恢复原来的剪贴板内容
 	clip := A_Clipboard, clipLen := StrLen(clip), A_Clipboard := clipCache, clipCache := ''
 /*	if Debug {
@@ -178,10 +231,7 @@ getNext() {
 */
 	; 如果复制的字符长度为1 或 是回车換行符（行末）或 是emoji
 	if clipLen = 1 or clip ~= '`a)^\R$' or IsEmoji(clip) {
-		Send "{Left}"  ; 光标回到原来的位置
-		; Sleep 20  ; 暂停一下以等待光标完成向左移动
-		if WinActive("ahk_group Slow")  ; 如果是反应慢的软件，增加暂停时间
-			Sleep 20
+		SendEvent "{Left}"  ; ℹ用SendEvent保证光标回到原来的位置再发送后面的按键
 	}
 	return clip
 }
@@ -250,16 +300,6 @@ isLatin(char) {
 		return true
 	else
 		return false
-}
-/**
- * @description 恢复指定按键（`key`参数）正确的逻辑状态，使其逻辑状态与物理状态一致。
- * @param {String} key 需要恢复逻辑状态的按键名称。
- */
-reKeyState(key) {
-	if GetKeyState(key, "P") {
-		Send "{" key " down}"
-		; Sleep 50
-	}
 }
 /**
  * @description 将给定的标点（`punct`参数）输出到屏幕，并在必要时显示提示信息。
@@ -347,6 +387,7 @@ smartChoice(en, cn) {
 			Return cn
 	}
 }
+; FIXME: 将妙按的输出推迟到检测是否长按之后，以避免有自动配对功能的软件的问题。
 /**
  * @description 根据按键方式和是否有提供中文标点参数来智能输入中/英文标点符号。
  * * 短按 根据光标前的内容智能上屏中文标点或者英文标点；
@@ -356,7 +397,6 @@ smartChoice(en, cn) {
  * @param {String} en 按键名称，也是此按键所对应的英文标点。
  * @param {String} [cn] （可选）按键所对应的中文标点。
  */
-; FIXME: 将妙按的输出推迟到检测是否长按之后，以避免有自动配对功能的软件的问题。
 smartType(en, cn?) {  ; （Send函数中[^+!#{}]标点须用{}包裹。）
 	if not isSet(cn)
 		cn := en
@@ -460,57 +500,68 @@ showTip(info, sec) {
 	}
 	SetTimer ToolTip, -sec*1000  ; 负数表示提示信息会在显示sec秒后清除
 }
+/**
+ * @description 恢复指定按键（`key`参数）正确的逻辑状态，使其逻辑状态与物理状态一致。
+ * @param {String} key 需要恢复逻辑状态的按键名称。
+ */
+syncKeyState(key) {
+	if GetKeyState(key, "P") {
+		Send "{" key " down}"
+		; Sleep 50
+	}
+}
 ; 如果 聪明标点开关打开，并且不是（存在输入法候选窗口 或 当前软件是 不支持聪明标点输入和自动配对功能的应用程序组 或 不适用须要排除的应用程序组）  ; 并且 在中文输入状态。
 #HotIf Smart and not (WinExist("ahk_group IME") or WinActive("ahk_group UnSmart") or WinActive("ahk_group Exclude"))  ; and IsCNInputMode()
 .:: smartType('.', '。')
 ,:: smartType(',', '，')
 (:: {
-	Send "{Blind}{9 up}{LShift up}"
+	Send "{Blind}{9 up}{LShift up}"  ; 逻辑释放按键
 	smartType('(', '（')
-	reKeyState "LShift"  ; 恢复Shift键的物理状态
+	syncKeyState "LShift"  ; 让Shift键的逻辑状态和物理状态一致
 }
 ):: {
 	Send "{Blind}{0 up}{LShift up}"
 	smartType(')', '）')
-	reKeyState "LShift"  ; 恢复Shift键的物理状态
+	syncKeyState "LShift"
 }
 _:: {  ; （连按键）
 	Send "{Blind}{- up}{LShift up}"
 	smartType('_', '——')
-	reKeyState "LShift"  ; 恢复Shift键的物理状态
+	syncKeyState "LShift"
 }
 ::: {
-	; Send "{Blind}{; up}{LShift up}"
-	smartType(':', '：')  ; 长按输入中文标点
+	Send "{Blind}{; up}{LShift up}"
+	smartType(':', '：')
+	syncKeyState "LShift"
 }
 ":: {
 	Send "{Blind}{' up}{LShift up}"
 	smartType('"', '“')
-	reKeyState "LShift"  ; 恢复Shift键的物理状态
+	syncKeyState "LShift"
 }
 /:: smartType(ThisHotkey)
 =:: SendText ThisHotkey  ; （连按键）
 <:: {
 	Send "{Blind}{, up}{LShift up}"
 	smartType('<', '《')
-	reKeyState "LShift"  ; 恢复Shift键的物理状态
+	syncKeyState "LShift"
 }
 >:: {
 	Send "{Blind}{. up}{LShift up}"
 	smartType('>', '》')
-	reKeyState "LShift"  ; 恢复Shift键的物理状态
+	syncKeyState "LShift"
 }
 `;:: smartType(';', '；')
 -:: SendText ThisHotkey  ; （连按键）
 {:: {
 	Send "{Blind}{[ up}{LShift up}"
 	smartType('{', '「')
-	reKeyState "LShift"  ; 恢复Shift键的物理状态
+	syncKeyState "LShift"
 }
 }:: {
 	Send "{Blind}{] up}{LShift up}"
 	smartType('}', '」')
-	reKeyState "LShift"  ; 恢复Shift键的物理状态
+	syncKeyState "LShift"
 }
 ':: smartType("'", '‘')
 *:: SendText ThisHotkey  ; （连按键）
@@ -522,61 +573,61 @@ _:: {  ; （连按键）
 &:: {
 	Send "{Blind}{7 up}{LShift up}"
 	smartType(ThisHotkey)
-	reKeyState "LShift"  ; 恢复Shift键的物理状态
+	syncKeyState "LShift"
 }
 ?:: {
 	Send "{Blind}{/ up}{LShift up}"
 	smartType('?', '？')
-	reKeyState "LShift"  ; 恢复Shift键的物理状态
+	syncKeyState "LShift"
 }
 !:: {
 	Send "{Blind}{1 up}{RShift up}"
 	smartType('!', '！')
-	reKeyState "RShift"  ; 恢复Shift键的物理状态
+	syncKeyState "RShift"
 }
 \:: smartType('\', '、')
 |:: {
 	Send "{Blind}{\ up}{LShift up}"
 	smartType('|', '｜')
-	reKeyState "LShift"  ; 恢复Shift键的物理状态
+	syncKeyState "LShift"
 }
 @:: {
 	Send "{Blind}{2 up}{RShift up}"
 	smartType(ThisHotkey)
-	reKeyState "RShift"  ; 恢复Shift键的物理状态
+	syncKeyState "RShift"
 }
 %:: {
 	Send "{Blind}{5 up}{RShift up}"
 	smartType(ThisHotkey)
-	reKeyState "RShift"  ; 恢复Shift键的物理状态
+	syncKeyState "RShift"
 }
 ^:: {
 	Send "{Blind}{6 up}{LShift up}"
 	smartType('^', '……')
-	reKeyState "LShift"  ; 恢复Shift键的物理状态
+	syncKeyState "LShift"
 }
 ~:: {  ; （连按键）
 	Send "{Blind}{`` up}{RShift up}"
 	smartType('~', '～')
-	reKeyState "RShift"  ; 恢复Shift键的物理状态
+	syncKeyState "RShift"
 }
 $:: {
 	Send "{Blind}{4 up}{RShift up}"
 	smartType('$', '￥')
-	reKeyState "RShift"  ; 恢复Shift键的物理状态
+	syncKeyState "RShift"
 }
 
 Global ENG_GRC_MAP := getDriftMap(A_ScriptDir "\MySettings\ENG_GRC.yaml")  ; 获取英文字母↔希腊字母对应关系映射表
 Global NUMBER_MAP := getDriftMap(A_ScriptDir "\MySettings\Number.yaml")  ; 获取数字漂移配置表
 Global SYMBOL_MAP := getDriftMap(A_ScriptDir "\MySettings\Symbol.yaml")  ; 获取标点符号漂移配置表
+; TODO: 尝试通过output函数和smartPair函数精简此函数。
+; TODO: 漂移多个字符。
 /**
  * @description 标点符号循环漂移函数。
  * 删除光标前原来的标点符号（`origin`参数），并输入漂移数组中（`list`参数）排在`origin`后面的标点符号。如果`origin`不在数组中 或者 是数组中最后1个标点符号，则输入数组中第1个标点符号。
  * @param {String} origin 原来的标点符号。
  * @param {Array} list 标点符号漂移数组。
  */
-; TODO: 尝试通过output函数和smartPair函数精简此函数。
-; TODO: 漂移多个字符。
 drift(origin, list*) {
 	i := 0
 	loop list.length
@@ -635,9 +686,9 @@ parseYAMLScalar(value) {
 /**
  * @description 读取并反序列化给定的 YAML 配置文件。
  * 它会逐行扫描 YAML，识别 LShift/RShift 章节和其后的键值列表，
- * 然后将每个键映射到字符串数组，用于实际的字符漂移循环。
- * @param {String} filePath 配置文件路径。
- * @returns {Map} 由左右 Shift 配置组成的漂移映射。
+ * 然后将每个键映射到字符串数组，用于字符漂移。
+ * @param {String} filePath 要反序列化的配置文件路径。
+ * @returns {Map} 由左、右 Shift 章节组成的漂移映射表。
  */
 getDriftMap(filePath) {
 	driftMap := Map("LShift", Map(), "RShift", Map())  ; 初始化两套映射：左右Shift分别保存各自的漂移列表
@@ -675,6 +726,7 @@ getDriftMap(filePath) {
 	}
 	return driftMap  ; 返回整个配置对象，供后续查表使用
 }
+; TODO: 合并Letter和Number漂移功能。
 /**
  * @description 根据 所触发的热键（`hotkey`参数）和 光标前的内容（`origin`参数）返回`hotkey`热键的配置表中`origin`标点符号所在的键的值列表。
  * @param {("LShift"|"RShift"|"<#LShift"|"<#RShift"|">#LShift"|">#RShift")} hotkey 触发的热键
@@ -690,7 +742,6 @@ getDriftMap(filePath) {
  *   - 若触发的是 RShift up，则返回 RShift['.'] 的值列表
  *   外层的 drift(origin, list*) 会按所选值（数组）顺序循环切换。
  */
-; TODO: 合并Letter和Number漂移功能。
 getDriftList(hotkey, origin) {
 	driftMap := {}
 	switch hotkey {
@@ -743,10 +794,56 @@ isValueInArray(value, arr*) {
 }
 ; 如果*不是*（存在输入法候选窗口 或 当前软件是 不适用须要排除的应用程序组 或 文件管理器且活动控件*不是*输入框）
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not InStr(ControlGetClassNN(ControlGetFocus("A")), "edit")))  ; or hasMS_IMEWindow()
+; TODO: 合并Letter和Number漂移功能。
+/*
+ * 数字漂移和字母漂移功能
+ * 如果更改触发快捷键，须要同时修改FinalD.ahk中getDriftList函数的对应快捷键键。
+ */
+<#LShift up:: {  ; 左Win+左Shift 将光标前面的数字变换为上下标数字形式
+	static numberList := []
+	if A_PriorKey = "LShift" {
+		origin := getPrev()  ; 获取光标前一个内容（将要被变换的字符）
+		if not numberList.Length or not isValueInArray(origin, numberList*)
+			numberList := getDriftList("<#LShift", origin)
+		if numberList.Length
+			drift(origin, numberList*)
+	}
+}
+<#RShift up:: {  ; 左Win+右Shift 将光标前面的数字变换为对应的罗马数字形式
+	static numberList := []
+	if A_PriorKey = "RShift" {
+		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
+		if not numberList.Length or not isValueInArray(origin, numberList*)
+			numberList := getDriftList("<#RShift", origin)
+		if numberList.Length
+			drift(origin, numberList*)
+	}
+}
+>#LShift up:: {  ; 右Win+左Shift 将光标前面的希腊字母变换为对应的英文字母
+	static letterList := []
+	if A_PriorKey = "LShift" {
+		origin := getPrev()  ; 获取光标前一个内容（将要被变换的字符）
+		if not letterList.Length or not isValueInArray(origin, letterList*)
+			letterList := getDriftList(">#LShift", origin)
+		if letterList.Length
+			drift(origin, letterList*)
+	}
+}
+>#RShift up:: {  ; 右Win+右Shift 将光标前面的英文字母变换为对应的希腊字母
+	static letterList := []
+	if A_PriorKey = "RShift" {
+		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
+		if not letterList.Length or not isValueInArray(origin, letterList*)
+			letterList := getDriftList(">#RShift", origin)
+		if letterList.Length
+			drift(origin, letterList*)
+	}
+}
+
 ; 英/中常用标点变换，处理有配对标点符号时按情况变换单个或者成对标点。
 ~LShift up:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
-	static symbolList := []
 	if HolyShift and A_PriorKey = "LShift" {
+		static symbolList := []
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
 		if not symbolList.Length or not isValueInArray(origin, symbolList*)  ; 如果 symbolList 为空 或者 光标前的内容*不在* symbolList 中
 			symbolList := getDriftList("LShift", origin)
@@ -756,8 +853,8 @@ isValueInArray(value, arr*) {
 }
 ; 扩展标点变换。处理有配对标点符号时可快速变换单个或者成对标点。
 ~RShift up:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
-	static symbolList := []
 	if HolyShift and A_PriorKey = "RShift" {
+		static symbolList := []
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
 		switch origin {
 			case '"': Send "{Left}{Del}{Text}“"
@@ -783,9 +880,70 @@ isValueInArray(value, arr*) {
 	}
 }
 
-Global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
+/**
+ * 通过剪贴板获取光标前的英文片段，并删除该片段。
+ *
+ * @returns {String} 光标前的英文片段；如果没有匹配内容，则返回空字符串。
+ */
+getPrevWord_X() {
+	clipCache := ClipboardAll(), A_Clipboard := ''
+	Send "^+{Left}^c"  ; 选取当前光标前的片段并复制
+	if !ClipWait(0.5) {  ; 如果剪贴板在0.6秒内没有内容，则返回空字符串
+		A_Clipboard := clipCache
+		return ''
+	}
+	Send "{Right}"  ; 取消选择，光标回到原位置
+	prevWord := '', text := A_Clipboard, A_Clipboard := clipCache
+	if RegExMatch(text, "([0-9A-Za-z_]+)$", &match) ; 取出末尾连续的英文/数字/下划线片段
+		prevWord := match[1]
+	if prevWord != '' {  ; 如果有匹配内容，则删除该片段
+		Send "{LShift down}"
+		Send "{Left " StrLen(prevWord) "}"
+		Send "{LShift up}"
+		Send "{Del}"
+	}
+	return prevWord
+}
+; CapsLock键处于打开状态时启用的热键。
+#HotIf GetKeyState("CapsLock", "T")
+<+CapsLock:: {  ; 左Shift+CapsLock 将光标前1个英文单词转换为小写。
+	Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的排队按键
+	Critical "Off"  ; 将此线程修改为非关键线程，配合上一行代码，使未处理的排队按键会被丢弃
+	SetCapsLockState "Off"
+	Send "{Blind}{LShift up}"
+	SendText StrLower(getPrevWord_X())
+	KeyWait "CapsLock"
+	KeyWait "LShift"
+}
+>+CapsLock:: {  ; 右Shift+CapsLock 将光标前1个英文单词转换为小写输入码（发送给中文输入法）。
+	Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的排队按键
+	Critical "Off"  ; 将此线程修改为非关键线程，配合上一行代码，使未处理的排队按键会被丢弃
+	SetCapsLockState "Off"
+	Send "{Blind}{RShift up}"
+	Send StrLower(getPrevWord_X())
+	KeyWait "CapsLock"
+	KeyWait "RShift"
+}
 
+Global HolyShift := true  ; 标记是否只按下了Shift键，是则为 true
+; 无任何前置条件的热键。
 #HotIf
+<+CapsLock:: {  ; 左Shift+CapsLock 将光标前1个英文单词转换为大写。
+	Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的排队按键
+	Critical "Off"  ; 将此线程修改为非关键线程，配合上一行代码，使未处理的排队按键会被丢弃
+	Send "{Blind}{LShift up}"
+	SendText StrUpper(getPrevWord_X())
+	KeyWait "CapsLock"
+	KeyWait "LShift"
+}
+>+CapsLock:: {  ; 右Shift+CapsLock 将光标前1个英文单词转换为首字母大写。
+	Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的排队按键
+	Critical "Off"  ; 将此线程修改为非关键线程，配合上一行代码，使未处理的排队按键会被丢弃
+	Send "{Blind}{RShift up}"
+	SendText StrTitle(getPrevWord_X())
+	KeyWait "CapsLock"
+	KeyWait "RShift"
+}
 ; ~~~~~~ Optional Hotkeys Begin ~~~~~~
 ; 这部分热键为非必须热键，如果和你使用的其它AHK脚本有冲突，可以将这部分代码注释或删除。但这将失去按键按顺序执行的功能，当输入太快时顺序可能会出现错乱。
 Enter::
@@ -810,4 +968,16 @@ Space:: xkeySender(ThisHotkey)
 ~LShift::
 ~RShift:: {  ; 如果只按下Shift键，则HolyShift为true
 	Global HolyShift := true
+}
+~#Space up:: {  ; Win+Space 切换输入法时检测当前所使用的输入法
+	if A_PriorKey = "Space" {
+		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的排队按键
+		Critical "Off"  ; 将此线程修改为非关键线程，配合上一行代码，使未处理的排队按键会被丢弃
+		if GetKeyState("LWin", "P")  ; 如果Win键仍然按下，等待Win键释放
+			KeyWait	"LWin"
+		else
+			KeyWait	"RWin"
+		Sleep 20  ; 等待输入法切换完成
+		checkIME()  ;	检测当前所使用的输入法
+	}
 }
