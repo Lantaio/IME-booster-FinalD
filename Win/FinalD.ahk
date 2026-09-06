@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 KeyHistory 100
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-Global Version := "v9.79.267`n　　　 © 2024~2026"  ; 此程序的版本号
+Global Version := "v9.79.268`n　　　 © 2024~2026"  ; 此程序的版本号
 A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 
 #Include <Caret>  ; 和光标有关的函数
@@ -711,9 +711,9 @@ getDriftMap(filePath) {
 		keyText := Trim(SubStr(line, 1, InStr(line, ': ') - 1))  ; 取出键名，例如 "." 或 "?"
 		key := parseYAMLScalar(keyText)  ; 去掉键名周围引号，得到真实符号
 		if !InStr(line, '[ ')
-			listText := Trim(SubStr(line, InStr(line, ': ') + 1, InStr(line, ' #') ? InStr(line, ' #') - 1 : StrLen(line)))  ; 如果没有方括号，取出冒号后面至注释（如果有的话）之前的内容作为列表内容
+			listText := Trim(SubStr(line, InStr(line, ': ') + 1, InStr(line, ' #') ? InStr(line, ' #') - InStr(line, ': ') : StrLen(line) - InStr(line, ': ')))  ; 如果没有方括号，取出冒号后面至注释（如果有的话）之前的内容作为列表内容
 		else
-			listText := Trim(SubStr(line, InStr(line, '[ ') + 1, InStr(line, ' ]') - InStr(line, '[ ') - 1))  ; 取出列表内容，例如 "'。', '.'"
+			listText := Trim(SubStr(line, InStr(line, '[ ') + 1, InStr(line, ' ]') - InStr(line, '[ ')))  ; 取出列表内容，例如 "'。', '.'"
 		list := []  ; 这个键对应的漂移顺序列表
 		if listText != '' {  ; 如果列表不是空的才继续解析
 			for item in StrSplit(listText, ', ') {  ; 按逗号拆分列表项
