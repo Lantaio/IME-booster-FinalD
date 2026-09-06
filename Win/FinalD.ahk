@@ -130,45 +130,6 @@ Loop Parse, letters  ;添加大写字母热键，使按键可以按顺序执行
 
 Global Commit := ''  ; 刚上屏的标点
 Global Prev := ''  ; 光标前1个内容
-/**
- * @description 在合适的情况下输入与给定的标点（`punct`参数）配对的后标点（如果有的话）。
- * @param {String} punct 给定的标点。
- */
-smartPair(punct) {
-	switch punct {
-		case '(', '[', '{':
-			if not WinActive("ahk_group AutoPair") and shouldPair(punct) {  ; 如果 是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
-				if Tip
-					showTip("Pair", 1)
-				SendText getPair(punct)  ; 输入对应的后标点
-				Send "{Left}"  ; 光标回到配对标点中间
-			}
-		case '"', "'":
-			if not WinActive("ahk_group AutoPair") and (Prev = ' ' or Prev ~= '`a)\R$' or Prev = '`t' or Prev = '') and shouldPair(punct) {  ; 如果 是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
-				if Tip
-					showTip("Pair", 1)
-				SendText getPair(punct)  ; 输入对应的后标点
-				Send "{Left}"  ; 光标回到配对标点中间
-			}
-		case '“', '‘':
-			if Commit = '“' or Commit = '‘'  ; 如果 刚输入的是中文引号前标点
-				if shouldPair(Commit) {  ; 如果 应该自动配对，则……
-					if Tip
-						showTip("配对", 1)
-					if Commit = '“'
-						Send "`"{Left}"  ; 交给输入法处理
-					else
-						Send "'{Left}"  ; 交给输入法处理
-				}
-		case '（', '【', '「', '《':  ; 此处只需要检查可通过按键直接输入的标点
-			if shouldPair(punct) {
-				if Tip and punct = '（'
-					showTip("配对", 1)
-				SendText getPair(punct)
-				Send "{Left}"
-			}
-	}
-}
 ; FIXME: 需要添加检测光标前的内容是图片的情况。
 /**
  * @description 借助剪贴板获取光标前一个内容（字符）。
@@ -302,38 +263,6 @@ isLatin(char) {
 		return false
 }
 /**
- * @description 将给定的标点（`punct`参数）输出到屏幕，并在必要时显示提示信息。
- * @param {String} punct 给定的标点。
- */
-output(punct) {
-	switch punct {
-		case '“', '‘':
-			if punct = '“'
-				Send '"'  ; 交给输入法处理
-			else
-				Send "'"  ; 交给输入法处理
-			Global Commit := getPrev()
-			if Commit = '“' or Commit = '‘' {  ; 如果 刚输入的是中文引号前标点
-				if Tip
-					showTip("前", 1)
-			} else if Tip  ; 否则 刚输入的是中文引号后标点
-				showTip("后", 1)
-		case '（', '）', '【', '】', '「', '」', '《', '》':
-			if Tip
-				if punct = '（'
-					showTip("前", 1)
-				else if punct = '）'
-					showTip("后", 1)
-			SendText punct
-		default:  ; 其他中、英文单标点
-			if Tip and InStr("(`"'[{", punct)
-				showTip("En", 1)
-			if Tip and InStr("，：；？！｜～", punct)
-				showTip("中", 1)
-			SendText punct
-	}
-}
-/**
  * @description 根据所给定的前标点（`front`参数）和光标后的内容，判断是否应该输入配对的后标点。
  * @param {String} front 给定的前标点，用于分类处理。
  * @returns {Boolean} 如果应该输入配对的后标点，返回`true`，否则返回`false`。
@@ -359,6 +288,45 @@ shouldPair(front) {
 		case '，', '。', '：', '；', '？', '！', '）', '］', '】', '〗', '〕', '〙', '｝', '》', '〉': return true
 	}
 	return false
+}
+/**
+ * @description 在合适的情况下输入与给定的标点（`punct`参数）配对的后标点（如果有的话）。
+ * @param {String} punct 给定的标点。
+ */
+smartPair(punct) {
+	switch punct {
+		case '(', '[', '{':
+			if not WinActive("ahk_group AutoPair") and shouldPair(punct) {  ; 如果 是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
+				if Tip
+					showTip("Pair", 1)
+				SendText getPair(punct)  ; 输入对应的后标点
+				Send "{Left}"  ; 光标回到配对标点中间
+			}
+		case '"', "'":
+			if not WinActive("ahk_group AutoPair") and (Prev = ' ' or Prev ~= '`a)\R$' or Prev = '`t' or Prev = '') and shouldPair(punct) {  ; 如果 是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
+				if Tip
+					showTip("Pair", 1)
+				SendText getPair(punct)  ; 输入对应的后标点
+				Send "{Left}"  ; 光标回到配对标点中间
+			}
+		case '“', '‘':
+			if Commit = '“' or Commit = '‘'  ; 如果 刚输入的是中文引号前标点
+				if shouldPair(Commit) {  ; 如果 应该自动配对，则……
+					if Tip
+						showTip("配对", 1)
+					if Commit = '“'
+						Send "`"{Left}"  ; 交给输入法处理
+					else
+						Send "'{Left}"  ; 交给输入法处理
+				}
+		case '（', '【', '「', '《':  ; 此处只需要检查可通过按键直接输入的标点
+			if shouldPair(punct) {
+				if Tip and punct = '（'
+					showTip("配对", 1)
+				SendText getPair(punct)
+				Send "{Left}"
+			}
+	}
 }
 /**
  * @description 根据当前的智能模式和具体情况，确定要上屏按键所对应的英文标点还是中文标点。
@@ -409,7 +377,7 @@ smartType(en, cn?) {  ; （Send函数中[^+!#{}]标点须用{}包裹。）
 				SendText en
 				smartPair(en)  ; 自动配对英文标点
 			} else {  ; 应该输入中文标点
-				output(cn)
+				typing(cn)
 				smartPair(cn)  ; 自动配对中文标点
 			}
 		}
@@ -423,7 +391,7 @@ smartType(en, cn?) {  ; （Send函数中[^+!#{}]标点须用{}包裹。）
 				if InStr("/&|@%^$", en)  ; 如果是Rime功能触发键
 					en = '^' ? Send("{" en "}") : Send(en)  ; 交给输入法处理
 				else  ; 不是Rime功能触发键
-					output(cn)  ; （后面#1再作配对处理）
+					typing(cn)  ; （后面#1再作配对处理）
 			} else {  ; 本来应该输入中文标点，变成输入英文标点
 				if InStr("/&|@%^$", en)  ; 如果是Rime功能触发键
 					en = '^' ? Send("{" en "}") : Send(en)  ; 交给输入法处理
@@ -434,7 +402,7 @@ smartType(en, cn?) {  ; （Send函数中[^+!#{}]标点须用{}包裹。）
 			if en = cn  ; 如果英文标点和中文标点相同，直接输出
 				SendText en
 			else if choice = en  ; 本来应该输入英文标点，变成输入中文标点
-				output(cn)
+				typing(cn)
 			else  ; 本来应该输入中文标点，变成输入英文标点
 				SendText en
 		}
@@ -449,7 +417,7 @@ smartType(en, cn?) {  ; （Send函数中[^+!#{}]标点须用{}包裹。）
 				Send "{BS}{Text}" en  ; 删除妙按输入的中文标点（或者关闭输入法候选窗口），并输入1个英文标点（此操作统一不同中文输入法的行为）
 			} else {  ; 如果应该输入中文
 				Send "{BS}"  ; 删除妙按时输入的英文标点（或者关闭输入法候选窗口）（此操作统一不同中文输入法的行为）
-				output(cn)
+				typing(cn)
 			}
 			Sleep 1000 * Interval
 		} else {  ; # 妙按后没有长按（#1）
@@ -471,6 +439,38 @@ smartType(en, cn?) {  ; （Send函数中[^+!#{}]标点须用{}包裹。）
 				SendText cn
 			Sleep 1000 * Interval
 		}
+	}
+}
+/**
+ * @description 将给定的标点（`punct`参数）输出到屏幕，并在必要时显示提示信息。
+ * @param {String} punct 给定的标点。
+ */
+typing(punct) {
+	switch punct {
+		case '“', '‘':
+			if punct = '“'
+				Send '"'  ; 交给输入法处理
+			else
+				Send "'"  ; 交给输入法处理
+			Global Commit := getPrev()
+			if Commit = '“' or Commit = '‘' {  ; 如果 刚输入的是中文引号前标点
+				if Tip
+					showTip("前", 1)
+			} else if Tip  ; 否则 刚输入的是中文引号后标点
+				showTip("后", 1)
+		case '（', '）', '【', '】', '「', '」', '《', '》':
+			if Tip
+				if punct = '（'
+					showTip("前", 1)
+				else if punct = '）'
+					showTip("后", 1)
+			SendText punct
+		default:  ; 其他中、英文单标点
+			if Tip and InStr("(`"'[{", punct)
+				showTip("En", 1)
+			if Tip and InStr("，：；？！｜～", punct)
+				showTip("中", 1)
+			SendText punct
 	}
 }
 /**
@@ -729,9 +729,9 @@ getDriftMap(filePath) {
 ; TODO: 合并Letter和Number漂移功能。
 /**
  * @description 根据 所触发的热键（`hotkey`参数）和 光标前的内容（`origin`参数）返回`hotkey`热键的配置表中`origin`标点符号所在的键的值列表。
- * @param {("LShift"|"RShift"|"<#LShift"|"<#RShift"|">#LShift"|">#RShift")} hotkey 触发的热键
- * @param {(String)} origin 光标前的内容（标点符号）
- * @returns {(Array)} hotkey热键的配置表中origin标点符号所在的键的值列表（如果有的话，没有则返回空数组），例如 [ '。', '.' ] 或 [ '℃', '°', '℉' ]
+ * @param {"LShift"|"RShift"|"<#LShift"|"<#RShift"|">#LShift"|">#RShift"} hotkey 触发的热键
+ * @param {String} origin 光标前的内容（标点符号）
+ * @returns {Array} hotkey热键的配置表中origin标点符号所在的键的值列表（如果有的话，没有则返回空数组），例如 [ '。', '.' ] 或 [ '℃', '°', '℉' ]
  * @note 关键点在于：origin 不是按键本身，而是当前光标前的内容（标点符号）。
  *   所以不能直接用 origin 去索引 YAML 的键名；需要先在所有 Shift 配置里
  *   搜索哪个按键列表包含这个字符，再根据触发的 Shift 方向选择对应的同键列表。
@@ -780,10 +780,10 @@ getDriftList(hotkey, origin) {
 	return []  ; 若当前方向不存在该键，则直接忽略，不做漂移
 }
 /**
- * @description 检测给定的值（value）是否存在于数组（arr）中
- * @param {(Any)} value 要检测的值
- * @param {(Array)} arr 给定的数组
- * @returns {(true|false)} 如果 value 存在于 arr 中返回 true，否则返回 false
+ * @description 检测某个值（`value`参数）是否存在于给定的数组（`arr`参数）中。
+ * @param {Any} value 要检测的值。
+ * @param {Array} arr 给定的数组。
+ * @returns {Boolean} 如果`value`存在于`arr`数组中返回`true`，否则返回`false`。
  */
 isValueInArray(value, arr*) {
 	for v in arr {
