@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 KeyHistory 100
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-Global Version := "v9.79.271`n　　　 © 2024~2026"  ; 此程序的版本号
+Global Version := "v9.79.272`n　　　 © 2024~2026"  ; 此程序的版本号
 A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 
 #Include <Caret>  ; 和光标有关的函数
@@ -285,6 +285,9 @@ shouldPair(front) {
 		Pause
 	}
 */
+	; 如果前标点是‘{’并且后一个字符是空格
+	if front = '{' and next = ' '
+		return false
 	; 如果后一个字符是空字符 或 空格 或 换行符
 	if next = '' or next = ' ' or next ~= '`a)\R$'
 		return true
@@ -314,7 +317,7 @@ smartPair(punct) {
 				Send "{Left}"  ; 光标回到配对标点中间
 			}
 		case '"', "'":
-			if not WinActive("ahk_group AutoPair") and (Prev = ' ' or Prev ~= '`a)\R$' or Prev = '`t' or Prev = '') and shouldPair(punct) {  ; 如果 是英文引号 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
+			if not WinActive("ahk_group AutoPair") and (Prev = ' ' or Prev = '`t' or Prev ~= '`a)\R$' or Prev = '') and shouldPair(punct) {  ; 如果 是英文引号 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
 				; if Tip
 				; 	showTip("Pair", 1)
 				SendText getPair(punct)  ; 输入对应的后标点
@@ -432,7 +435,7 @@ smartType(en, cn?) {  ; （Send函数中[^+!#{}]标点须用{}包裹。）
 				else if cn = '“' or cn = '‘'  ; 否则 如果 是中文引号
 					Send en  ; 交给输入法处理
 				else  ; 否则 是其它中文标点
-					SendText cn
+					SendText cn  ; 此处不用typing函数，因为长按时不显示提示信息
 			} until KeyWait(en, "T" String(Interval))  ; 直至按键弹起时退出循环
 		}
 	}
