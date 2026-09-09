@@ -1,10 +1,11 @@
 ﻿/**
  * @description 存放FinalD项目的自定义程序组信息。
  * @author Lantaio Joy
- * @version v3.8 （v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新，或查找文件中有“✨”符号的地方。修订号为不影响功能的修改，可以不管。）
- * @modified 2026/8/21
+ * @version v4.9 （v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新，或查找文件中有“✨”符号的地方。修订号为不影响功能的修改，可以不管。）
+ * @modified 2026/9/9
  * 重大更新说明：
- * v3.x：添加Win系统打开文件窗口（ahk_class #32770）到文件管理器组。适配主程序版本 v7.70.205 ~ 待定
+ * v4.x：将VSCode编辑Markdown文件时加入“Slow”程序组。适配主程序版本 v9.79.270 ~ 最新版
+ * v3.x：添加Win系统打开文件窗口（ahk_class #32770）到文件管理器组。适配主程序版本 v7.70.205 ~ v9.79.268
  * v2.x：将此项目所有ahk脚本程序的编码方式统一更改为UTF-8 with BOM格式。只需将你自己的AppGroup.ahk文件的编码格式修改为此编码格式并保存即可。适配主程序版本 v7.68.190 ~ v7.70.204
  * v1.x：将各程序组信息从FinalD.ahk分离出来的首个版本。适配主程序版本 v5.61.162 ~ v7.68.189
  *
@@ -51,7 +52,8 @@ GroupAdd "IME", "ahk_class A)BaiduPinyinImeWnd"  ; 百度拼音？
 ; GroupAdd "IME", "ahk_class A)TfFrameClass"  ; 智能ABC
 
 ; 以下为 反应慢的应用程序组 定义。（在发送箭头键后须要停顿几十毫秒）
-; GroupAdd "Slow", "ahk_class A)SunAwtFrame$"  ; JetBrains系列IDE
+GroupAdd "Slow", "\.md - ahk_exe \\Code\.exe$"  ; ✨️VSCode的Markdown所见即所得编辑器反应慢
+GroupAdd "Slow", "ahk_class A)SunAwtFrame$"  ; JetBrains系列IDE
 GroupAdd "Slow", "ahk_exe \\AliIM\.exe$"  ; 阿里旺旺
 
 ; 以下为 不支持智能标点输入和自动配对功能的应用程序组 定义。

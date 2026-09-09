@@ -4,7 +4,7 @@
  * @see https://github.com/Lantaio/IME-booster-FinalD
  * @author Lantaio Joy
  * @version 见下面的全局变量 Version，或运行此程序后按左 Win+Alt+. 查看。
- * @modified 2026/9/6
+ * @modified 2026/9/9
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 KeyHistory 100
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-Global Version := "v9.79.268`n　　　 © 2024~2026"  ; 此程序的版本号
+Global Version := "v9.79.271`n　　　 © 2024~2026"  ; 此程序的版本号
 A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 
 #Include <Caret>  ; 和光标有关的函数
@@ -63,12 +63,12 @@ errorHandler(ex, mode) {
 }
 
 /**
- * 根据按键按下时间决定是发送原键，还是执行长按功能。
+ * 根据按键按下时间决定是发送原键（`key`参数），还是执行长按时执行的功能键序列（`fn`参数）。
  *
  * @param {String} key 需要监听的按键名称。
  * @param {String} fn 长按时执行的功能键序列。
  */
-actionKey(key, fn) {
+fnKey(key, fn) {
 	if KeyWait(key, "T" String(Interval))  ; 短按
 		Send "{Blind}" key  ; 根据Shift键是否按下发送按键的相应大小写
 	else {  ; 长按
@@ -91,16 +91,16 @@ actionKey(key, fn) {
 }
 ; 如果 字母方向键功能打开 并且 不是大写状态打开
 #HotIf Arrow and not GetKeyState("CapsLock", "T")
-i:: actionKey('i', "{Up}")  ; 长按时发送‘↑’
-j:: actionKey('j', "{Left}")  ; 长按时发送‘←’
-k:: actionKey('k', "{Down}")  ; 长按时发送‘↓’
-l:: actionKey('l', "{Right}")  ; 长按时发送‘→’
-+i:: actionKey('i', "^{Home}")  ; 长按时发送‘Ctrl+Home’（光标到文件头）
-+j:: actionKey('j', "{Home}")  ; 长按时发送‘Home’（光标到行首）
-+k:: actionKey('k', "^{End}")  ; 长按时发送‘Ctrl+End’（光标到文件尾）
-+l:: actionKey('l', "{End}")  ; 长按时发送‘End’（光标到行尾）
-u:: actionKey('u', "{Esc}")  ; 长按时发送‘Esc’
-o:: actionKey('o', "{Del}")  ; 长按时发送‘Del’
+i:: fnKey('i', "{Up}")  ; 长按时发送‘↑’
+j:: fnKey('j', "{Left}")  ; 长按时发送‘←’
+k:: fnKey('k', "{Down}")  ; 长按时发送‘↓’
+l:: fnKey('l', "{Right}")  ; 长按时发送‘→’
++i:: fnKey('i', "^{Home}")  ; 长按时发送‘Ctrl+Home’（光标到文件头）
++j:: fnKey('j', "{Home}")  ; 长按时发送‘Home’（光标到行首）
++k:: fnKey('k', "^{End}")  ; 长按时发送‘Ctrl+End’（光标到文件尾）
++l:: fnKey('l', "{End}")  ; 长按时发送‘End’（光标到行尾）
+u:: fnKey('u', "{Esc}")  ; 长按时发送‘Esc’
+o:: fnKey('o', "{Del}")  ; 长按时发送‘Del’
 
 /**
  * @description 基本的热键回调函数，直接将按键发送给系统处理。
@@ -138,7 +138,12 @@ Global Prev := ''  ; 光标前1个内容
 getPrev() {
 	clipCache := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪贴板内容，清空剪贴板
 	Send "+{Left}^c"  ; 选取并复制当前光标前一个内容
-	ClipWait 0.5, 1  ; 等待剪贴板更新
+	ClipWait 0.3, 1  ; 等待剪贴板更新
+	if !A_Clipboard and WinActive("ahk_group Slow") {  ; 如果剪贴板为空，并且当前软件是反应慢的应用程序
+		; Sleep 300
+		Send "^c"
+		ClipWait 0.3, 1
+	}
 	; 获取剪贴板中的字符（一般是光标前一个字符），计算它的长度
 	clip := A_Clipboard, clipLen := StrLen(clip)
 /*	if Debug {
@@ -149,8 +154,8 @@ getPrev() {
 */
 	; 如果复制的字符长度为1 或 是回车換行符（行首）或 是emoji
 	if clipLen = 1 or clip ~= '`a)^\R$' or IsEmoji(clip) {
-		SendEvent "{Right}"  ; ℹ用SendEvent保证光标回到原来的位置再发送后面的按键
-	} else if clip = '' and WinActive(" - Word$") {  ; 否则，如果当前软件是Word或PowerPoint
+		Send "{Right}"  ; ℹ用SendEvent保证光标回到原来的位置再发送后面的按键
+	} else if !clip and WinActive(" - Word$") {  ; 否则，如果当前软件是Word
 		A_Clipboard := ''  ; 清空剪贴板
 		Send "+{Left}^c"  ; 选取并复制光标前2个内容
 		ClipWait 0.3, 1  ; 等待剪贴板更新
@@ -162,16 +167,16 @@ getPrev() {
 			Pause
 		}
 */
-		if not clip2 = '' {
-			SendEvent "{Right}"  ; ℹ用SendEvent保证光标回到原来的位置再发送后面的按键
+		if clip2 {
+			Send "{Right}"  ; ℹ用SendEvent保证光标回到原来的位置再发送后面的按键
 		}
 	}
+	if WinActive("ahk_group Slow")
+		Sleep 40  ; 等待光标回到原来的位置
 	; 恢复原来的剪贴板内容
 	A_Clipboard := clipCache, clipCache := ''
 	if clip = '…' or clip = '—'
 		clip := clip . clip
-/* 	else if clip = '—'
-		clip := '——' */
 	return clip
 }
 /**
@@ -182,6 +187,11 @@ getNext() {
 	clipCache := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪贴板内容，清空剪贴板
 	Send "+{Right}^c"  ; 选取并复制当前光标后一个字符
 	ClipWait 0.3, 1  ; 等待剪贴板更新（此等待时间应尽量小，因为光标后经常没有内容）
+	if !A_Clipboard and WinActive("ahk_group Slow") {  ; 如果剪贴板为空 并且 当前软件是反应慢的应用程序
+		Sleep 300
+		Send "^c"
+		ClipWait 0.3, 1
+	}
 	; 获取剪贴板中的字符，即光标后一个字符，计算它的长度，然后恢复原来的剪贴板内容
 	clip := A_Clipboard, clipLen := StrLen(clip), A_Clipboard := clipCache, clipCache := ''
 /*	if Debug {
@@ -191,9 +201,10 @@ getNext() {
 	}
 */
 	; 如果复制的字符长度为1 或 是回车換行符（行末）或 是emoji
-	if clipLen = 1 or clip ~= '`a)^\R$' or IsEmoji(clip) {
-		SendEvent "{Left}"  ; ℹ用SendEvent保证光标回到原来的位置再发送后面的按键
-	}
+	if clipLen = 1 or clip ~= '`a)^\R$' or IsEmoji(clip)
+		Send "{Left}"  ; ℹ用Send保证光标回到原来的位置再发送后面的按键
+	if WinActive("ahk_group Slow")
+		Sleep 40  ; 等待光标回到原来的位置
 	return clip
 }
 /**
@@ -297,15 +308,15 @@ smartPair(punct) {
 	switch punct {
 		case '(', '[', '{':
 			if not WinActive("ahk_group AutoPair") and shouldPair(punct) {  ; 如果 是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
-				if Tip
-					showTip("Pair", 1)
+				; if Tip
+				; 	showTip("Pair", 1)
 				SendText getPair(punct)  ; 输入对应的后标点
 				Send "{Left}"  ; 光标回到配对标点中间
 			}
 		case '"', "'":
-			if not WinActive("ahk_group AutoPair") and (Prev = ' ' or Prev ~= '`a)\R$' or Prev = '`t' or Prev = '') and shouldPair(punct) {  ; 如果 是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
-				if Tip
-					showTip("Pair", 1)
+			if not WinActive("ahk_group AutoPair") and (Prev = ' ' or Prev ~= '`a)\R$' or Prev = '`t' or Prev = '') and shouldPair(punct) {  ; 如果 是英文引号 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
+				; if Tip
+				; 	showTip("Pair", 1)
 				SendText getPair(punct)  ; 输入对应的后标点
 				Send "{Left}"  ; 光标回到配对标点中间
 			}
@@ -333,8 +344,9 @@ smartPair(punct) {
  * @param {String} en 按键所对应的英文标点。
  * @param {String} cn 按键所对应的中文标点。
  * @returns {String} 如果应该上屏英文标点，返回`en`参数，否则返回`cn`参数。
+ * @note 因为此函数所调用的getPrev函数比较耗时，所以不能将此函数放在检测按键时长的语句之前，否则不能正确检测按键时长。
  */
-smartChoice(en, cn) {
+smartLang(en, cn) {
 	if en = cn
 		return en
 	Global Prev := getPrev()
@@ -355,7 +367,6 @@ smartChoice(en, cn) {
 			Return cn
 	}
 }
-; FIXME: 将妙按的输出推迟到检测是否长按之后，以避免有自动配对功能的软件的问题。
 /**
  * @description 根据按键方式和是否有提供中文标点参数来智能输入中/英文标点符号。
  * * 短按 根据光标前的内容智能上屏中文标点或者英文标点；
@@ -368,76 +379,61 @@ smartChoice(en, cn) {
 smartType(en, cn?) {  ; （Send函数中[^+!#{}]标点须用{}包裹。）
 	if not isSet(cn)
 		cn := en
-	if KeyWait(en, "T" String(Interval)) {  ; # 短按
+	if KeyWait(en, "T" String(Interval)) {  ; ## 短按
 		if en = cn  ; 如果英文标点和中文标点相同，直接输出
 			SendText en
 		else {  ; 英文标点和中文标点不同
-			choice := smartChoice(en, cn)  ; （⚠ 由于getPrev函数的执行时间可能会超过0.5秒，因此不能放在if语句之前，否则不能正确检测是短按还是长按）
-			if choice = en {  ; 如果 应该输入英文标点
+			lang := smartLang(en, cn)  ; （⚠ 由于getPrev函数的执行时间可能会超过0.5秒，因此不能放在if语句之前，否则不能正确检测是短按还是长按）
+			if lang = en {  ; 如果 应该输入英文标点
 				SendText en
-				smartPair(en)  ; 自动配对英文标点
+				smartPair(en)  ; 智能配对英文标点
 			} else {  ; 应该输入中文标点
 				typing(cn)
-				smartPair(cn)  ; 自动配对中文标点
+				smartPair(cn)  ; 智能配对中文标点
 			}
 		}
 	} else {  ; 妙按 和 长按
 		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的按键
-		Critical "Off"
-		; # 妙按
-		choice := smartChoice(en, cn)
-		if Rime {  ; 如果是Rime输入法
-			if choice = en {  ; 本来应该输入英文标点，变成输入中文标点
-				if InStr("/&|@%^$", en)  ; 如果是Rime功能触发键
-					en = '^' ? Send("{" en "}") : Send(en)  ; 交给输入法处理
-				else  ; 不是Rime功能触发键
-					typing(cn)  ; （后面#1再作配对处理）
-			} else {  ; 本来应该输入中文标点，变成输入英文标点
-				if InStr("/&|@%^$", en)  ; 如果是Rime功能触发键
-					en = '^' ? Send("{" en "}") : Send(en)  ; 交给输入法处理
-				else  ; 否则（不是Rime功能触发键）
-					SendText en  ; （后面#1再作配对处理）
+		Critical "Off"  ; 将此线程修改为非关键线程，配合上一行代码，使未处理的排队按键会被丢弃
+		if KeyWait(en, "T" String(Interval)) {  ; ## 妙按
+	 		lang := smartLang(en, cn)
+			if Rime {  ; ### 如果是Rime输入法
+				if lang = en {  ; 本来应该输入英文标点，变成输入中文标点
+					if InStr("/&|@%^$", en)  ; 如果是Rime功能触发键
+						en = '^' ? Send("{" en "}") : Send(en)  ; 交给输入法处理
+					else {  ; 不是Rime功能触发键
+						typing(cn)
+						smartPair(cn)  ; 智能配对中文标点
+					}
+				} else {  ; 本来应该输入中文标点，变成输入英文标点
+					if InStr("/&|@%^$", en)  ; 如果是Rime功能触发键
+						en = '^' ? Send("{" en "}") : Send(en)  ; 交给输入法处理
+					else {  ; 否则（不是Rime功能触发键）
+						SendText en
+						smartPair(en)  ; 智能配对英文标点
+					}
+				}
+			} else {  ; ### 非Rime输入法
+				if en = cn {  ; 如果英文标点和中文标点相同，直接输出
+					SendText en
+				} else if lang = en {  ; 本来应该输入英文标点，变成输入中文标点
+					typing(cn)
+					smartPair(cn)  ; 智能配对中文标点
+				}	else {  ; 本来应该输入中文标点，变成输入英文标点
+					SendText en
+					smartPair(en)  ; 智能配对英文标点
+				}
 			}
-		} else {  ; 非Rime输入法
-			if en = cn  ; 如果英文标点和中文标点相同，直接输出
-				SendText en
-			else if choice = en  ; 本来应该输入英文标点，变成输入中文标点
-				typing(cn)
-			else  ; 本来应该输入中文标点，变成输入英文标点
-				SendText en
-		}
-		Sleep 1000 * Interval
-		; # 长按的第1次输入
-		if GetKeyState(en, "P") {  ; 如果按键未弹起
-			if en = cn {  ; 如果英文标点和中文标点相同，直接输出
-				Send "{BS}{Text}" en
-			} else if choice = en {  ; 如果应该输入英文标点
-				if (en = '^' or en = '_') and not WinExist("ahk_group IME")  ; 如果妙按输入的是“……”或“——”，并且没有输入法候选窗口（有则表示未上屏）
-					Send "{BS}"  ; 多输入1个退格键
-				Send "{BS}{Text}" en  ; 删除妙按输入的中文标点（或者关闭输入法候选窗口），并输入1个英文标点（此操作统一不同中文输入法的行为）
-			} else {  ; 如果应该输入中文
-				Send "{BS}"  ; 删除妙按时输入的英文标点（或者关闭输入法候选窗口）（此操作统一不同中文输入法的行为）
-				typing(cn)
-			}
-			Sleep 1000 * Interval
-		} else {  ; # 妙按后没有长按（#1）
-			if en = cn  ; 如果英文标点和中文标点相同，直接返回（⚠ 此处假设中英文相同标点不存在配对标点）
-				return
-			else if choice = en  ; ⚠ 如果妙按时输入中文
-				smartPair(cn)  ; 自动配对中文标点
-			else  ; 否则 如果妙按时输入英文
-				smartPair(en)  ; 自动配对英文标点
-			return
-		}
-		; # 长按的后续输入
-		while GetKeyState(en, "P") {  ; 当按键未弹起时
-			if choice = en  ; 如果 应该输入英文标点
-				SendText en
-			else if cn = '“' or cn = '‘'  ; 否则 如果 是中文引号
-				Send en  ; 交给输入法处理
-			else  ; 否则 是其它中文标点
-				SendText cn
-			Sleep 1000 * Interval
+		} else {  ; ## 长按
+	 		lang := smartLang(en, cn)
+			loop {  ; 此处须要先输入，再判断按键是否已经释放来决定是否继续输入
+				if lang = en  ; 如果 应该输入英文标点
+					SendText en
+				else if cn = '“' or cn = '‘'  ; 否则 如果 是中文引号
+					Send en  ; 交给输入法处理
+				else  ; 否则 是其它中文标点
+					SendText cn
+			} until KeyWait(en, "T" String(Interval))  ; 直至按键弹起时退出循环
 		}
 	}
 }
@@ -465,9 +461,9 @@ typing(punct) {
 				else if punct = '）'
 					showTip("后", 1)
 			SendText punct
-		default:  ; 其他中、英文单标点
-			if Tip and InStr("(`"'[{", punct)
-				showTip("En", 1)
+		default:  ; 其他中文标点
+			; if Tip and InStr("(`"'[{", punct)
+			; 	showTip("En", 1)
 			if Tip and InStr("，：；？！｜～", punct)
 				showTip("中", 1)
 			SendText punct
@@ -620,7 +616,7 @@ $:: {
 Global ENG_GRC_MAP := getDriftMap(A_ScriptDir "\MySettings\ENG_GRC.yaml")  ; 获取英文字母↔希腊字母对应关系映射表
 Global NUMBER_MAP := getDriftMap(A_ScriptDir "\MySettings\Number.yaml")  ; 获取数字漂移配置表
 Global SYMBOL_MAP := getDriftMap(A_ScriptDir "\MySettings\Symbol.yaml")  ; 获取标点符号漂移配置表
-; TODO: 尝试通过output函数和smartPair函数精简此函数。
+; TODO: 尝试通过typing函数和smartPair函数精简此函数。
 ; TODO: 漂移多个字符。
 /**
  * @description 标点符号循环漂移函数。
@@ -896,12 +892,8 @@ getPrevWord_X() {
 	prevWord := '', text := A_Clipboard, A_Clipboard := clipCache
 	if RegExMatch(text, "([0-9A-Za-z_]+)$", &match) ; 取出末尾连续的英文/数字/下划线片段
 		prevWord := match[1]
-	if prevWord != '' {  ; 如果有匹配内容，则删除该片段
-		Send "{LShift down}"
-		Send "{Left " StrLen(prevWord) "}"
-		Send "{LShift up}"
-		Send "{Del}"
-	}
+	if prevWord != ''  ; 如果有匹配内容，则删除该片段
+		Send "{LShift down}{Left " StrLen(prevWord) "}{LShift up}{Del}"
 	return prevWord
 }
 ; CapsLock键处于打开状态时启用的热键。
