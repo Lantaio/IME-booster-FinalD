@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 KeyHistory 100
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-Global Version := "v9.79.273`n　　　 © 2024~2026"  ; 此程序的版本号
+Global Version := "v9.81.277`n　　　 © 2024~2026"  ; 此程序的版本号
 A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 
 #Include <Caret>  ; 和光标有关的函数
@@ -617,10 +617,11 @@ $:: {
 	syncKeyState "RShift"
 }
 
-Global ENG_GRC_MAP := getDriftMap(A_ScriptDir "\MySettings\ENG_GRC.yaml")  ; 获取英文字母↔希腊字母对应关系映射表
-Global NUMBER_MAP := getDriftMap(A_ScriptDir "\MySettings\Number.yaml")  ; 获取数字漂移配置表
+abcMap := mergeMaps(getDriftMap(A_ScriptDir "\MySettings\English.yaml"), getDriftMap(A_ScriptDir "\MySettings\Greek.yaml"))  ; 将英文字母漂移配置表和希腊字母漂移配置表合并为一个字母漂移配置表（💡可以更换不同国家的漂移配置表）
+Global ABC_NUM_MAP := mergeMaps(
+ getDriftMap(A_ScriptDir "\MySettings\Number.yaml"),
+ abcMap)  ; 合并数字和英文字母漂移配置，使得可以共用相同的触发热键
 Global SYMBOL_MAP := getDriftMap(A_ScriptDir "\MySettings\Symbol.yaml")  ; 获取标点符号漂移配置表
-; TODO: 尝试通过typing函数和smartPair函数精简此函数。
 ; TODO: 漂移多个字符。
 /**
  * @description 标点符号循环漂移函数。
@@ -731,14 +732,14 @@ getDriftMap(filePath) {
 	}
 	return driftMap  ; 返回整个配置对象，供后续查表使用
 }
-; TODO: 合并Letter和Number漂移功能。
 /**
  * @description 根据 所触发的热键（`hotkey`参数）和 光标前的内容（`origin`参数）返回`hotkey`热键的配置表中`origin`标点符号所在的键的值列表。
- * @param {"LShift"|"RShift"|"<#LShift"|"<#RShift"|">#LShift"|">#RShift"} hotkey 触发的热键
- * @param {String} origin 光标前的内容（标点符号）
- * @returns {Array} hotkey热键的配置表中origin标点符号所在的键的值列表（如果有的话，没有则返回空数组），例如 [ '。', '.' ] 或 [ '℃', '°', '℉' ]
- * @note 关键点在于：origin 不是按键本身，而是当前光标前的内容（标点符号）。
- *   所以不能直接用 origin 去索引 YAML 的键名；需要先在所有 Shift 配置里
+ * @param {"LShift"|"RShift"} hotkey 哪边的`Shift`键触发的（决定了返回哪张表的值列表）。
+ * @param {Map} driftMap 指定的漂移配置映射表。
+ * @param {String} origin 光标前的内容（标点符号）。
+ * @returns {Array} hotkey热键的配置表中origin标点符号所在的键的值列表（如果有的话，没有则返回空数组），例如 [ '。', '.' ] 或 [ '℃', '°', '℉' ]。
+ * @note 关键点在于：`origin`不是按键本身，而是当前光标前的内容（标点符号）。
+ *   所以不能直接用`origin`去索引 YAML 的键名；需要先在所有 Shift 配置里
  *   搜索哪个按键列表包含这个字符，再根据触发的 Shift 方向选择对应的同键列表。
  * @example
  * 例如 symbol='℃' 时：
@@ -747,20 +748,7 @@ getDriftMap(filePath) {
  *   - 若触发的是 RShift up，则返回 RShift['.'] 的值列表
  *   外层的 drift(origin, list*) 会按所选值（数组）顺序循环切换。
  */
-getDriftList(hotkey, origin) {
-	driftMap := {}
-	switch hotkey {
-		case "LShift", "RShift":  ; 如果触发的热键是左/右Shift键，使用 Symbol.yaml 的配置表
-			driftMap := SYMBOL_MAP
-		case "<#LShift", "<#RShift":  ; 如果触发的热键是 左Win+左/右Shift键，则使用 Number.yaml 的配置表
-			driftMap := NUMBER_MAP
-			hotkey := SubStr(hotkey, 3)  ; 去掉前面的“<#”，得到“LShift”或“RShift”
-		case ">#LShift", ">#RShift":  ; 如果触发的热键是 右Win+左/右Shift键，则使用 ENG_GRC.yaml 的配置表
-			driftMap := ENG_GRC_MAP
-			hotkey := SubStr(hotkey, 3)  ; 去掉前面的“>#”，得到“LShift”或“RShift”
-		default:
-			return []  ; 如果不是上述热键，直接返回空数组
-	}
+getDriftList(hotkey, driftMap, origin) {
 	if !driftMap.Has("LShift") || !driftMap.Has("RShift")  ; 若两张表都不存在，则直接返回空数组
 		return []
 	matchedKey := ''  ; 记录 origin 所在的键名，例如 '.'
@@ -797,51 +785,44 @@ isValueInArray(value, arr*) {
 	}
 	return false
 }
+/**
+ * @description 将2个配置映射表（`baseMap`参数 和`extraMap`参数）合并为1个映射表。
+ * @param {Map} baseMap 基础映射表。
+ * @param {Map} extraMap 需要合并的映射表。
+ * @returns {Map} 合并后的映射表。
+ * @note 🚨`baseMap`和`extraMap`中的键名不能相同，否则基础映射表的键值会被追加的映射表覆盖！
+ */
+mergeMaps(baseMap, extraMap) {
+	for section in ["LShift", "RShift"] {
+		for key, list in extraMap[section]
+			baseMap[section].Set(key, list)
+	}
+	return baseMap
+}
 ; 如果*不是*（存在输入法候选窗口 或 当前软件是 不适用须要排除的应用程序组 或 文件管理器且活动控件*不是*输入框）
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not InStr(ControlGetClassNN(ControlGetFocus("A")), "edit")))  ; or hasMS_IMEWindow()
-; TODO: 合并Letter和Number漂移功能。
 /*
- * 数字漂移和字母漂移功能
- * 如果更改触发快捷键，须要同时修改FinalD.ahk中getDriftList函数的对应快捷键键。
+ * 字母和数字的漂移功能
+ * 如果更改触发快捷键，须要同时修改`getDriftList`函数的对应快捷键。
  */
-<#LShift up:: {  ; 左Win+左Shift 将光标前面的数字变换为上下标数字形式
-	static numberList := []
+<#LShift up:: {  ; 左Win+左Shift 将光标前面的希腊字母变换为对应的英文字母，数字变换为上下标数字形式
+	static AbcNumList := []
 	if A_PriorKey = "LShift" {
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的字符）
-		if not numberList.Length or not isValueInArray(origin, numberList*)
-			numberList := getDriftList("<#LShift", origin)
-		if numberList.Length
-			drift(origin, numberList*)
+		if not AbcNumList.Length or not isValueInArray(origin, AbcNumList*)
+			AbcNumList := getDriftList("LShift", ABC_NUM_MAP, origin)
+		if AbcNumList.Length
+			drift(origin, AbcNumList*)
 	}
 }
-<#RShift up:: {  ; 左Win+右Shift 将光标前面的数字变换为对应的罗马数字形式
-	static numberList := []
+<#RShift up:: {  ; 左Win+右Shift 将光标前面的英文字母变换为对应的希腊字母，数字变换为对应的罗马数字形式
+	static AbcNumList := []
 	if A_PriorKey = "RShift" {
-		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
-		if not numberList.Length or not isValueInArray(origin, numberList*)
-			numberList := getDriftList("<#RShift", origin)
-		if numberList.Length
-			drift(origin, numberList*)
-	}
-}
->#LShift up:: {  ; 右Win+左Shift 将光标前面的希腊字母变换为对应的英文字母
-	static letterList := []
-	if A_PriorKey = "LShift" {
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的字符）
-		if not letterList.Length or not isValueInArray(origin, letterList*)
-			letterList := getDriftList(">#LShift", origin)
-		if letterList.Length
-			drift(origin, letterList*)
-	}
-}
->#RShift up:: {  ; 右Win+右Shift 将光标前面的英文字母变换为对应的希腊字母
-	static letterList := []
-	if A_PriorKey = "RShift" {
-		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
-		if not letterList.Length or not isValueInArray(origin, letterList*)
-			letterList := getDriftList(">#RShift", origin)
-		if letterList.Length
-			drift(origin, letterList*)
+		if not AbcNumList.Length or not isValueInArray(origin, AbcNumList*)
+			AbcNumList := getDriftList("RShift", ABC_NUM_MAP, origin)
+		if AbcNumList.Length
+			drift(origin, AbcNumList*)
 	}
 }
 
@@ -851,7 +832,7 @@ isValueInArray(value, arr*) {
 		static symbolList := []
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
 		if not symbolList.Length or not isValueInArray(origin, symbolList*)  ; 如果 symbolList 为空 或者 光标前的内容*不在* symbolList 中
-			symbolList := getDriftList("LShift", origin)
+			symbolList := getDriftList("LShift", SYMBOL_MAP, origin)
 		if symbolList.Length
 			drift(origin, symbolList*)
 	}
@@ -878,7 +859,7 @@ isValueInArray(value, arr*) {
 			case "’": SendText("!"), Send("{Left}{BS}{Text}'"), Send("{Del}")
 			default:
 				if not symbolList.Length or not isValueInArray(origin, symbolList*)  ; 如果 symbolList 为空，或者光标前的内容*不在* symbolList 中
-					symbolList := getDriftList("RShift", origin)
+					symbolList := getDriftList("RShift", SYMBOL_MAP, origin)
 				if symbolList.Length
 					drift(origin, symbolList*)
 		}
