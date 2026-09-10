@@ -1,6 +1,9 @@
 # encoding: utf-8
 #
-# 英文字母↔希腊字母对应关系映射表
+# 键盘按键与英文字母对应关系映射表
+# 说明：
+# * 此配置文件只有LShift部分映射表，程序会将其和其它国家语言的配置文件中的RShift部分映射表合并。
+# * ⚠ 此映射表中的键名不能和Number.yaml配置文件中的键名相同，否则会覆盖Number映射表中的键的值。
 # 网址：https://github.com/Lantaio/IME-booster-FinalD
 # 作者：Lantaio Joy
 # 版本：0.1.3
