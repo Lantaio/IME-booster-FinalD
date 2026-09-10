@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 KeyHistory 100
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-Global Version := "v9.81.277`n　　　 © 2024~2026"  ; 此程序的版本号
+Global Version := "v9.81.278`n　　　 © 2024~2026"  ; 此程序的版本号
 A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 
 #Include <Caret>  ; 和光标有关的函数
@@ -517,51 +517,51 @@ syncKeyState(key) {
 (:: {
 	Send "{Blind}{9 up}{LShift up}"  ; 逻辑释放按键
 	smartType('(', '（')
-	syncKeyState "LShift"  ; 让Shift键的逻辑状态和物理状态一致
+	; syncKeyState "LShift"  ; 让Shift键的逻辑状态和物理状态一致
 }
 ):: {
 	Send "{Blind}{0 up}{LShift up}"
 	smartType(')', '）')
-	syncKeyState "LShift"
+	; syncKeyState "LShift"
 }
 _:: {  ; （连按键）
 	Send "{Blind}{- up}{LShift up}"
 	smartType('_', '——')
-	syncKeyState "LShift"
+	; syncKeyState "LShift"
 }
 ::: {
 	Send "{Blind}{; up}{LShift up}"
 	smartType(':', '：')
-	syncKeyState "LShift"
+	; syncKeyState "LShift"
 }
 ":: {
 	Send "{Blind}{' up}{LShift up}"
 	smartType('"', '“')
-	syncKeyState "LShift"
+	; syncKeyState "LShift"
 }
 /:: smartType(ThisHotkey)
 =:: SendText ThisHotkey  ; （连按键）
 <:: {
 	Send "{Blind}{, up}{LShift up}"
 	smartType('<', '《')
-	syncKeyState "LShift"
+	; syncKeyState "LShift"
 }
 >:: {
 	Send "{Blind}{. up}{LShift up}"
 	smartType('>', '》')
-	syncKeyState "LShift"
+	; syncKeyState "LShift"
 }
 `;:: smartType(';', '；')
 -:: SendText ThisHotkey  ; （连按键）
 {:: {
 	Send "{Blind}{[ up}{LShift up}"
 	smartType('{', '「')
-	syncKeyState "LShift"
+	; syncKeyState "LShift"
 }
 }:: {
 	Send "{Blind}{] up}{LShift up}"
 	smartType('}', '」')
-	syncKeyState "LShift"
+	; syncKeyState "LShift"
 }
 ':: smartType("'", '‘')
 *:: SendText ThisHotkey  ; （连按键）
@@ -573,48 +573,48 @@ _:: {  ; （连按键）
 &:: {
 	Send "{Blind}{7 up}{LShift up}"
 	smartType(ThisHotkey)
-	syncKeyState "LShift"
+	; syncKeyState "LShift"
 }
 ?:: {
 	Send "{Blind}{/ up}{LShift up}"
 	smartType('?', '？')
-	syncKeyState "LShift"
+	; syncKeyState "LShift"
 }
 !:: {
 	Send "{Blind}{1 up}{RShift up}"
 	smartType('!', '！')
-	syncKeyState "RShift"
+	; syncKeyState "RShift"
 }
 \:: smartType('\', '、')
 |:: {
 	Send "{Blind}{\ up}{LShift up}"
 	smartType('|', '｜')
-	syncKeyState "LShift"
+	; syncKeyState "LShift"
 }
 @:: {
 	Send "{Blind}{2 up}{RShift up}"
 	smartType(ThisHotkey)
-	syncKeyState "RShift"
+	; syncKeyState "RShift"
 }
 %:: {
 	Send "{Blind}{5 up}{RShift up}"
 	smartType(ThisHotkey)
-	syncKeyState "RShift"
+	; syncKeyState "RShift"
 }
 ^:: {
 	Send "{Blind}{6 up}{LShift up}"
 	smartType('^', '……')
-	syncKeyState "LShift"
+	; syncKeyState "LShift"
 }
 ~:: {  ; （连按键）
 	Send "{Blind}{`` up}{RShift up}"
 	smartType('~', '～')
-	syncKeyState "RShift"
+	; syncKeyState "RShift"
 }
 $:: {
 	Send "{Blind}{4 up}{RShift up}"
 	smartType('$', '￥')
-	syncKeyState "RShift"
+	; syncKeyState "RShift"
 }
 
 abcMap := mergeMaps(getDriftMap(A_ScriptDir "\MySettings\English.yaml"), getDriftMap(A_ScriptDir "\MySettings\Greek.yaml"))  ; 将英文字母漂移配置表和希腊字母漂移配置表合并为一个字母漂移配置表（💡可以更换不同国家的漂移配置表）
