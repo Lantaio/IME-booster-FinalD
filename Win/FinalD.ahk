@@ -4,7 +4,7 @@
  * @see https://github.com/Lantaio/IME-booster-FinalD
  * @author Lantaio Joy
  * @version 见下面的全局变量 Version，或运行此程序后按左 Win+Alt+. 查看。
- * @modified 2026/9/9
+ * @modified 2026/9/10
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 KeyHistory 100
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-Global Version := "v9.79.272`n　　　 © 2024~2026"  ; 此程序的版本号
+Global Version := "v9.79.273`n　　　 © 2024~2026"  ; 此程序的版本号
 A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 
 #Include <Caret>  ; 和光标有关的函数
@@ -310,29 +310,28 @@ shouldPair(front) {
 smartPair(punct) {
 	switch punct {
 		case '(', '[', '{':
-			if not WinActive("ahk_group AutoPair") and shouldPair(punct) {  ; 如果 是英文前标点 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
+			if not WinActive("ahk_group AutoPair") and shouldPair(punct) {  ; 如果 是英文前标点 并且 *不是*有自动配对功能的程序组 并且 应该输入配对的后标点
 				; if Tip
 				; 	showTip("Pair", 1)
 				SendText getPair(punct)  ; 输入对应的后标点
 				Send "{Left}"  ; 光标回到配对标点中间
 			}
 		case '"', "'":
-			if not WinActive("ahk_group AutoPair") and (Prev = ' ' or Prev = '`t' or Prev ~= '`a)\R$' or Prev = '') and shouldPair(punct) {  ; 如果 是英文引号 并且 *不是*自动配对功能程序组 并且 应该输入配对的后标点
+			if not WinActive("ahk_group AutoPair") and (Prev = ' ' or Prev = '`t' or Prev ~= '`a)\R$' or Prev = '') and shouldPair(punct) {  ; 如果 是英文引号 并且 *不是*有自动配对功能的程序组 并且 应该输入配对的后标点
 				; if Tip
 				; 	showTip("Pair", 1)
 				SendText getPair(punct)  ; 输入对应的后标点
 				Send "{Left}"  ; 光标回到配对标点中间
 			}
 		case '“', '‘':
-			if Commit = '“' or Commit = '‘'  ; 如果 刚输入的是中文引号前标点
-				if shouldPair(Commit) {  ; 如果 应该自动配对，则……
-					if Tip
-						showTip("配对", 1)
-					if Commit = '“'
-						Send "`"{Left}"  ; 交给输入法处理
-					else
-						Send "'{Left}"  ; 交给输入法处理
-				}
+			if (Commit = '“' or Commit = '‘') and shouldPair(Commit) {  ; 如果 刚输入的是中文引号前标点 并且 应该自动配对，则……
+				if Tip
+					showTip("配对", 1)
+				if Commit = '“'
+					Send "`"{Left}"  ; 交给输入法处理
+				else
+					Send "'{Left}"  ; 交给输入法处理
+			}
 		case '（', '【', '「', '《':  ; 此处只需要检查可通过按键直接输入的标点
 			if shouldPair(punct) {
 				if Tip and punct = '（'
@@ -451,23 +450,25 @@ typing(punct) {
 				Send '"'  ; 交给输入法处理
 			else
 				Send "'"  ; 交给输入法处理
-			Global Commit := getPrev()
-			if Commit = '“' or Commit = '‘' {  ; 如果 刚输入的是中文引号前标点
-				if Tip
+			Global Commit := getPrev()  ; （⚠ 因为后面的聪明配对处理需要此信息，因此不能放在下面的Tip语句里)
+			if Tip {
+				if Commit = '“' or Commit = '‘'  ; 如果 刚输入的是中文引号前标点
 					showTip("前", 1)
-			} else if Tip  ; 否则 刚输入的是中文引号后标点
-				showTip("后", 1)
-		case '（', '）', '【', '】', '「', '」', '《', '》':
-			if Tip
-				if punct = '（'
-					showTip("前", 1)
-				else if punct = '）'
+				else  ; 否则 刚输入的是中文引号后标点
 					showTip("后", 1)
+			}
+		case '（', '［', '｛', '〈':
+			if Tip
+				showTip("前", 1)
 			SendText punct
-		default:  ; 其他中文标点
+		case '）', '］', '｝', '〉':
+			if Tip
+				showTip("后", 1)
+			SendText punct
+		default:  ; 其他中/英文标点或扩展标点符号
 			; if Tip and InStr("(`"'[{", punct)
 			; 	showTip("En", 1)
-			if Tip and InStr("，：；？！｜～", punct)
+			if Tip and InStr("，：；？！｜～＄／", punct)
 				showTip("中", 1)
 			SendText punct
 	}
@@ -653,19 +654,24 @@ drift(origin, list*) {
 			Send "{Del}"  ; 删除之前用于防止软件过度自动化的感叹号
 		}
 	} else {  ; 否则（原来的标点没有配对的后标点）
-		if Tip
-			switch list[i] {
-				case '，', '：', '；', '？', '！', '｜', '～', '＄', '／', '＼': showTip("中", 1)
-				case '“', '‘', '（', '［', '｛', '〈': showTip("前", 1)
-				case '”', '’', '）', '］', '｝', '〉': showTip("后", 1)
-			}
-			; FIXME: 优化防止软件过度自动化的处理范围。
-		if InStr("`"')]}", list[i]) {	; 如果新标点是英文后标点
+		if WinActive("ahk_group AutoPair") and InStr("`"'()[]{}", list[i]) {	; 如果是有自动配对功能的程序组 并且 新标点是英文后标点
 			SendText "!"  ; 输入感叹号防止软件过度自动化
 			Send "{Left}{BS}{Text}" list[i]  ; 光标归位，漂移标点符号
 			Send "{Del}"  ; 删除之前用于防止软件过度自动化的感叹号
-		} else  ; 否则（新标点不是英文后标点，可能是中英文标点符号，甚至是扩展符号）
-			Send "{BS}{Text}" list[i]  ; 漂移标点符号
+		} else {
+			Send "{BS}"
+			if list[i] = '“' or list[i] = '‘' {  ; 如果新标点是中文引号前标点
+				if Tip
+					showTip("前", 1)
+				SendText list[i]  ; （⚠引号不能用typing函数，因为它会交给输入法处理，导致漂移标点有问题）
+			} else if list[i] = '”' or list[i] = '’' {  ; 如果新标点是中文引号后标点
+				if Tip
+					showTip("后", 1)
+				SendText list[i]
+			} else {  ; 否则（新标点不是英文后标点，可能是中英文标点符号，甚至是扩展符号）
+				typing(list[i])  ; 漂移标点符号
+			}
+		}
 	}
 }
 /**
