@@ -101,7 +101,8 @@
 助记：左<kbd>Shift</kbd>+<kbd>CapsLock</kbd>是转换为全大写或者全小写，而 右<kbd>Shift</kbd>+<kbd>CapsLock</kbd>是更特别的转换功能。
 
 ## 扩展功能⚡️
-### 全键盘漂移
+### 全键盘漂移✨️
+
 此插件从v2.x版开始加入英文字母和数字的漂移功能（v7.x版改变了变换快捷键）。当光标在大、小写英文字母后面时，按 左<kbd>Win</kbd>+右<kbd>Shift</kbd>键可以将光标前面的英文字母变换为对应的大、小写希腊字母。反之，当光标在大、小写希腊字母后面时，按  左<kbd>Win</kbd>+左<kbd>Shift</kbd>键可以将光标前的希腊字母变换为对应的大、小写英文字母。英文字母和希腊字母的对应关系见下图（黑色为英文字母键位，红色为大写希腊字母，蓝色为小写希腊字母）：
 
 ![英文、希腊字母对应键位图](joy/assets/GreekKB.png)
@@ -110,7 +111,10 @@
 
 ![数字漂移方案图](joy/assets/num.png)
 
+✨️从v9.81版开始，字母漂移配置存放在MySettings文件夹中的English.yaml和Greek.yaml文件中，数字漂移配置存放在Number.yaml文件中，方便用户自定制和调整顺序。
+
 ### 字母方向键
+
 从v7.67版开始加入此功能，妙按（0.2~0.4秒）<kbd>i</kbd>、<kbd>k</kbd>、<kbd>j</kbd>和<kbd>l</kbd>键相当于按1次<kbd>↑</kbd>
 、<kbd>↓</kbd>、<kbd>←</kbd>和<kbd>→</kbd>，长按（超过0.4秒）这些键会连续移动光标；妙按<kbd>Shift</kbd>+<kbd>i</kbd>、<kbd>k</kbd>、<kbd>j</kbd>和<kbd>l</kbd>键相当于按<kbd>Ctrl</kbd>+<kbd>Home</kbd>（滚动到页首）
 、<kbd>Ctrl</kbd>+<kbd>End</kbd>（滚动到页尾）、<kbd>Home</kbd>和<kbd>End</kbd>；妙按<kbd>u</kbd>、<kbd>o</kbd>键相当于按<kbd>Esc</kbd>、<kbd>Delete</kbd>
