@@ -10,7 +10,7 @@
 #SingleInstance  ; 只允许运行1个实例
 #UseHook  ; 使用键盘钩子，相当于在每个热键前面使用$前缀，以避免Send函数触发它自己
 Critical "On"  ; 将所有线程默认设置为关键线程（不可中断），使短按按键可以按顺序执行，并缓存未处理的按键
-ProcessSetPriority "High"  ; 将此程序的进程优先级设置为高
+ProcessSetPriority "AboveNormal"  ; 将此程序的进程优先级设置为高于正常
 CoordMode "Caret", "Screen"  ; 设置CaretGetPos函数的坐标模式为相对于屏幕
 CoordMode "Mouse", "Screen"  ; 设置MouseGetPos函数的坐标模式为相对于屏幕
 CoordMode "ToolTip", "Screen"  ; 设置ToolTip函数的坐标模式为相对于屏幕
@@ -130,6 +130,26 @@ Loop Parse, letters  ;添加大写字母热键，使按键可以按顺序执行
 
 Global Commit := ''  ; 刚上屏的标点
 Global Prev := ''  ; 光标前1个内容
+Global CommonPair := Map(
+	'(', ')',
+	'"', '"',
+	"'", "'",
+	'{', '}',
+	'[', ']',
+	'<', '>',
+	'（', '）',
+	'“', '”',
+	'‘', '’',
+	'「', '」',
+	'『', '』',
+	'【', '】',
+	'〖', '〗',
+	'《', '》',
+	'〈', '〉',
+	'｛', '｝',
+	'［', '］',
+	'〔', '〕',
+	'〘', '〙')
 ; FIXME: 需要添加检测光标前的内容是图片的情况。
 /**
  * @description 借助剪贴板获取光标前一个内容（字符）。
@@ -140,7 +160,7 @@ getPrev() {
 	Send "+{Left}^c"  ; 选取并复制当前光标前一个内容
 	ClipWait 0.3, 1  ; 等待剪贴板更新
 	if !A_Clipboard and WinActive("ahk_group Slow") {  ; 如果剪贴板为空，并且当前软件是反应慢的应用程序
-		; Sleep 300
+		Sleep 300
 		Send "^c"
 		ClipWait 0.3, 1
 	}
@@ -213,28 +233,7 @@ getNext() {
  * @returns {String} 与给定的标点（`punct`参数）配对的后标点。如果没有，返回空字符。
  */
 getPair(punct) {
-	switch punct {
-		case '(': return ')'
-		case '"': return '"'
-		case "'": return "'"
-		case '{': return '}'
-		case '[': return ']'
-		case '<': return '>'
-		case '（': return '）'
-		case '“': return '”'
-		case '‘': return '’'
-		case '「': return '」'
-		case '『': return '』'
-		case '【': return '】'
-		case '〖': return '〗'
-		case '《': return '》'
-		case '〈': return '〉'
-		case '｛': return '｝'
-		case '［': return '］'
-		case '〔': return '〕'
-		case '〘': return '〙'
-	}
-	return ''
+	return CommonPair.Get(punct, '')
 }
 /**
  * @description 检测给定的前标点（`front`参数）是否已存在配对的后标点。
@@ -617,8 +616,8 @@ $:: {
 	; syncKeyState "RShift"
 }
 
-abcMap := mergeMaps(getDriftMap(A_ScriptDir "\MySettings\English.yaml"), getDriftMap(A_ScriptDir "\MySettings\Greek.yaml"))  ; 将英文字母漂移配置表和希腊字母漂移配置表合并为一个字母漂移配置表（💡可以更换不同国家的漂移配置表）
-Global ABC_NUM_MAP := mergeMaps(
+abcMap := merge2Maps(getDriftMap(A_ScriptDir "\MySettings\English.yaml"), getDriftMap(A_ScriptDir "\MySettings\Greek.yaml"))  ; 将英文字母漂移配置表和希腊字母漂移配置表合并为一个字母漂移配置表（💡可以更换不同国家的漂移配置表）
+Global ABC_NUM_MAP := merge2Maps(
  getDriftMap(A_ScriptDir "\MySettings\Number.yaml"),
  abcMap)  ; 合并数字和英文字母漂移配置，使得可以共用相同的触发热键
 Global SYMBOL_MAP := getDriftMap(A_ScriptDir "\MySettings\Symbol.yaml")  ; 获取标点符号漂移配置表
@@ -786,15 +785,15 @@ isValueInArray(value, arr*) {
 	return false
 }
 /**
- * @description 将2个配置映射表（`baseMap`参数 和`extraMap`参数）合并为1个映射表。
+ * @description 将2个配置映射表（`baseMap`参数 和`extendMap`参数）合并为1个映射表。
  * @param {Map} baseMap 基础映射表。
- * @param {Map} extraMap 需要合并的映射表。
+ * @param {Map} extendMap 需要合并的映射表。
  * @returns {Map} 合并后的映射表。
- * @note 🚨`baseMap`和`extraMap`中的键名不能相同，否则基础映射表的键值会被追加的映射表覆盖！
+ * @note 🚨`baseMap`和`extendMap`中的键名不能相同，否则基础映射表的键值会被追加的映射表覆盖！
  */
-mergeMaps(baseMap, extraMap) {
+merge2Maps(baseMap, extendMap) {
 	for section in ["LShift", "RShift"] {
-		for key, list in extraMap[section]
+		for key, list in extendMap[section]
 			baseMap[section].Set(key, list)
 	}
 	return baseMap
