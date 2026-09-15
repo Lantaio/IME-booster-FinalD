@@ -4,7 +4,7 @@
  * @see https://github.com/Lantaio/IME-booster-FinalD
  * @author Lantaio Joy
  * @version 见下面的全局变量 Version，或运行此程序后按左 Win+Alt+. 查看。
- * @modified 2026/9/10
+ * @modified 2026/9/15
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 KeyHistory 100
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-Global Version := "v9.81.278`n　　　 © 2024~2026"  ; 此程序的版本号
+Global Version := "v9.81.280`n　　　 © 2024~2026"  ; 此程序的版本号
 A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 
 #Include <Caret>  ; 和光标有关的函数
@@ -175,6 +175,7 @@ getPrev() {
 	; 如果复制的字符长度为1 或 是回车換行符（行首）或 是emoji
 	if clipLen = 1 or clip ~= '`a)^\R$' or IsEmoji(clip) {
 		Send "{Right}"  ; ℹ用SendEvent保证光标回到原来的位置再发送后面的按键
+		Sleep 20	; 等待光标回到原来的位置
 	} else if !clip and WinActive(" - Word$") {  ; 否则，如果当前软件是Word
 		A_Clipboard := ''  ; 清空剪贴板
 		Send "+{Left}^c"  ; 选取并复制光标前2个内容
@@ -189,10 +190,11 @@ getPrev() {
 */
 		if clip2 {
 			Send "{Right}"  ; ℹ用SendEvent保证光标回到原来的位置再发送后面的按键
+			Sleep 20	; 等待光标回到原来的位置
 		}
 	}
 	if WinActive("ahk_group Slow")
-		Sleep 40  ; 等待光标回到原来的位置
+		Sleep 30  ; 等待光标回到原来的位置
 	; 恢复原来的剪贴板内容
 	A_Clipboard := clipCache, clipCache := ''
 	if clip = '…' or clip = '—'
@@ -221,10 +223,12 @@ getNext() {
 	}
 */
 	; 如果复制的字符长度为1 或 是回车換行符（行末）或 是emoji
-	if clipLen = 1 or clip ~= '`a)^\R$' or IsEmoji(clip)
+	if clipLen = 1 or clip ~= '`a)^\R$' or IsEmoji(clip) {
 		Send "{Left}"  ; ℹ用Send保证光标回到原来的位置再发送后面的按键
+		Sleep 20	; 等待光标回到原来的位置
+	}
 	if WinActive("ahk_group Slow")
-		Sleep 40  ; 等待光标回到原来的位置
+		Sleep 30  ; 等待光标回到原来的位置
 	return clip
 }
 /**
@@ -616,11 +620,13 @@ $:: {
 	; syncKeyState "RShift"
 }
 
-abcMap := merge2Maps(getDriftMap(A_ScriptDir "\MySettings\English.yaml"), getDriftMap(A_ScriptDir "\MySettings\Greek.yaml"))  ; 将英文字母漂移配置表和希腊字母漂移配置表合并为一个字母漂移配置表（💡可以更换不同国家的漂移配置表）
-Global ABC_NUM_MAP := merge2Maps(
- getDriftMap(A_ScriptDir "\MySettings\Number.yaml"),
- abcMap)  ; 合并数字和英文字母漂移配置，使得可以共用相同的触发热键
-Global SYMBOL_MAP := getDriftMap(A_ScriptDir "\MySettings\Symbol.yaml")  ; 获取标点符号漂移配置表
+Global SHIFT_MAP := getMap(A_ScriptDir "\MySettings\Symbol.yaml")  ; 获取标点符号漂移配置表
+Global WIN_SHIFT_MAP := merge2Maps(  ; 合并数字和英文字母漂移配置，使得可以共用相同的触发热键
+	getMap(A_ScriptDir "\MySettings\Number.yaml"),
+	merge2Maps(  ; 将英文字母漂移配置表和希腊字母漂移配置表合并为一个字母漂移配置表（💡可以更换不同国家的漂移配置表）
+		getMap(A_ScriptDir "\MySettings\English.yaml"), 
+		getMap(A_ScriptDir "\MySettings\Greek.yaml")))  ; 
+
 ; TODO: 漂移多个字符。
 /**
  * @description 标点符号循环漂移函数。
@@ -690,24 +696,24 @@ parseYAMLScalar(value) {
 }
 /**
  * @description 读取并反序列化给定的 YAML 配置文件。
- * 它会逐行扫描 YAML，识别 LShift/RShift 章节和其后的键值列表，
+ * 它会逐行扫描 YAML，识别 Left/Right 章节和其后的键值列表，
  * 然后将每个键映射到字符串数组，用于字符漂移。
  * @param {String} filePath 要反序列化的配置文件路径。
- * @returns {Map} 由左、右 Shift 章节组成的漂移映射表。
+ * @returns {Map} 由左、右章节组成的漂移映射表。
  */
-getDriftMap(filePath) {
-	driftMap := Map("LShift", Map(), "RShift", Map())  ; 初始化两套映射：左右Shift分别保存各自的漂移列表
+getMap(filePath) {
+	buildMap := Map("Left", Map(), "Right", Map())  ; 初始化两套映射：左右Shift分别保存各自的漂移列表
 	if !FileExist(filePath)  ; 如果文件不存在，就返回空配置，不影响其它功能
-		return driftMap
+		return buildMap
 	text := FileRead(filePath, "UTF-8")  ; 把 YAML 全部读成字符串
 	; if text = ''  ; 空文件直接返回空配置
 	; 	return driftMap
-	section := ''  ; 当前处于哪个分组：LShift / RShift
+	section := ''  ; 当前处于哪个分组：Left / Right
 	for line in StrSplit(text, "`n", "`r") {  ; 逐行扫描，兼容 Windows 的 CRLF 和 LF 两种换行方式
 		line := Trim(line)  ; 去掉首尾空白，方便判断注释和章节头
 		if line = '' or RegExMatch(line, '^\s*#')  ; 跳过空行和注释行
 			continue
-		if RegExMatch(line, '^(LShift|RShift)\s*:', &m) {  ; 识别 "LShift:" / "RShift:" 章节头
+		if RegExMatch(line, '^(Left|Right)\s*:', &m) {  ; 识别 "Left:" / "Right:" 章节头
 			section := m[1]  ; 切换到当前章节
 			continue
 		}
@@ -727,33 +733,33 @@ getDriftMap(filePath) {
 					list.Push(value)
 			}
 		}
-		driftMap[section].Set(key, list)  ; 把 "键 -> 列表" 保存进对应的 Map 中
+		buildMap[section].Set(key, list)  ; 把 "键 -> 列表" 保存进对应的 Map 中
 	}
-	return driftMap  ; 返回整个配置对象，供后续查表使用
+	return buildMap  ; 返回整个配置对象，供后续查表使用
 }
 /**
  * @description 根据 所触发的热键（`hotkey`参数）和 光标前的内容（`origin`参数）返回`hotkey`热键的配置表中`origin`标点符号所在的键的值列表。
- * @param {"LShift"|"RShift"} hotkey 哪边的`Shift`键触发的（决定了返回哪张表的值列表）。
+ * @param {"Left"|"Right"} hotkey 哪边的功能键触发的（决定了返回哪边的值列表）。
  * @param {Map} driftMap 指定的漂移配置映射表。
  * @param {String} origin 光标前的内容（标点符号）。
  * @returns {Array} hotkey热键的配置表中origin标点符号所在的键的值列表（如果有的话，没有则返回空数组），例如 [ '。', '.' ] 或 [ '℃', '°', '℉' ]。
  * @note 关键点在于：`origin`不是按键本身，而是当前光标前的内容（标点符号）。
- *   所以不能直接用`origin`去索引 YAML 的键名；需要先在所有 Shift 配置里
- *   搜索哪个按键列表包含这个字符，再根据触发的 Shift 方向选择对应的同键列表。
+ *   所以不能直接用`origin`去索引 YAML 的键名；需要先在“Left”、“Right”
+ *   配置里搜索哪个按键列表包含这个字符，再根据触发的方向选择对应的同键列表。
  * @example
  * 例如 symbol='℃' 时：
- *   - 先在 LShift 和 RShift 两张表中搜索包含 '℃' 的列表，发现是 '.' 的列表
- *   - 若触发的是 LShift up，则返回 LShift['.'] 的值列表
- *   - 若触发的是 RShift up，则返回 RShift['.'] 的值列表
+ *   - 先在 Left 和 Right 两张表中搜索包含 '℃' 的列表，发现是 '.' 的列表
+ *   - 若触发的是 LShift up，则返回 driftMap['Left']['.'] 的值列表
+ *   - 若触发的是 RShift up，则返回 driftMap['Right']['.'] 的值列表
  *   外层的 drift(origin, list*) 会按所选值（数组）顺序循环切换。
  */
 getDriftList(hotkey, driftMap, origin) {
-	if !driftMap.Has("LShift") || !driftMap.Has("RShift")  ; 若两张表都不存在，则直接返回空数组
+	if !driftMap.Has("Left") || !driftMap.Has("Right")  ; 若两张表都不存在，则直接返回空数组
 		return []
 	matchedKey := ''  ; 记录 origin 所在的键名，例如 '.'
-	for _, section in ["LShift", "RShift"] {  ; 先在左右两张表中找出包含 origin 的键名
+	for _, section in ["Left", "Right"] {  ; 先在左右两张表中找出包含 origin 的键名
 		for key, list in driftMap[section] {
-			if key == origin {
+			if key == origin {  ; “==”是区分大小写的比较，"="是忽略大小写的比较
 				matchedKey := key
 				break 2
 			}
@@ -767,7 +773,7 @@ getDriftList(hotkey, driftMap, origin) {
 	}
 	if matchedKey = ''  ; 如果两张表都没找到，就返回空数组
 		return []
-	if driftMap.Has(hotkey) && driftMap[hotkey].Has(matchedKey)  ; 只返回当前触发 Shift 方向下的同键列表
+	if driftMap.Has(hotkey) && driftMap[hotkey].Has(matchedKey)  ; 只返回当前触发方向下的同键列表
 		return driftMap[hotkey][matchedKey]
 	return []  ; 若当前方向不存在该键，则直接忽略，不做漂移
 }
@@ -777,7 +783,7 @@ getDriftList(hotkey, driftMap, origin) {
  * @param {Array} arr 给定的数组。
  * @returns {Boolean} 如果`value`存在于`arr`数组中返回`true`，否则返回`false`。
  */
-isValueInArray(value, arr*) {
+isInArray(value, arr*) {
 	for v in arr {
 		if (v == value)
 			return true
@@ -785,31 +791,30 @@ isValueInArray(value, arr*) {
 	return false
 }
 /**
- * @description 将2个配置映射表（`baseMap`参数 和`extendMap`参数）合并为1个映射表。
- * @param {Map} baseMap 基础映射表。
+ * @description 将2个配置映射表（`basicMap`参数 和`extendMap`参数）合并为1个映射表。
+ * @param {Map} basicMap 基础映射表。
  * @param {Map} extendMap 需要合并的映射表。
  * @returns {Map} 合并后的映射表。
- * @note 🚨`baseMap`和`extendMap`中的键名不能相同，否则基础映射表的键值会被追加的映射表覆盖！
+ * @note 🚨`basicMap`和`extendMap`中的键名不能相同，否则基础映射表的键值会被追加的映射表覆盖！
  */
-merge2Maps(baseMap, extendMap) {
-	for section in ["LShift", "RShift"] {
+merge2Maps(basicMap, extendMap) {
+	for section in ["Left", "Right"] {
 		for key, list in extendMap[section]
-			baseMap[section].Set(key, list)
+			basicMap[section].Set(key, list)
 	}
-	return baseMap
+	return basicMap
 }
 ; 如果*不是*（存在输入法候选窗口 或 当前软件是 不适用须要排除的应用程序组 或 文件管理器且活动控件*不是*输入框）
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not InStr(ControlGetClassNN(ControlGetFocus("A")), "edit")))  ; or hasMS_IMEWindow()
 /*
  * 字母和数字的漂移功能
- * 如果更改触发快捷键，须要同时修改`getDriftList`函数的对应快捷键。
  */
 <#LShift up:: {  ; 左Win+左Shift 将光标前面的希腊字母变换为对应的英文字母，数字变换为上下标数字形式
 	static AbcNumList := []
 	if A_PriorKey = "LShift" {
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的字符）
-		if not AbcNumList.Length or not isValueInArray(origin, AbcNumList*)
-			AbcNumList := getDriftList("LShift", ABC_NUM_MAP, origin)
+		if not AbcNumList.Length or not isInArray(origin, AbcNumList*)
+			AbcNumList := getDriftList("Left", WIN_SHIFT_MAP, origin)
 		if AbcNumList.Length
 			drift(origin, AbcNumList*)
 	}
@@ -818,8 +823,8 @@ merge2Maps(baseMap, extendMap) {
 	static AbcNumList := []
 	if A_PriorKey = "RShift" {
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的字符）
-		if not AbcNumList.Length or not isValueInArray(origin, AbcNumList*)
-			AbcNumList := getDriftList("RShift", ABC_NUM_MAP, origin)
+		if not AbcNumList.Length or not isInArray(origin, AbcNumList*)
+			AbcNumList := getDriftList("Right", WIN_SHIFT_MAP, origin)
 		if AbcNumList.Length
 			drift(origin, AbcNumList*)
 	}
@@ -830,8 +835,8 @@ merge2Maps(baseMap, extendMap) {
 	if HolyShift and A_PriorKey = "LShift" {
 		static symbolList := []
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
-		if not symbolList.Length or not isValueInArray(origin, symbolList*)  ; 如果 symbolList 为空 或者 光标前的内容*不在* symbolList 中
-			symbolList := getDriftList("LShift", SYMBOL_MAP, origin)
+		if not symbolList.Length or not isInArray(origin, symbolList*)  ; 如果 symbolList 为空 或者 光标前的内容*不在* symbolList 中
+			symbolList := getDriftList("Left", SHIFT_MAP, origin)
 		if symbolList.Length
 			drift(origin, symbolList*)
 	}
@@ -857,8 +862,8 @@ merge2Maps(baseMap, extendMap) {
 					showTip("后", 1)
 			case "’": SendText("!"), Send("{Left}{BS}{Text}'"), Send("{Del}")
 			default:
-				if not symbolList.Length or not isValueInArray(origin, symbolList*)  ; 如果 symbolList 为空，或者光标前的内容*不在* symbolList 中
-					symbolList := getDriftList("RShift", SYMBOL_MAP, origin)
+				if not symbolList.Length or not isInArray(origin, symbolList*)  ; 如果 symbolList 为空，或者光标前的内容*不在* symbolList 中
+					symbolList := getDriftList("Right", SHIFT_MAP, origin)
 				if symbolList.Length
 					drift(origin, symbolList*)
 		}
