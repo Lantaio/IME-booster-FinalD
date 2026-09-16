@@ -1,9 +1,8 @@
 ﻿; #Requires AutoHotkey v2.0
 
-/*
- * 检测当前是否处于中文输入状态
- * 返回值：
- *   如果是中文输入状态返回true，否则返回false
+/**
+ * @description 检测当前活动窗口是否处于中文输入状态。
+ * @returns {Boolean} 当前为中文输入状态时返回`true`，否则返回`false`。
  */
 IsCNInputMode() {
 	hWnd := WinExist("A")

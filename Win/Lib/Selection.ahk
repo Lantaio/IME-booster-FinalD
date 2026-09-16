@@ -1,12 +1,10 @@
 ﻿; #Requires AutoHotkey v2.0
 
-/*
- * (注意：⚠此函数由AI提供，且未经审查！)
- * 检测字符串是不是emoji
- * 参数：
- *   str (string) 待检测的字符串
- * 返回值：
- *   如果待检测的字符串是emoji返回true，否则返回false
+/**
+ * @description 检测字符串是否为 emoji。
+ * @param {String} str 待检测的字符串。
+ * @returns {Boolean} 字符串为 emoji 时返回`true`，否则返回`false`。
+ * @warning 此函数由 AI 提供，未经审查。
  */
 IsEmoji(str) {
 	; 空字符串或太长肯定不是

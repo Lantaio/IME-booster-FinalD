@@ -1,13 +1,13 @@
 ﻿; #Requires AutoHotkey v2.0
 
-/*
- * 加强版获取光标坐标位置函数
- * 来源：https://www.autoahk.com/archives/44158
- * 参数：
- *   &x? (integer) （引用、可选）光标相对于屏幕的横坐标值
- *   &y? (integer) （引用、可选）光标相对于屏幕的纵坐标值
- *   &w? (integer) （引用、可选）光标的宽度
- *   &h? (integer) （引用、可选）光标的高度
+/**
+ * @description 获取当前光标相对于屏幕的位置和尺寸。
+ * @param {VarRef} [x] 输出光标相对于屏幕的横坐标。
+ * @param {VarRef} [y] 输出光标相对于屏幕的纵坐标。
+ * @param {VarRef} [w] 输出光标的宽度。
+ * @param {VarRef} [h] 输出光标的高度。
+ * @returns {Integer} 获取到光标所在窗口的句柄（HWND），失败时返回 0。
+ * @see https://www.autoahk.com/archives/44158
  */
 CaretGetPos2(&x?, &y?, &w?, &h?) {
 	x := y := w := h := 0
@@ -72,6 +72,10 @@ useGUITHREADINFO:
 		}
 	}
 	return 0
+	/**
+	 * @description 初始化 UI Automation、IAccessible 和 GUI 线程信息所需的资源。
+	 * @returns {Integer} 始终返回 0。
+	 */
 	static init() {
 		try
 			iUIAutomation := ComObject("{E22AD333-B25F-460C-83D0-0581107395C9}", "{30CBE57D-D9D0-452A-AB13-7AC5AC4825EE}")
