@@ -32,8 +32,8 @@ getMap(filePath) {
 		line := Trim(line)  ; 去掉首尾空白，方便判断注释和章节头
 		if line = '' or RegExMatch(line, '^\s*#')  ; 跳过空行和注释行
 			continue
-		if RegExMatch(line, '^(Left|Right)\s*:', &m) {  ; 识别 "Left:" / "Right:" 章节头
-			section := m[1]  ; 切换到当前章节
+		if RegExMatch(line, '^(Left|Right)\s*:', &match) {  ; 识别 "Left:" / "Right:" 章节头
+			section := match[1]  ; 切换到当前章节
 			continue
 		}
 		if section = '' || !InStr(line, ': ')  ; 只处理当前分组下的键值列表
@@ -61,12 +61,18 @@ getMap(filePath) {
  * @param {Map} basicMap 基础映射表。
  * @param {Map} extendMap 需要合并的映射表。
  * @returns {Map} 合并后的映射表。
- * @note 🚨`basicMap`和`extendMap`中的键名不能相同，否则基础映射表的键值会被追加的映射表覆盖！
+ * @note 如果`extendMap`中的键名在`basicMap`中已经存在，则将`extendMap`的值列表追加到`basicMap`同名键的的值列表后；否则（`extendMap`中的键名在`basicMap`中不存在），则直接将该键值对添加到`basicMap`中。
  */
 merge2Maps(basicMap, extendMap) {
 	for section in ["Left", "Right"] {
-		for key, list in extendMap[section]
-			basicMap[section].Set(key, list)
+		for key, list in extendMap[section] {
+			if basicMap[section].Has(key) {  ; 如果basicMap中已经存在同名键
+				; for value in list  ; 如果须要进一步对每个value值进行处理，就用for循环
+				; 	basicMap[section][key].Push(value)
+				basicMap[section][key].Push(list*)  ; 将extendMap中的值列表追加到basicMap中同名键的值列表后
+			} else  ; 否则（`extendMap`中的键名在`basicMap`中不存在），则直接将该键值对添加到`basicMap`中。
+				basicMap[section].Set(key, list)
+		}
 	}
 	return basicMap
 }

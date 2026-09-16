@@ -4,7 +4,7 @@
  * @see https://github.com/Lantaio/IME-booster-FinalD
  * @author Lantaio Joy
  * @version 见下面的全局变量 Version，或运行此程序后按左 Win+Alt+. 查看。
- * @modified 2026/9/15
+ * @modified 2026/9/16
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 KeyHistory 100
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 ; 此程序的版本号信息
-Global Version := "v9.82.282`n　　　 © 2024~2026"
+Global Version := "v9.83.284`n　　　 © 2024~2026"
 A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 
 #Include <Caret>  ; 和光标有关的函数
@@ -653,7 +653,7 @@ drift(origin, list*) {
 			Send "{Del}"  ; 删除之前用于防止软件过度自动化的感叹号
 		}
 	} else {  ; 否则（原来的标点没有配对的后标点）
-		if WinActive("ahk_group AutoPair") and InStr("`"'()[]{}", list[i]) {	; 如果是有自动配对功能的程序组 并且 新标点是英文后标点
+		if WinActive("ahk_group AutoPair") and InStr("`"'()[]{}", list[i]) {	; 如果是有自动配对功能的程序组 并且 新标点是英文标点
 			SendText "!"  ; 输入感叹号防止软件过度自动化
 			Send "{Left}{BS}{Text}" list[i]  ; 光标归位，漂移标点符号
 			Send "{Del}"  ; 删除之前用于防止软件过度自动化的感叹号
