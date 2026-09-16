@@ -17,8 +17,8 @@ CoordMode "ToolTip", "Screen"  ; 设置ToolTip函数的坐标模式为相对于�
 SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（此模式默认区分大小写）
 KeyHistory 100
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
-
-Global Version := "v9.81.281`n　　　 © 2024~2026"  ; 此程序的版本号
+; 此程序的版本号信息
+Global Version := "v9.82.282`n　　　 © 2024~2026"
 A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 
 #Include <Caret>  ; 和光标有关的函数
