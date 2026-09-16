@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 KeyHistory 100
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 
-Global Version := "v9.81.280`n　　　 © 2024~2026"  ; 此程序的版本号
+Global Version := "v9.81.281`n　　　 © 2024~2026"  ; 此程序的版本号
 A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 
 #Include <Caret>  ; 和光标有关的函数
@@ -620,13 +620,6 @@ $:: {
 	; syncKeyState "RShift"
 }
 
-Global SHIFT_MAP := getMap(A_ScriptDir "\MySettings\Symbol.yaml")  ; 获取标点符号漂移配置表
-Global WIN_SHIFT_MAP := merge2Maps(  ; 合并数字和英文字母漂移配置，使得可以共用相同的触发热键
-	getMap(A_ScriptDir "\MySettings\Number.yaml"),
-	merge2Maps(  ; 将英文字母漂移配置表和希腊字母漂移配置表合并为一个字母漂移配置表（💡可以更换不同国家的漂移配置表）
-		getMap(A_ScriptDir "\MySettings\English.yaml"), 
-		getMap(A_ScriptDir "\MySettings\Greek.yaml")))  ; 
-
 ; TODO: 漂移多个字符。
 /**
  * @description 标点符号循环漂移函数。
@@ -681,63 +674,6 @@ drift(origin, list*) {
 	}
 }
 /**
- * @description 解析 YAML 中的字符串，去除外层引号。
- * YAML 中键和值通常写成 '。' 或 "." 的形式；这里去掉外层引号，避免后续把实际符号当作带引号文本处理。
- * @param {String} value 需要处理的字符串。
- * @returns {String} 去除引号后的原始字符内容。
- */
-parseYAMLScalar(value) {
-	value := Trim(value)  ; 去掉行首行尾空白，使得像 "  '。'  " 这种格式也能正常处理
-	if value = ''  ; 空字符串直接返回，避免后面索引出错
-		return ''
-	if (SubStr(value, 1, 1) = "'" and SubStr(value, -1) = "'") or (SubStr(value, 1, 1) = '"' and SubStr(value, -1) = '"')
-		return SubStr(value, 2, StrLen(value) - 2)  ; 去掉外层的一对引号，保留真实标点字符本身
-	return value  ; 如果本来就不是带引号的值，就直接返回原始内容
-}
-/**
- * @description 读取并反序列化给定的 YAML 配置文件。
- * 它会逐行扫描 YAML，识别 Left/Right 章节和其后的键值列表，
- * 然后将每个键映射到字符串数组，用于字符漂移。
- * @param {String} filePath 要反序列化的配置文件路径。
- * @returns {Map} 由左、右章节组成的漂移映射表。
- */
-getMap(filePath) {
-	buildMap := Map("Left", Map(), "Right", Map())  ; 初始化两套映射：左右Shift分别保存各自的漂移列表
-	if !FileExist(filePath)  ; 如果文件不存在，就返回空配置，不影响其它功能
-		return buildMap
-	text := FileRead(filePath, "UTF-8")  ; 把 YAML 全部读成字符串
-	; if text = ''  ; 空文件直接返回空配置
-	; 	return driftMap
-	section := ''  ; 当前处于哪个分组：Left / Right
-	for line in StrSplit(text, "`n", "`r") {  ; 逐行扫描，兼容 Windows 的 CRLF 和 LF 两种换行方式
-		line := Trim(line)  ; 去掉首尾空白，方便判断注释和章节头
-		if line = '' or RegExMatch(line, '^\s*#')  ; 跳过空行和注释行
-			continue
-		if RegExMatch(line, '^(Left|Right)\s*:', &m) {  ; 识别 "Left:" / "Right:" 章节头
-			section := m[1]  ; 切换到当前章节
-			continue
-		}
-		if section = '' || !InStr(line, ': ')  ; 只处理当前分组下的键值列表
-			continue
-		keyText := Trim(SubStr(line, 1, InStr(line, ': ') - 1))  ; 取出键名，例如 "." 或 "?"
-		key := parseYAMLScalar(keyText)  ; 去掉键名周围引号，得到真实符号
-		if !InStr(line, '[ ')
-			listText := Trim(SubStr(line, InStr(line, ': ') + 1, InStr(line, ' #') ? InStr(line, ' #') - InStr(line, ': ') : StrLen(line) - InStr(line, ': ')))  ; 如果没有方括号，取出冒号后面至注释（如果有的话）之前的内容作为列表内容
-		else
-			listText := Trim(SubStr(line, InStr(line, '[ ') + 1, InStr(line, ' ]') - InStr(line, '[ ')))  ; 取出列表内容，例如 "'。', '.'"
-		list := []  ; 这个键对应的漂移顺序列表
-		if listText != '' {  ; 如果列表不是空的才继续解析
-			for item in StrSplit(listText, ', ') {  ; 按逗号拆分列表项
-				value := parseYAMLScalar(Trim(item))  ; 每一项也去掉引号形成真实字符
-				if value != ''  ; 跳过空项，避免把空字符串写进列表
-					list.Push(value)
-			}
-		}
-		buildMap[section].Set(key, list)  ; 把 "键 -> 列表" 保存进对应的 Map 中
-	}
-	return buildMap  ; 返回整个配置对象，供后续查表使用
-}
-/**
  * @description 根据 所触发的热键（`hotkey`参数）和 光标前的内容（`origin`参数）返回`hotkey`热键的配置表中`origin`标点符号所在的键的值列表。
  * @param {"Left"|"Right"} hotkey 哪边的功能键触发的（决定了返回哪边的值列表）。
  * @param {Map} driftMap 指定的漂移配置映射表。
@@ -790,61 +726,51 @@ isInArray(value, arr*) {
 	}
 	return false
 }
-/**
- * @description 将2个配置映射表（`basicMap`参数 和`extendMap`参数）合并为1个映射表。
- * @param {Map} basicMap 基础映射表。
- * @param {Map} extendMap 需要合并的映射表。
- * @returns {Map} 合并后的映射表。
- * @note 🚨`basicMap`和`extendMap`中的键名不能相同，否则基础映射表的键值会被追加的映射表覆盖！
- */
-merge2Maps(basicMap, extendMap) {
-	for section in ["Left", "Right"] {
-		for key, list in extendMap[section]
-			basicMap[section].Set(key, list)
-	}
-	return basicMap
-}
+
+; Global SHIFT_MAP := SHIFT_MAP
+; Global LWIN_SHIFT_MAP := LWIN_SHIFT_MAP
+
 ; 如果*不是*（存在输入法候选窗口 或 当前软件是 不适用须要排除的应用程序组 或 文件管理器且活动控件*不是*输入框）
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not InStr(ControlGetClassNN(ControlGetFocus("A")), "edit")))  ; or hasMS_IMEWindow()
 /*
  * 字母和数字的漂移功能
  */
 <#LShift up:: {  ; 左Win+左Shift 将光标前面的希腊字母变换为对应的英文字母，数字变换为上下标数字形式
-	static AbcNumList := []
+	static lWinShiftList := []
 	if A_PriorKey = "LShift" {
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的字符）
-		if not AbcNumList.Length or not isInArray(origin, AbcNumList*)
-			AbcNumList := getDriftList("Left", WIN_SHIFT_MAP, origin)
-		if AbcNumList.Length
-			drift(origin, AbcNumList*)
+		if not lWinShiftList.Length or not isInArray(origin, lWinShiftList*)
+			lWinShiftList := getDriftList("Left", LWIN_SHIFT_MAP, origin)
+		if lWinShiftList.Length
+			drift(origin, lWinShiftList*)
 	}
 }
 <#RShift up:: {  ; 左Win+右Shift 将光标前面的英文字母变换为对应的希腊字母，数字变换为对应的罗马数字形式
-	static AbcNumList := []
+	static lWinShiftList := []
 	if A_PriorKey = "RShift" {
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的字符）
-		if not AbcNumList.Length or not isInArray(origin, AbcNumList*)
-			AbcNumList := getDriftList("Right", WIN_SHIFT_MAP, origin)
-		if AbcNumList.Length
-			drift(origin, AbcNumList*)
+		if not lWinShiftList.Length or not isInArray(origin, lWinShiftList*)
+			lWinShiftList := getDriftList("Right", LWIN_SHIFT_MAP, origin)
+		if lWinShiftList.Length
+			drift(origin, lWinShiftList*)
 	}
 }
 
 ; 英/中常用标点变换，处理有配对标点符号时按情况变换单个或者成对标点。
 ~LShift up:: {  ; 当左Shift键弹起并且之前没有按过其它键时触发
+	static shiftList := []
 	if HolyShift and A_PriorKey = "LShift" {
-		static symbolList := []
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
-		if not symbolList.Length or not isInArray(origin, symbolList*)  ; 如果 symbolList 为空 或者 光标前的内容*不在* symbolList 中
-			symbolList := getDriftList("Left", SHIFT_MAP, origin)
-		if symbolList.Length
-			drift(origin, symbolList*)
+		if not shiftList.Length or not isInArray(origin, shiftList*)  ; 如果 symbolList 为空 或者 光标前的内容*不在* symbolList 中
+			shiftList := getDriftList("Left", SHIFT_MAP, origin)
+		if shiftList.Length
+			drift(origin, shiftList*)
 	}
 }
 ; 扩展标点变换。处理有配对标点符号时可快速变换单个或者成对标点。
 ~RShift up:: {  ; 当右Shift键弹起并且之前没有按过其它键时触发
+	static shiftList := []
 	if HolyShift and A_PriorKey = "RShift" {
-		static symbolList := []
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
 		switch origin {
 			case '"': Send "{Left}{Del}{Text}“"
@@ -862,10 +788,10 @@ merge2Maps(basicMap, extendMap) {
 					showTip("后", 1)
 			case "’": SendText("!"), Send("{Left}{BS}{Text}'"), Send("{Del}")
 			default:
-				if not symbolList.Length or not isInArray(origin, symbolList*)  ; 如果 symbolList 为空，或者光标前的内容*不在* symbolList 中
-					symbolList := getDriftList("Right", SHIFT_MAP, origin)
-				if symbolList.Length
-					drift(origin, symbolList*)
+				if not shiftList.Length or not isInArray(origin, shiftList*)  ; 如果 symbolList 为空，或者光标前的内容*不在* symbolList 中
+					shiftList := getDriftList("Right", SHIFT_MAP, origin)
+				if shiftList.Length
+					drift(origin, shiftList*)
 		}
 	}
 }
