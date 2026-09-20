@@ -4,7 +4,7 @@
  * @see https://github.com/Lantaio/IME-booster-FinalD
  * @author Lantaio Joy
  * @version 见下面的全局变量 Version，或运行此程序后按左 Win+Alt+. 查看。
- * @modified 2026/9/16
+ * @modified 2026/9/19
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 KeyHistory 100
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 ; 此程序的版本号信息
-Global Version := "v9.83.284`n　　　 © 2024~2026"
+Global Version := "v9.84.286`n　　　 © 2024~2026"
 A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 
 #Include <Caret>  ; 和光标有关的函数
@@ -693,7 +693,7 @@ getDriftList(hotkey, driftMap, origin) {
 	if !driftMap.Has("Left") || !driftMap.Has("Right")  ; 若两张表都不存在，则直接返回空数组
 		return []
 	matchedKey := ''  ; 记录 origin 所在的键名，例如 '.'
-	for _, section in ["Left", "Right"] {  ; 先在左右两张表中找出包含 origin 的键名
+	for section in ["Left", "Right"] {  ; 先在左右两张表中找出包含 origin 的键名
 		for key, list in driftMap[section] {
 			if key == origin {  ; “==”是区分大小写的比较，"="是忽略大小写的比较
 				matchedKey := key

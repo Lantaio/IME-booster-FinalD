@@ -20,7 +20,7 @@ parseYAMLScalar(value) {
  * @param {String} filePath 要反序列化的配置文件路径。
  * @returns {Map} 由左、右章节组成的漂移映射表。
  */
-getMap(filePath) {
+getDriftMap(filePath) {
 	buildMap := Map("Left", Map(), "Right", Map())  ; 初始化两套映射：左右Shift分别保存各自的漂移列表
 	if !FileExist(filePath)  ; 如果文件不存在，就返回空配置，不影响其它功能
 		return buildMap
@@ -57,21 +57,37 @@ getMap(filePath) {
 	return buildMap  ; 返回整个配置对象，供后续查表使用
 }
 /**
- * @description 将2个配置映射表（`basicMap`参数 和`extendMap`参数）合并为1个映射表。
- * @param {Map} basicMap 基础映射表。
- * @param {Map} extendMap 需要合并的映射表。
- * @returns {Map} 合并后的映射表。
- * @note 如果`extendMap`中的键名在`basicMap`中已经存在，则将`extendMap`的值列表追加到`basicMap`同名键的的值列表后；否则（`extendMap`中的键名在`basicMap`中不存在），则直接将该键值对添加到`basicMap`中。
+ * @description 读取并合并多个漂移配置文件。
+ * 配置文件按照参数顺序读取，第一个配置作为基础映射表，后续配置依次合并；
+ * 如果多个配置包含相同的触发键，则按顺序追加其漂移列表。
+ * @param {String*} driftMapList 漂移配置文件名列表，例如："Number", "English", "Greek"。
+ * @returns {Map} 合并后的、由 Left 和 Right 两个章节组成的漂移映射表。
  */
-merge2Maps(basicMap, extendMap) {
-	for section in ["Left", "Right"] {
-		for key, list in extendMap[section] {
-			if basicMap[section].Has(key) {  ; 如果basicMap中已经存在同名键
+assembleMaps(driftMapList*) {
+	; 按参数顺序读取用户自定义配置文件夹中的漂移映射表
+	assembledMaps := []
+	for driftMap in driftMapList
+		assembledMaps.Push(getDriftMap(A_ScriptDir "\MySettings\" driftMap ".yaml"))  ; 将参数列表中的映射表文件名转换成真实文件路径，并通过getDriftMap函数将文件转换为映射表，然后添加到assembleMaps数组中，下面再按先后顺序进行合并。
+	; 没有提供配置名称时返回空映射，避免后续访问不存在的基础映射
+	if assembledMaps.Length = 0
+		return Map("Left", Map(), "Right", Map())
+	; 第一个映射作为基础，后续映射都合并到它上面
+	basicMap := assembledMaps[1]
+	if assembledMaps.Length = 1
+		return basicMap
+	for mapIndex, extendMap in assembledMaps {
+		if mapIndex = 1
+			continue
+		; 分别合并 Left 和 Right 章节中的触发键
+		for section in ["Left", "Right"] {
+			for key, list in extendMap[section] {
+				if basicMap[section].Has(key)  ; 如果basicMap中已经存在同名键
+					basicMap[section][key].Push(list*)  ; 将当前映射表中的值列表追加到基础表同名键的值列表后
 				; for value in list  ; 如果须要进一步对每个value值进行处理，就用for循环
 				; 	basicMap[section][key].Push(value)
-				basicMap[section][key].Push(list*)  ; 将extendMap中的值列表追加到basicMap中同名键的值列表后
-			} else  ; 否则（`extendMap`中的键名在`basicMap`中不存在），则直接将该键值对添加到`basicMap`中。
-				basicMap[section].Set(key, list)
+				else  ; 否则（当前映射表中的键名在basicMap中不存在），则直接将该键值对添加到basicMap中。
+					basicMap[section].Set(key, list)
+			}
 		}
 	}
 	return basicMap
