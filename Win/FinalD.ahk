@@ -4,7 +4,7 @@
  * @see https://github.com/Lantaio/IME-booster-FinalD
  * @author Lantaio Joy
  * @version 见下面的全局变量 Version，或运行此程序后按左 Win+Alt+. 查看。
- * @modified 2026/9/19
+ * @modified 2026/9/20
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 KeyHistory 100
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 ; 此程序的版本号信息
-Global Version := "v9.84.286`n　　　 © 2024~2026"
+Global Version := "v9.84.289`n　　　 © 2024~2026"
 A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 
 #Include <Caret>  ; 和光标有关的函数
@@ -676,7 +676,7 @@ drift(origin, list*) {
 /**
  * @description 根据 所触发的热键（`hotkey`参数）和 光标前的内容（`origin`参数）返回`hotkey`热键的配置表中`origin`标点符号所在的键的值列表。
  * @param {"Left"|"Right"} hotkey 哪边的功能键触发的（决定了返回哪边的值列表）。
- * @param {Map} driftMap 指定的漂移配置映射表。
+ * @param {Map} assembledMap 指定的经过组合处理的漂移配置映射表。
  * @param {String} origin 光标前的内容（标点符号）。
  * @returns {Array} hotkey热键的配置表中origin标点符号所在的键的值列表（如果有的话，没有则返回空数组），例如 [ '。', '.' ] 或 [ '℃', '°', '℉' ]。
  * @note 关键点在于：`origin`不是按键本身，而是当前光标前的内容（标点符号）。
@@ -688,13 +688,14 @@ drift(origin, list*) {
  *   - 若触发的是 LShift up，则返回 driftMap['Left']['.'] 的值列表
  *   - 若触发的是 RShift up，则返回 driftMap['Right']['.'] 的值列表
  *   外层的 drift(origin, list*) 会按所选值（数组）顺序循环切换。
+ * @see assembledMaps
  */
-getDriftList(hotkey, driftMap, origin) {
-	if !driftMap.Has("Left") || !driftMap.Has("Right")  ; 若两张表都不存在，则直接返回空数组
+getDriftList(hotkey, assembledMap, origin) {
+	if !assembledMap.Has("Left") || !assembledMap.Has("Right")  ; 若两张表都不存在，则直接返回空数组
 		return []
 	matchedKey := ''  ; 记录 origin 所在的键名，例如 '.'
 	for section in ["Left", "Right"] {  ; 先在左右两张表中找出包含 origin 的键名
-		for key, list in driftMap[section] {
+		for key, list in assembledMap[section] {
 			if key == origin {  ; “==”是区分大小写的比较，"="是忽略大小写的比较
 				matchedKey := key
 				break 2
@@ -709,8 +710,8 @@ getDriftList(hotkey, driftMap, origin) {
 	}
 	if matchedKey = ''  ; 如果两张表都没找到，就返回空数组
 		return []
-	if driftMap.Has(hotkey) && driftMap[hotkey].Has(matchedKey)  ; 只返回当前触发方向下的同键列表
-		return driftMap[hotkey][matchedKey]
+	if assembledMap.Has(hotkey) && assembledMap[hotkey].Has(matchedKey)  ; 只返回当前触发方向下的同键列表
+		return assembledMap[hotkey][matchedKey]
 	return []  ; 若当前方向不存在该键，则直接忽略，不做漂移
 }
 /**
@@ -726,9 +727,6 @@ isInArray(value, arr*) {
 	}
 	return false
 }
-
-; Global SHIFT_MAP := SHIFT_MAP
-; Global LWIN_SHIFT_MAP := LWIN_SHIFT_MAP
 
 ; 如果*不是*（存在输入法候选窗口 或 当前软件是 不适用须要排除的应用程序组 或 文件管理器且活动控件*不是*输入框）
 #HotIf not (WinExist("ahk_group IME") or WinActive("ahk_group Exclude") or (WinActive("ahk_group FileManager") and not InStr(ControlGetClassNN(ControlGetFocus("A")), "edit")))  ; or hasMS_IMEWindow()

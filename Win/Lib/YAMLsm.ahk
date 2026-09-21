@@ -65,30 +65,30 @@ getDriftMap(filePath) {
  */
 assembleMaps(driftMapList*) {
 	; 按参数顺序读取用户自定义配置文件夹中的漂移映射表
-	assembledMaps := []
+	assembleMapList := []
 	for driftMap in driftMapList
-		assembledMaps.Push(getDriftMap(A_ScriptDir "\MySettings\" driftMap ".yaml"))  ; 将参数列表中的映射表文件名转换成真实文件路径，并通过getDriftMap函数将文件转换为映射表，然后添加到assembleMaps数组中，下面再按先后顺序进行合并。
+		assembleMapList.Push(getDriftMap(A_ScriptDir "\MySettings\" driftMap ".yaml"))  ; 将参数列表中的映射表文件名转换成真实文件路径，并通过getDriftMap函数将文件转换为映射表，然后添加到assembleMapList数组中，下面再按先后顺序进行合并。
 	; 没有提供配置名称时返回空映射，避免后续访问不存在的基础映射
-	if assembledMaps.Length = 0
+	if assembleMapList.Length = 0
 		return Map("Left", Map(), "Right", Map())
-	; 第一个映射作为基础，后续映射都合并到它上面
-	basicMap := assembledMaps[1]
-	if assembledMaps.Length = 1
-		return basicMap
-	for mapIndex, extendMap in assembledMaps {
+	; 第一个映射作为基础，后续映射都合并到它后面
+	assembledMap := assembleMapList[1]
+	if assembleMapList.Length = 1
+		return assembledMap
+	for mapIndex, extendMap in assembleMapList {
 		if mapIndex = 1
 			continue
-		; 分别合并 Left 和 Right 章节中的触发键
+		; 分别合并 Left 和 Right 章节中的键—值
 		for section in ["Left", "Right"] {
 			for key, list in extendMap[section] {
-				if basicMap[section].Has(key)  ; 如果basicMap中已经存在同名键
-					basicMap[section][key].Push(list*)  ; 将当前映射表中的值列表追加到基础表同名键的值列表后
+				if assembledMap[section].Has(key)  ; 如果basicMap中已经存在同名键
+					assembledMap[section][key].Push(list*)  ; 将当前映射表中的值列表追加到基础表同名键的值列表后
 				; for value in list  ; 如果须要进一步对每个value值进行处理，就用for循环
 				; 	basicMap[section][key].Push(value)
 				else  ; 否则（当前映射表中的键名在basicMap中不存在），则直接将该键值对添加到basicMap中。
-					basicMap[section].Set(key, list)
+					assembledMap[section].Set(key, list)
 			}
 		}
 	}
-	return basicMap
+	return assembledMap
 }
