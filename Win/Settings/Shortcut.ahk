@@ -1,8 +1,8 @@
 ﻿/**
  * @description 存放FinalD项目的各种功能开关（全局变量）及其初始状态，还有自定义快捷键设置。
 * @author Lantaio Joy
- * @version v14.37 （v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新，或查找文件中有“🐣️”或“✨”符号的地方。修订号为不影响功能的修改，可以不管。）
- * @modified 2026/9/19
+ * @version v14.38 （v版本号.修订号，如果版本号不同，则表示有重大更新，须要根据下面的【重大更新说明】比较合并更新，或查找文件中有“🐣️”或“✨”符号的地方。修订号为不影响功能的修改，可以不管。）
+ * @modified 2026/9/20
  * 重大更新说明：
  * v14.x：将漂移映射表全局常量从主程序移到此程序，方便自定义修改。适配主程序版本 v9.81.281 ~ 最新版
  * v13.x: 尽量将不是可修改的快捷键代码移到FinalD.ahk主程序，使得日后修改程序功能时可以尽量少修改此程序。适配 v9.79.267 ~ v9.81.280
@@ -28,8 +28,8 @@ Global Interval := 0.2  ; 重复按键的间隔时间，以秒为单位
 Global Rime := false  ; Rime输入法/非Rime输入法 切换 的默认状态
 Global Smart := true  ; 聪明中/英标点输入和自动配对 功能开关 的默认状态（表格兼容模式）
 Global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
-Global SHIFT_MAP := assembleMaps("Symbol")  ; 🐣️将标点符号漂移配置表组装到Shift漂移触发热键
-Global LWIN_SHIFT_MAP := assembleMaps("Number", "English", "Greek")  ; 🐣️将数字、英文字母、希腊字母漂移配置表组装到LWin+Shift漂移触发热键
+Global SHIFT_MAP := assembleMaps("Symbol")  ; 🐣️将标点符号漂移配置映射表组装到Shift漂移触发热键
+Global LWIN_SHIFT_MAP := assembleMaps("Number", "SuperscriptNumber", "SubscriptNumber", "RomanNumber", "CircledNumber", "English", "Greek")  ; 🐣️将数字、英文字母、希腊字母漂移配置映射表组装到LWin+Shift漂移触发热键
 ; Global LWIN_ALT_MAP := assembleMaps("HTML")  ; 🐣️
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
