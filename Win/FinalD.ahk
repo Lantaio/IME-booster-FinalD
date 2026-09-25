@@ -4,7 +4,7 @@
  * @see https://github.com/Lantaio/IME-booster-FinalD
  * @author Lantaio Joy
  * @version 见下面的全局变量 Version，或运行此程序后按左 Win+Alt+. 查看。
- * @modified 2026/9/20
+ * @modified 2026/9/22
  */
 #Requires AutoHotkey >=v2.0.26  ; 此程序只能在 >=v2.0.26版的AutoHotkey正常运行
 #SingleInstance  ; 只允许运行1个实例
@@ -18,7 +18,7 @@ SetTitleMatchMode "RegEx"  ; 设置窗口标题的匹配模式为正则模式（
 KeyHistory 100
 ; OnError errorHandler  ; 指定错误处理函数（避免不存在当前窗口时会弹出错误信息的问题）
 ; 此程序的版本号信息
-Global Version := "v9.84.289`n　　　 © 2024~2026"
+Global Version := "v9.85.290`n　　　 © 2024~2026"
 A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
 
 #Include <Caret>  ; 和光标有关的函数
@@ -674,9 +674,10 @@ drift(origin, list*) {
 	}
 }
 /**
- * @description 根据 所触发的热键（`hotkey`参数）和 光标前的内容（`origin`参数）返回`hotkey`热键的配置表中`origin`标点符号所在的键的值列表。
- * @param {"Left"|"Right"} hotkey 哪边的功能键触发的（决定了返回哪边的值列表）。
+ * @description 根据 触发的热键是哪边的（`triggerSide`参数）和 光标前的内容（`origin`参数）返回漂移配置表中`triggerSide`那边的`origin`标点符号所在的键的值列表。
+ * @param {"Left"|"Right"} triggerSide 哪边的热键触发的（决定了返回哪边的值列表）。
  * @param {Map} assembledMap 指定的经过组合处理的漂移配置映射表。
+ * @param {Map} revIndex `assembledMap`的反查表。
  * @param {String} origin 光标前的内容（标点符号）。
  * @returns {Array} hotkey热键的配置表中origin标点符号所在的键的值列表（如果有的话，没有则返回空数组），例如 [ '。', '.' ] 或 [ '℃', '°', '℉' ]。
  * @note 关键点在于：`origin`不是按键本身，而是当前光标前的内容（标点符号）。
@@ -690,28 +691,22 @@ drift(origin, list*) {
  *   外层的 drift(origin, list*) 会按所选值（数组）顺序循环切换。
  * @see assembledMaps
  */
-getDriftList(hotkey, assembledMap, origin) {
-	if !assembledMap.Has("Left") || !assembledMap.Has("Right")  ; 若两张表都不存在，则直接返回空数组
+getDriftList(triggerSide, assembledMap, revIndex, origin) {
+	if (!assembledMap.Has("Left") && !assembledMap.Has("Right")) || (!revIndex.Has("Left") && !revIndex.Has("Right"))  ; 若漂移组合映射表和反查表两部分都不存在，则直接返回空数组
 		return []
 	matchedKey := ''  ; 记录 origin 所在的键名，例如 '.'
-	for section in ["Left", "Right"] {  ; 先在左右两张表中找出包含 origin 的键名
-		for key, list in assembledMap[section] {
-			if key == origin {  ; “==”是区分大小写的比较，"="是忽略大小写的比较
-				matchedKey := key
-				break 2
-			}
-			for item in list {
-				if item == origin {
-					matchedKey := key
-					break 2
-				}
-			}
+	for side in ["Left", "Right"] {
+		; 依次检查 Left 和 Right 两侧的反查表
+		if revIndex[side].Has(origin) {
+			; 找到 origin 对应的原始按键后记录键名
+			matchedKey := revIndex[side][origin]  ; 例如 origin='。' -> matchedKey='.'
+			break
 		}
 	}
-	if matchedKey = ''  ; 如果两张表都没找到，就返回空数组
-		return []
-	if assembledMap.Has(hotkey) && assembledMap[hotkey].Has(matchedKey)  ; 只返回当前触发方向下的同键列表
-		return assembledMap[hotkey][matchedKey]
+
+	; 如果该键在当前触发方向的配置中存在时，返回对应的值列表；
+	if matchedKey != '' && assembledMap[triggerSide].Has(matchedKey)
+		return assembledMap[triggerSide][matchedKey]
 	return []  ; 若当前方向不存在该键，则直接忽略，不做漂移
 }
 /**
@@ -738,7 +733,7 @@ isInArray(value, arr*) {
 	if A_PriorKey = "LShift" {
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的字符）
 		if not lWinShiftList.Length or not isInArray(origin, lWinShiftList*)
-			lWinShiftList := getDriftList("Left", LWIN_SHIFT_MAP, origin)
+			lWinShiftList := getDriftList("Left", LWIN_SHIFT_MAP, LWIN_SHIFT_REV_INDEX, origin)
 		if lWinShiftList.Length
 			drift(origin, lWinShiftList*)
 	}
@@ -748,7 +743,7 @@ isInArray(value, arr*) {
 	if A_PriorKey = "RShift" {
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的字符）
 		if not lWinShiftList.Length or not isInArray(origin, lWinShiftList*)
-			lWinShiftList := getDriftList("Right", LWIN_SHIFT_MAP, origin)
+			lWinShiftList := getDriftList("Right", LWIN_SHIFT_MAP, LWIN_SHIFT_REV_INDEX, origin)
 		if lWinShiftList.Length
 			drift(origin, lWinShiftList*)
 	}
@@ -760,7 +755,7 @@ isInArray(value, arr*) {
 	if HolyShift and A_PriorKey = "LShift" {
 		origin := getPrev()  ; 获取光标前一个内容（将要被变换的标点）
 		if not shiftList.Length or not isInArray(origin, shiftList*)  ; 如果 symbolList 为空 或者 光标前的内容*不在* symbolList 中
-			shiftList := getDriftList("Left", SHIFT_MAP, origin)
+			shiftList := getDriftList("Left", SHIFT_MAP, SHIFT_REV_INDEX, origin)
 		if shiftList.Length
 			drift(origin, shiftList*)
 	}
@@ -787,7 +782,7 @@ isInArray(value, arr*) {
 			case "’": SendText("!"), Send("{Left}{BS}{Text}'"), Send("{Del}")
 			default:
 				if not shiftList.Length or not isInArray(origin, shiftList*)  ; 如果 symbolList 为空，或者光标前的内容*不在* symbolList 中
-					shiftList := getDriftList("Right", SHIFT_MAP, origin)
+					shiftList := getDriftList("Right", SHIFT_MAP, SHIFT_REV_INDEX, origin)
 				if shiftList.Length
 					drift(origin, shiftList*)
 		}

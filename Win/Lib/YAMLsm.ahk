@@ -27,16 +27,16 @@ getDriftMap(filePath) {
 	text := FileRead(filePath, "UTF-8")  ; 把 YAML 全部读成字符串
 	; if text = ''  ; 空文件直接返回空配置
 	; 	return driftMap
-	section := ''  ; 当前处于哪个分组：Left / Right
+	side := ''  ; 当前处于哪个分组：Left / Right
 	for line in StrSplit(text, "`n", "`r") {  ; 逐行扫描，兼容 Windows 的 CRLF 和 LF 两种换行方式
 		line := Trim(line)  ; 去掉首尾空白，方便判断注释和章节头
 		if line = '' or RegExMatch(line, '^\s*#')  ; 跳过空行和注释行
 			continue
 		if RegExMatch(line, '^(Left|Right)\s*:', &match) {  ; 识别 "Left:" / "Right:" 章节头
-			section := match[1]  ; 切换到当前章节
+			side := match[1]  ; 切换到当前章节
 			continue
 		}
-		if section = '' || !InStr(line, ': ')  ; 只处理当前分组下的键值列表
+		if side = '' || !InStr(line, ': ')  ; 只处理当前分组下的键值列表
 			continue
 		keyText := Trim(SubStr(line, 1, InStr(line, ': ') - 1))  ; 取出键名，例如 "." 或 "?"
 		key := parseYAMLScalar(keyText)  ; 去掉键名周围引号，得到真实符号
@@ -52,7 +52,7 @@ getDriftMap(filePath) {
 					list.Push(value)
 			}
 		}
-		buildMap[section].Set(key, list)  ; 把 "键 -> 列表" 保存进对应的 Map 中
+		buildMap[side].Set(key, list)  ; 把 "键 -> 列表" 保存进对应的 Map 中
 	}
 	return buildMap  ; 返回整个配置对象，供后续查表使用
 }
@@ -79,16 +79,36 @@ assembleMaps(driftMapList*) {
 		if mapIndex = 1
 			continue
 		; 分别合并 Left 和 Right 章节中的键—值
-		for section in ["Left", "Right"] {
-			for key, list in extendMap[section] {
-				if assembledMap[section].Has(key)  ; 如果basicMap中已经存在同名键
-					assembledMap[section][key].Push(list*)  ; 将当前映射表中的值列表追加到基础表同名键的值列表后
+		for side in ["Left", "Right"] {
+			for key, list in extendMap[side] {
+				if assembledMap[side].Has(key)  ; 如果assembledMap中已经存在同名键
+					assembledMap[side][key].Push(list*)  ; 将当前映射表中的值列表追加到基础表同名键的值列表后
 				; for value in list  ; 如果须要进一步对每个value值进行处理，就用for循环
-				; 	basicMap[section][key].Push(value)
+				; 	assembledMap[side][key].Push(value)
 				else  ; 否则（当前映射表中的键名在basicMap中不存在），则直接将该键值对添加到basicMap中。
-					assembledMap[section].Set(key, list)
+					assembledMap[side].Set(key, list)
 			}
 		}
 	}
 	return assembledMap
+}
+/**
+ * @description 构建给定的漂移配置映射表（`originMap`参数）的反向索引表。
+ * 输入的原始映射是「触发键 -> 漂移字符列表」，此函数会把它翻转成
+ * 「漂移字符 -> 触发键」的索引，便于后续在 Left / Right 分组中快速查找
+ * 某个字符对应的原始键位。
+ * @param {Map} originMap 原始漂移配置映射表，结构为 {Left: Map(...), Right: Map(...)}。
+ * @returns {Map} 反向索引表，格式为 {Left: Map(漂移字符 -> 触发键), Right: Map(...)}。
+ */
+reverseIndex(originMap) {
+	revIndex := Map("Left", Map(), "Right", Map())  ; 反向索引：候选字符 -> 对应的触发键
+	for side in ["Left", "Right"] {  ; 遍历左、右分组
+		for key, list in originMap[side] {  ; key 是触发键，list 是其对应的候选字符列表
+			for item in list {  ; 把每个漂移字符都建立反向索引
+				if !revIndex[side].Has(item)  ; 只保留第一次命中，避免同一字符被重复覆盖
+					revIndex[side][item] := key
+			}
+		}
+	}
+	return revIndex  ; 返回用于后续快速查表的反向索引表
 }
