@@ -29,11 +29,11 @@ Global Interval := 0.2  ; 重复按键的间隔时间，以秒为单位
 Global Rime := false  ; Rime输入法/非Rime输入法 切换 的默认状态
 Global Smart := true  ; 聪明中/英标点输入和自动配对 功能开关 的默认状态（表格兼容模式）
 Global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
-Global SHIFT_MAP := assembleMaps("Symbol")  ; 🐣️将标点符号漂移配置映射表组装到Shift漂移触发热键
-Global SHIFT_REV_INDEX := reverseIndex(SHIFT_MAP)  ; 🐣️生成Shift键漂移配置映射表的反向索引表
-Global LWIN_SHIFT_MAP := assembleMaps("Number", "SuperscriptNumber", "SubscriptNumber", "RomanNumber", "CircledNumber", "English", "Greek")  ; 🐣️将数字、英文字母、希腊字母漂移配置映射表组装到LWin+Shift漂移触发热键
-Global LWIN_SHIFT_REV_INDEX := reverseIndex(LWIN_SHIFT_MAP)  ; 🐣️生成LWin+Shift键漂移配置映射表的反向索引表
-; Global LWIN_ALT_MAP := assembleMaps("HTML")  ; 🐣️
+Global SHIFT_MAP := assembleMap("Symbol")  ; 🐣️将标点符号漂移配置映射表组装到Shift漂移触发热键
+Global SHIFT_REV := reverseMap(SHIFT_MAP)  ; 🐣️Shift键漂移配置映射表的反查表
+Global LWIN_SHIFT_MAP := assembleMap("Number", "SuperscriptNumber", "SubscriptNumber", "RomanNumber", "CircledNumber", "English", "Greek")  ; 🐣️将数字、英文字母、希腊字母漂移配置映射表组装到LWin+Shift漂移触发热键
+Global LWIN_SHIFT_REV := reverseMap(LWIN_SHIFT_MAP)  ; 🐣️LWin+Shift键漂移配置映射表的反查表
+; Global LWIN_ALT_MAP := assembleMaps("HTML")
 
 #SuspendExempt  ; 此程序处于挂起状态时依然可用的功能。
 <#!.:: {  ; 左Win+Alt+. 显示此程序的版本信息以及各项功能的状态信息。
@@ -43,7 +43,7 @@ Global LWIN_SHIFT_REV_INDEX := reverseIndex(LWIN_SHIFT_MAP)  ; 🐣️生成LWin
 	else {
 		msg .= "　　　　左Win+. 启用/停用 此插件，当前 已启用🚀"
 		msg .= "`n（妙按）左Win+. 输入法检测，当前适配 "
-		if Rime  ; ✨️
+		if Rime
 			msg .= "Rime输入法"
 		else
 			msg .= "非Rime输入法"
@@ -71,12 +71,12 @@ Global LWIN_SHIFT_REV_INDEX := reverseIndex(LWIN_SHIFT_MAP)  ; 🐣️生成LWin
 	MsgBox msg, , "Iconi"
 }
 <#.:: {  ; 左Win+.
-	if KeyWait('.', "T" String(Interval)) {  ; ### ✨️短按，启用/停用 此程序
+	if KeyWait('.', "T" String(Interval)) {  ; ### 短按，启用/停用 此程序
 		Suspend
 		if A_IsSuspended
 			MsgBox "终点 输入法插件 全部功能 已停用⛔", , "Iconx T2"
 		else {
-			checkIME()  ; ✨️每次从休眠中恢复启用此插件时检测当前所使用的输入法
+			checkIME()  ; 每次从休眠中恢复启用此插件时检测当前所使用的输入法
 			msg := "终点 输入法插件 已启用🚀`n`n左Win+Alt+. 查看各项功能的状态：`n"
 			msg .= "`n字母方向键 "
 			if Arrow
@@ -100,7 +100,7 @@ Global LWIN_SHIFT_REV_INDEX := reverseIndex(LWIN_SHIFT_MAP)  ; 🐣️生成LWin
 				msg .= "❌"
 			MsgBox msg, , "Iconi T5"
 		}
-	} else {  ; ### ✨️妙按，检测当前所使用的输入法
+	} else {  ; ### 妙按，检测当前所使用的输入法
 		checkIME()
 	}
 }

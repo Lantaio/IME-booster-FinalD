@@ -63,19 +63,19 @@ getDriftMap(filePath) {
  * @param {String*} driftMapList 漂移配置文件名列表，例如："Number", "English", "Greek"。
  * @returns {Map} 合并后的、由 Left 和 Right 两个章节组成的漂移映射表。
  */
-assembleMaps(driftMapList*) {
+assembleMap(driftMapList*) {
 	; 按参数顺序读取用户自定义配置文件夹中的漂移映射表
-	assembleMapList := []
+	mapList := []
 	for driftMap in driftMapList
-		assembleMapList.Push(getDriftMap(A_ScriptDir "\MySettings\" driftMap ".yaml"))  ; 将参数列表中的映射表文件名转换成真实文件路径，并通过getDriftMap函数将文件转换为映射表，然后添加到assembleMapList数组中，下面再按先后顺序进行合并。
+		mapList.Push(getDriftMap(A_ScriptDir "\MySettings\" driftMap ".yaml"))  ; 将参数列表中的映射表文件名转换成真实文件路径，并通过getDriftMap函数将文件转换为映射表，然后添加到mapList数组中，下面再按先后顺序进行合并。
 	; 没有提供配置名称时返回空映射，避免后续访问不存在的基础映射
-	if assembleMapList.Length = 0
+	if mapList.Length = 0
 		return Map("Left", Map(), "Right", Map())
 	; 第一个映射作为基础，后续映射都合并到它后面
-	assembledMap := assembleMapList[1]
-	if assembleMapList.Length = 1
+	assembledMap := mapList[1]
+	if mapList.Length = 1
 		return assembledMap
-	for mapIndex, extendMap in assembleMapList {
+	for mapIndex, extendMap in mapList {
 		if mapIndex = 1
 			continue
 		; 分别合并 Left 和 Right 章节中的键—值
@@ -93,22 +93,18 @@ assembleMaps(driftMapList*) {
 	return assembledMap
 }
 /**
- * @description 构建给定的漂移配置映射表（`originMap`参数）的反向索引表。
+ * @description 构建给定的漂移配置映射表（`originMap`参数）的反向映射表。
  * 输入的原始映射是「触发键 -> 漂移字符列表」，此函数会把它翻转成
- * 「漂移字符 -> 触发键」的索引，便于后续在 Left / Right 分组中快速查找
- * 某个字符对应的原始键位。
+ * 「漂移字符 -> 触发键」的映射，便于后续在 Left / Right 分组中快速查找
+ * 某个漂移字符对应的原始键位。
  * @param {Map} originMap 原始漂移配置映射表，结构为 {Left: Map(...), Right: Map(...)}。
- * @returns {Map} 反向索引表，格式为 {Left: Map(漂移字符 -> 触发键), Right: Map(...)}。
+ * @returns {Map} 反向映射表，格式为 {Left: Map(漂移字符 -> 触发键), Right: Map(...)}。
  */
-reverseIndex(originMap) {
-	revIndex := Map("Left", Map(), "Right", Map())  ; 反向索引：候选字符 -> 对应的触发键
-	for side in ["Left", "Right"] {  ; 遍历左、右分组
-		for key, list in originMap[side] {  ; key 是触发键，list 是其对应的候选字符列表
-			for item in list {  ; 把每个漂移字符都建立反向索引
-				if !revIndex[side].Has(item)  ; 只保留第一次命中，避免同一字符被重复覆盖
-					revIndex[side][item] := key
-			}
-		}
-	}
+reverseMap(originMap) {
+	revIndex := Map("Left", Map(), "Right", Map())  ; 反查映射表：漂移字符 -> 对应的触发键
+	for side in ["Left", "Right"]  ; 遍历左、右分组
+		for key, list in originMap[side]  ; key 是触发键，list 是其对应的候选字符列表
+			for item in list  ; 把每个漂移字符都建立反向映射
+				revIndex[side][item] := key  ; 此处简化处理，如果同一个漂移字符出现在多个按键的漂移列表中，会有问题。所以对于同一对热键来说，1个漂移字符只能出现在1个按键的列表中，并且只能出现1次。
 	return revIndex  ; 返回用于后续快速查表的反向索引表
 }
