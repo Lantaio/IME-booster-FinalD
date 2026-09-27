@@ -158,9 +158,9 @@ Global CommonPair := Map(
 getPrev() {
 	clipCache := ClipboardAll(), A_Clipboard := ''  ; 临时寄存剪贴板内容，清空剪贴板
 	Send "+{Left}^c"  ; 选取并复制当前光标前一个内容
-	ClipWait 0.3, 1  ; 等待剪贴板更新
+	ClipWait 0.5, 1  ; 等待剪贴板更新
 	if !A_Clipboard and WinActive("ahk_group Slow") {  ; 如果剪贴板为空，并且当前软件是反应慢的应用程序
-		Sleep 300
+		; Sleep 300
 		Send "^c"
 		ClipWait 0.3, 1
 	}
@@ -174,7 +174,7 @@ getPrev() {
 */
 	; 如果复制的字符长度为1 或 是回车換行符（行首）或 是emoji
 	if clipLen = 1 or clip ~= '`a)^\R$' or IsEmoji(clip) {
-		Send "{Right}"  ; ℹ用SendEvent保证光标回到原来的位置再发送后面的按键
+		Send "{Right}"
 		Sleep 20	; 等待光标回到原来的位置
 	} else if !clip and WinActive(" - Word$") {  ; 否则，如果当前软件是Word
 		A_Clipboard := ''  ; 清空剪贴板
@@ -189,7 +189,7 @@ getPrev() {
 		}
 */
 		if clip2 {
-			Send "{Right}"  ; ℹ用SendEvent保证光标回到原来的位置再发送后面的按键
+			Send "{Right}"
 			Sleep 20	; 等待光标回到原来的位置
 		}
 	}
