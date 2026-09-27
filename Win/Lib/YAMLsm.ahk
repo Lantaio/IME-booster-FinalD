@@ -63,7 +63,7 @@ getDriftMap(filePath) {
  * @param {String*} driftMapList 漂移配置文件名列表，例如："Number", "English", "Greek"。
  * @returns {Map} 合并后的、由 Left 和 Right 两个章节组成的漂移映射表。
  */
-assembleMap(driftMapList*) {
+assembleMaps(driftMapList*) {
 	; 按参数顺序读取用户自定义配置文件夹中的漂移映射表
 	mapList := []
 	for driftMap in driftMapList

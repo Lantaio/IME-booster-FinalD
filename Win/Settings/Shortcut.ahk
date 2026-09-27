@@ -29,9 +29,9 @@ Global Interval := 0.2  ; 重复按键的间隔时间，以秒为单位
 Global Rime := false  ; Rime输入法/非Rime输入法 切换 的默认状态
 Global Smart := true  ; 聪明中/英标点输入和自动配对 功能开关 的默认状态（表格兼容模式）
 Global Tip := false  ; 中文标点提示信息 功能开关 的默认状态
-Global SHIFT_MAP := assembleMap("Symbol")  ; 🐣️将标点符号漂移配置映射表组装到Shift漂移触发热键
+Global SHIFT_MAP := assembleMaps("Symbol")  ; 🐣️将标点符号漂移配置映射表组装到Shift漂移触发热键
 Global SHIFT_REV := reverseMap(SHIFT_MAP)  ; 🐣️Shift键漂移配置映射表的反查表
-Global LWIN_SHIFT_MAP := assembleMap("Number", "SuperscriptNumber", "SubscriptNumber", "RomanNumber", "CircledNumber", "English", "Greek")  ; 🐣️将数字、英文字母、希腊字母漂移配置映射表组装到LWin+Shift漂移触发热键
+Global LWIN_SHIFT_MAP := assembleMaps("Number", "SuperscriptNumber", "SubscriptNumber", "RomanNumber", "CircledNumber", "English", "Greek")  ; 🐣️将数字、英文字母、希腊字母漂移配置映射表组装到LWin+Shift漂移触发热键
 Global LWIN_SHIFT_REV := reverseMap(LWIN_SHIFT_MAP)  ; 🐣️LWin+Shift键漂移配置映射表的反查表
 ; Global LWIN_ALT_MAP := assembleMaps("HTML")
 
