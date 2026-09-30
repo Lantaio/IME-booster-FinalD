@@ -34,7 +34,7 @@ A_ScriptName := "FinalD/终点 输入法插件"  ; 此程序的名称
  */
 checkIME() {
 	Global Rime
- 	id := WinExist("A")
+	id := WinExist("A")
 	WinActivate("ahk_class A)Shell_TrayWnd$")  ; 激活任务栏
 	Send "a"
 	Sleep 120  ; 等待输入法候选窗口出现
@@ -401,7 +401,7 @@ smartType(en, cn?) {  ; （Send函数中[^+!#{}]标点须用{}包裹。）
 		Thread "Priority", 1  ; 提高线程优先级，使此线程不会被后面的低优先级线程中断，并丢弃未处理的按键
 		Critical "Off"  ; 将此线程修改为非关键线程，配合上一行代码，使未处理的排队按键会被丢弃
 		if KeyWait(en, "T" String(Interval)) {  ; ## 妙按
-	 		lang := smartLang(en, cn)
+			lang := smartLang(en, cn)
 			if Rime {  ; ### 如果是Rime输入法
 				if lang = en {  ; 本来应该输入英文标点，变成输入中文标点
 					if InStr("/&|@%^$", en)  ; 如果是Rime功能触发键
@@ -430,7 +430,7 @@ smartType(en, cn?) {  ; （Send函数中[^+!#{}]标点须用{}包裹。）
 				}
 			}
 		} else {  ; ## 长按
-	 		lang := smartLang(en, cn)
+			lang := smartLang(en, cn)
 			loop {  ; 此处须要先输入，再判断按键是否已经释放来决定是否继续输入
 				if lang = en  ; 如果 应该输入英文标点
 					SendText en
