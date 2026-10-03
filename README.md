@@ -17,7 +17,7 @@
 
 | 脚本名称                                                     | 最新版本                     | 说明                          |
 | ------------------------------------------------------------ | ---------------------------- | ----------------------------- |
-| [**FinalD.ahk**](https://github.com/Lantaio/IME-booster-FinalD/archive/refs/tags/v9.82.282.zip)✨️ | **v9.85.290**（*2026/9/26*） | 主程序                        |
+| [**FinalD.ahk**](https://github.com/Lantaio/IME-booster-FinalD/archive/refs/tags/v9.85.290.zip)✨️ | **v9.85.290**（*2026/9/26*） | 主程序                        |
 | MySettings\AppGroup.ahk✨️                                     | v4.9 (*2026/9/9*)            | 用户设置\自定义程序组         |
 | MySettings\Shortcut.ahk✨️                                     | v15.39 (*2026/9/26*)         | 用户设置\自定义快捷键         |
 | MySettings\CircledNumber.yaml🐣️                               | v0.1(*2026/9/20*)            | 用户设置\圆圈数字漂移映射表   |
