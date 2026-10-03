@@ -224,7 +224,7 @@ getNext() {
 */
 	; 如果复制的字符长度为1 或 是回车換行符（行末）或 是emoji
 	if clipLen = 1 or clip ~= '`a)^\R$' or IsEmoji(clip) {
-		Send "{Left}"  ; ℹ用Send保证光标回到原来的位置再发送后面的按键
+		Send "{Left}"
 		Sleep 20	; 等待光标回到原来的位置
 	}
 	if WinActive("ahk_group Slow")
